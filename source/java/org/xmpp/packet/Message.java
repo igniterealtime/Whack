@@ -106,7 +106,10 @@ public class Message extends Packet {
             element.remove(subjectElement);
             return;
         }
-
+        // Do nothing if the new subject is null
+        if (subject == null) {
+            return;
+        }
         if (subjectElement == null) {
             subjectElement = element.addElement("subject");
         }
@@ -136,7 +139,10 @@ public class Message extends Packet {
             }
             return;
         }
-
+        // Do nothing if the new body is null
+        if (body == null) {
+            return;
+        }
         if (bodyElement == null) {
             bodyElement = element.addElement("body");
         }
