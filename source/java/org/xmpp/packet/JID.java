@@ -131,6 +131,59 @@ public class JID implements Comparable {
     }
 
     /**
+     * Constructs a new JID, bypassing all stringprep profiles. This
+     * is useful for constructing a JID object when it's already known
+     * that the String representation is well-formed.
+     *
+     * @param jid the JID.
+     * @param fake an extra param to create a different method signature.
+     *      The value <tt>null</tt> should be passed in as this argument.
+     */
+    JID(String jid, Object fake) {
+        fake = null; // Workaround IDE warnings for unused param.
+        if (jid == null) {
+            throw new NullPointerException("JID cannot be null");
+        }
+
+        int atIndex = jid.indexOf("@");
+        int slashIndex = jid.indexOf("/");
+
+        // Node
+        if (atIndex > 0) {
+            node = jid.substring(0, atIndex);
+        }
+
+        // Domain
+        if (atIndex + 1 > jid.length()) {
+            throw new IllegalArgumentException("JID with empty domain not valid");
+        }
+        if (atIndex < 0) {
+            if (slashIndex > 0) {
+                domain = jid.substring(0, slashIndex);
+            }
+            else {
+                domain = jid;
+            }
+        }
+        else {
+            if (slashIndex > 0) {
+                domain = jid.substring(atIndex + 1, slashIndex);
+            }
+            else {
+                domain = jid.substring(atIndex + 1);
+            }
+        }
+
+        // Resource
+        if (slashIndex + 1 > jid.length() || slashIndex < 0) {
+            resource = null;
+        }
+        else {
+            resource = jid.substring(slashIndex + 1);
+        }
+    }
+
+    /**
      * Transforms the JID parts using the appropriate Stringprep profiles, then
      * validates them. If they are fully valid, the field values are saved, otherwise
      * an IllegalArgumentException is thrown.

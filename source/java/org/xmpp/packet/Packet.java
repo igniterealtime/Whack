@@ -47,6 +47,17 @@ public abstract class Packet {
      */
     public Packet(Element element) {
         this.element = element;
+        // Apply stringprep profiles to the "to" and "from" values.
+        String to = element.attributeValue("to");
+        if (to != null) {
+            JID toJID = new JID(to);
+            element.addAttribute("to",  toJID.toString());
+        }
+        String from = element.attributeValue("from");
+        if (from != null) {
+            JID fromJID = new JID(from);
+            element.addAttribute("from",  fromJID.toString());
+        }
     }
 
     /**
@@ -83,7 +94,11 @@ public abstract class Packet {
             return null;
         }
         else {
-            return new JID(to);
+            // Return a new JID that bypasses stringprep profile checking.
+            // This improves speed and is safe as long as the user doesn't
+            // directly manipulate the attributes of the underlying Element
+            // that represent JID's.
+            return new JID(to, null);
         }
     }
 
@@ -94,6 +109,10 @@ public abstract class Packet {
      * @param to the XMPP address (JID) that the packet is addressed to.
      */
     public void setTo(String to) {
+        // Apply stringprep profiles to value.
+        if (to !=  null) {
+            to = new JID(to).toString();
+        }
         element.addAttribute("to", to);
     }
 
@@ -126,7 +145,11 @@ public abstract class Packet {
             return null;
         }
         else {
-            return new JID(from);
+            // Return a new JID that bypasses stringprep profile checking.
+            // This improves speed and is safe as long as the user doesn't
+            // directly manipulate the attributes of the underlying Element
+            // that represent JID's.
+            return new JID(from, null);
         }
     }
 
@@ -137,6 +160,10 @@ public abstract class Packet {
      * @param from the XMPP address (JID) that the packet comes from.
      */
     public void setFrom(String from) {
+        // Apply stringprep profiles to value.
+        if (from != null) {
+            from = new JID(from).toString();
+        }
         element.addAttribute("from", from);
     }
 
