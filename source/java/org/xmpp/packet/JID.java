@@ -181,6 +181,13 @@ public class JID implements Comparable {
      * @param resource the resource.
      */
     private void init(String node, String domain, String resource) {
+        // Set node and resource to null if they are the empty string.
+        if (node != null && node.equals("")) {
+            node = null;
+        }
+        if (resource != null && resource.equals("")) {
+            resource = null;
+        }
         // Stringprep (node prep, resourceprep, etc).
         try {
             this.node = Stringprep.nodeprep(node);
