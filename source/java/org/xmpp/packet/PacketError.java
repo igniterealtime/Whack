@@ -38,15 +38,27 @@ public class PacketError {
     private Element element;
 
     /**
-     * Constructs a new PacketError.
+     * Construcs a new PacketError with the specified condition. The error
+     * type will be set to the default for the specified condition.
      *
-     * @param type the error type.
      * @param condition the error condition.
      */
-    public PacketError(Type type, Condition condition) {
+    public PacketError(Condition condition) {
         this.element = docFactory.createElement("error");
-        setType(type);
         setCondition(condition);
+        setType(condition.getDefaultType());
+    }
+
+    /**
+     * Constructs a new PacketError with the specified condition and type.
+     *
+     * @param condition the error condition.
+     * @param type the error type.
+     */
+    public PacketError(Condition condition, Type type) {
+        this.element = docFactory.createElement("error");
+        setCondition(condition);
+        setType(type);
     }
 
     /**
@@ -220,27 +232,27 @@ public class PacketError {
          * (e.g., an IQ stanza that includes an unrecognized value of the 'type'
          * attribute); the associated error type SHOULD be "modify".
          */
-        bad_request("bad-request", 400),
+        bad_request("bad-request", Type.modify, 400),
 
         /**
          * Access cannot be granted because an existing resource or session
          * exists with the same name or address; the associated error type
          * SHOULD be "cancel".
          */
-        conflict("conflict", 409),
+        conflict("conflict", Type.cancel, 409),
 
         /**
          * The feature requested is not implemented by the recipient or
          * server and therefore cannot be processed; the associated error
          * type SHOULD be "cancel".
          */
-        feature_not_implemented("feature-not-implemented", 501),
+        feature_not_implemented("feature-not-implemented", Type.cancel, 501),
 
         /**
          * The requesting entity does not possess the required permissions to
          * perform the action; the associated error type SHOULD be "auth".
          */
-        forbidden("forbidden", 403),
+        forbidden("forbidden", Type.auth, 403),
 
         /**
          * The recipient or server can no longer be contacted at this address
@@ -248,20 +260,20 @@ public class PacketError {
          * data of the <gone/> element); the associated error type SHOULD be
          * "modify".
          */
-        gone("gone", 302),
+        gone("gone", Type.modify, 302),
 
         /**
          * The server could not process the stanza because of a misconfiguration
          * or an otherwise-undefined internal server error; the associated error
          * type SHOULD be "wait".
          */
-        internal_server_error("internal-server-error", 500),
+        internal_server_error("internal-server-error", Type.wait, 500),
 
         /**
          * The addressed JID or item requested cannot be found; the associated
          * error type SHOULD be "cancel".
          */
-        item_not_found("item-not-found", 404),
+        item_not_found("item-not-found", Type.cancel, 404),
 
         /**
          * The sending entity has provided or communicated an XMPP address
@@ -270,7 +282,7 @@ public class PacketError {
          * in Addressing Scheme (Section 3); the associated error type SHOULD
          * be "modify".
          */
-        jid_malformed("jid-malformed", 400),
+        jid_malformed("jid-malformed", Type.modify, 400),
 
         /**
          * The recipient or server understands the request but is refusing
@@ -278,27 +290,27 @@ public class PacketError {
          * recipient or server (e.g., a local policy regarding acceptable
          * words in messages); the associated error type SHOULD be "modify".
          */
-        not_acceptable("not-acceptable", 406),
+        not_acceptable("not-acceptable", Type.modify, 406),
 
         /**
          * The recipient or server does not allow any entity to perform
          * the action; the associated error type SHOULD be "cancel".
          */
-        not_allowed("not-allowed", 405),
+        not_allowed("not-allowed", Type.cancel, 405),
 
         /**
          * The sender must provide proper credentials before being allowed
          * to perform the action, or has provided improper credentials;
          * the associated error type SHOULD be "auth".
          */
-        not_authorized("not-authorized", 401),
+        not_authorized("not-authorized", Type.auth, 401),
 
         /**
          * The requesting entity is not authorized to access the requested
          * service because payment is required; the associated error type
          * SHOULD be "auth".
          */
-        payment_required("payment-required", 402),
+        payment_required("payment-required", Type.auth, 402),
 
         /**
          * The intended recipient is temporarily unavailable; the associated
@@ -307,7 +319,7 @@ public class PacketError {
          * recipient's network availability to an entity that is not authorized
          * to know such information).
          */
-        recipient_unavailable("recipient-unavailable", 404),
+        recipient_unavailable("recipient-unavailable", Type.wait, 404),
 
         /**
          * The recipient or server is redirecting requests for this
@@ -316,21 +328,21 @@ public class PacketError {
          * valid JID, in the XML character data of the &lt;redirect/&gt; element);
          * the associated error type SHOULD be "modify".
          */
-        redirect("redirect", 302),
+        redirect("redirect", Type.modify, 302),
 
         /**
          * The requesting entity is not authorized to access the requested
          * service because registration is required; the associated error
          * type SHOULD be "auth".
          */
-        registration_required("registration-required", 407),
+        registration_required("registration-required", Type.auth, 407),
 
         /**
          * A remote server or service specified as part or all of the JID
          * of the intended recipient does not exist; the associated error
          * type SHOULD be "cancel".
          */
-        remote_server_not_found("remote-server-not-found", 404),
+        remote_server_not_found("remote-server-not-found", Type.cancel, 404),
 
         /**
          * A remote server or service specified as part or all of the JID of
@@ -338,41 +350,44 @@ public class PacketError {
          * be contacted within a reasonable amount of time; the associated
          * error type SHOULD be "wait".
          */
-        remote_server_timeout("remote-server-timeout", 504),
+        remote_server_timeout("remote-server-timeout", Type.wait, 504),
 
         /**
          * The server or recipient lacks the system resources necessary to
          * service the request; the associated error type SHOULD be "wait".
          */
-        resource_constraint("resource-constraint", 500),
+        resource_constraint("resource-constraint", Type.wait, 500),
 
         /**
          * The server or recipient does not currently provide the requested
          * service; the associated error type SHOULD be "cancel".
          */
-        service_unavailable("service-unavailable", 503),
+        service_unavailable("service-unavailable", Type.cancel, 503),
 
         /**
          * The requesting entity is not authorized to access the requested
          * service because a subscription is required; the associated error
          * type SHOULD be "auth".
          */
-        subscription_required("subscription-required", 407),
+        subscription_required("subscription-required", Type.auth, 407),
 
         /**
          * The error condition is not one of those defined by the other
          * conditions in this list; any error type may be associated with
          * this condition, and it SHOULD be used only in conjunction with
-         * an application-specific condition.
+         * an application-specific condition.<p>
+         *
+         * Implementation note: the default type for this condition is
+         * {@link Type#wait}, which is not specified in the XMPP protocol.
          */
-        undefined_condition("undefined-condition", 500),
+        undefined_condition("undefined-condition", Type.wait, 500),
 
         /**
          * The recipient or server understood the request but was not
          * expecting it at this time (e.g., the request was out of order);
          * the associated error type SHOULD be "wait".
          */
-        unexpected_condition("unexpected-condition", 400);
+        unexpected_condition("unexpected-condition", Type.wait, 400);
 
         /**
          * Converts a String value into its Condition representation.
@@ -530,10 +545,22 @@ public class PacketError {
 
         private String value;
         private int code;
+        private Type defaultType;
 
-        private Condition(String value, int code) {
+        private Condition(String value, Type defaultType, int code) {
             this.value = value;
+            this.defaultType = defaultType;
             this.code = code;
+        }
+
+        /**
+         * Returns the default {@link Type} associated with this condition. Each
+         * error condition has an error type that it is usually associated with.
+         *
+         * @return the default error type.
+         */
+        public Type getDefaultType() {
+            return defaultType;
         }
 
         /**

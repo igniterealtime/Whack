@@ -189,6 +189,19 @@ public abstract class Packet {
     }
 
     /**
+     * Sets the packet error using the specified condition. Calling this
+     * method will automatically set the packet "type" attribute to "error".
+     * This is a convenience method equivalent to calling:
+     *
+     * <tt>setError(new PacketError(condition));</tt>
+     *
+     * @param condition the error condition.
+     */
+    public void setError(PacketError.Condition condition) {
+       setError(new PacketError(condition));
+    }
+
+    /**
      * Creates a deep copy of this packet.
      *
      * @return a deep copy of this packet.
