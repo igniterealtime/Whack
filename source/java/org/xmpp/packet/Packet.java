@@ -206,7 +206,16 @@ public abstract class Packet {
         return element;
     }
 
-     public String toString() {
+    /**
+     * Returns the textual XML representation of this packet.
+     *
+     * @return the textual XML representation of this packet.
+     */
+    public String toXML() {
+        return element.asXML();
+    }
+
+    public String toString() {
         StringWriter out = new StringWriter();
         XMLWriter writer = new XMLWriter(out, OutputFormat.createPrettyPrint());
         try {
