@@ -318,10 +318,10 @@ public class JID implements Comparable {
         if (!(object instanceof JID)) {
             return false;
         }
-        JID jid = (JID)object;
-        if (jid == object) {
+        if (this == object) {
             return true;
         }
+        JID jid = (JID)object;
         // Node. If node isn't null, compare.
         if (node != null) {
             if (!node.equals(jid.node)) {
