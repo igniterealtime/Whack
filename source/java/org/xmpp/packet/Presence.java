@@ -22,6 +22,8 @@ package org.xmpp.packet;
 
 import org.dom4j.Element;
 
+import java.util.Iterator;
+
 /**
  * Presence packet. Presence packets are used to express an entity's current
  * network availability and to notify other entities of that availability.
@@ -184,6 +186,41 @@ public class Presence extends Packet {
             priorityElement = element.addElement("priority");
         }
         priorityElement.setText(Integer.toString(priority));
+    }
+
+    /**
+     * Returns the first child element of this packet that matches the
+     * given name and namespace. If no matching element is found,
+     * <tt>null</tt> will be returned. This is a convenience method to avoid
+     * manipulating this underlying packet's Element instance directly.
+     *
+     * @param name the element name.
+     * @param namespace the element namespace.
+     * @return the first matching child element, or <tt>null</tt> if there
+     *      is no matching child element.
+     */
+    public Element getChildElement(String name, String namespace) {
+        for (Iterator i=element.elementIterator(name); i.hasNext(); ) {
+            Element element = (Element)i.next();
+            if (element.getNamespaceURI().equals(namespace)) {
+                return element;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Adds a new child element to this packet with the given name and
+     * namespace. The newly created Element is returned. This is a
+     * convenience method to avoid manipulating this underlying packet's Element
+     * instance directly.
+     *
+     * @param name the element name.
+     * @param namespace the element namespace.
+     * @return the newly created child element.
+     */
+    public Element addChildElement(String name, String namespace) {
+        return element.addElement(name, namespace);
     }
 
     /**
