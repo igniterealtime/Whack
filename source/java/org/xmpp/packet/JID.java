@@ -279,6 +279,23 @@ public class JID implements Comparable {
     }
 
     /**
+     * Returns the bare JID version of this JID. If this JID does not contain a resource then
+     * answer this instance otherwise create a new JID with no resource.<p>
+     *
+     * This method optimizes the following code: <code>new JID(aJID.toBareJID())</code>.
+     *
+     * @return the bare JID version of this JID.
+     */
+    public JID asBareJID() {
+        if (resource == null) {
+            return this;
+        }
+        else {
+            return new JID(node, domain, null);
+        }
+    }
+
+    /**
      * Returns the String representation of the bare JID, which is the JID with
      * resource information removed.
      *
