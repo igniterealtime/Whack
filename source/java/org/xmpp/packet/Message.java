@@ -25,17 +25,11 @@ import org.dom4j.Element;
 import java.util.Iterator;
 
 /**
- * Message packet. A message can be one of several types:
+ * Message packet.<p>
  *
- * <ul>
- *      <li>Message.Type.NORMAL -- (Default) a normal text message used in email like interface.
- *      <li>Message.Type.CHAT -- a typically short text message used in line-by-line chat interfaces.
- *      <li>Message.Type.GROUP_CHAT -- a chat message sent to a groupchat server for group chats.
- *      <li>Message.Type.HEADLINE -- a text message to be displayed in scrolling marquee displays.
- *      <li>Message.Type.ERROR -- indicates a messaging error.
- * </ul>
+ * A message can have one of several {@link Type Types}. For each message type,
+ * different message fields are typically used as follows:
  *
- * For each message type, different message fields are typically used as follows:
  * <p>
  * <table border="1">
  * <tr><td>&nbsp;</td><td colspan="5"><b>Message type</b></td></tr>
@@ -74,7 +68,7 @@ public class Message extends Packet {
     public Type getType() {
         String type = element.attributeValue("type");
         if (type != null) {
-            return Type.fromString(type);
+            return Type.valueOf(type);
         }
         else {
             return null;
@@ -234,83 +228,45 @@ public class Message extends Packet {
     }
 
     /**
-     * Represents the type of a message. The types are:
+     * Type-safe enumeration for the type of a message. The types are:
      *
      *  <ul>
-     *      <li>Message.Type.NORMAL -- (Default) a normal text message used in email like interface.
-     *      <li>Message.Type.CHAT -- a typically short text message used in line-by-line chat interfaces.
-     *      <li>Message.Type.GROUP_CHAT -- a chat message sent to a groupchat server for group chats.
-     *      <li>Message.Type.HEADLINE -- a text message to be displayed in scrolling marquee displays.
-     *      <li>Message.Type.ERROR -- indicates a messaging error.
+     *      <li>{@link #normal Message.Type.normal} -- (Default) a normal text message
+     *          used in email like interface.
+     *      <li>{@link #chat Message.Type.cha}t -- a typically short text message used
+     *          in line-by-line chat interfaces.
+     *      <li>{@link #groupchat Message.Type.groupchat} -- a chat message sent to a
+     *          groupchat server for group chats.
+     *      <li>{@link #headline Message.Type.headline} -- a text message to be displayed
+     *          in scrolling marquee displays.
+     *      <li>{@link #error Message.Type.error} -- indicates a messaging error.
      * </ul>
      */
-    public static class Type {
+    public enum Type {
 
         /**
          * (Default) a normal text message used in email like interface.
          */
-        public static final Type NORMAL = new Type("normal");
+        normal,
 
         /**
          * Typically short text message used in line-by-line chat interfaces.
          */
-        public static final Type CHAT = new Type("chat");
+        chat,
 
         /**
          * Chat message sent to a groupchat server for group chats.
          */
-        public static final Type GROUP_CHAT = new Type("groupchat");
+        groupchat,
 
         /**
          * Text message to be displayed in scrolling marquee displays.
          */
-        public static final Type HEADLINE = new Type("headline");
+        headline,
 
         /**
          * Indicates a messaging error.
          */
-        public static final Type ERROR = new Type("error");
-
-        /**
-         * Converts a String value into its Type representation.
-         *
-         * @param type the String value.
-         * @return the Type corresponding to the String.
-         */
-        public static Type fromString(String type) {
-            // No type attribute means "normal".
-            if (type == null) {
-                return NORMAL;
-            }
-            type = type.toLowerCase();
-            if (CHAT.toString().equals(type)) {
-                return CHAT;
-            }
-            else if (GROUP_CHAT.toString().equals(type)) {
-                return GROUP_CHAT;
-            }
-            else if (HEADLINE.toString().equals(type)) {
-                return HEADLINE;
-            }
-            else if (ERROR.toString().equals(type)) {
-                return ERROR;
-            }
-            // From the XMPP spec: [if] the application does not understand the
-            // value of the 'type' attribute provided, it MUST consider the message
-            // to be of type "normal".
-            else {
-                return NORMAL;
-            }
-        }
-
-        private String value;
-
-        private Type(String value) {
-            this.value = value;
-        }
-
-        public String toString() {
-            return value;
-        }
+        error;
     }
 }

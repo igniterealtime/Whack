@@ -54,14 +54,32 @@ public class Presence extends Packet {
     }
 
     /**
-     * Returns the type of this presence.
+     * Returns true if the presence type is "available". This is a
+     * convenience method that is equivalent to:
      *
-     * @return the presence type.
+     * <pre>getType() == null</pre>
+     *
+     */
+    public boolean isAvailable() {
+        return getType() == null;
+    }
+
+    /**
+     * Returns the type of this presence. If the presence is "available", the
+     * type will be <tt>null</tt> (in XMPP, no value for the type attribute is
+     * defined as available).
+     *
+     * @return the presence type or <tt>null</tt> if "available".
      * @see Type
      */
     public Type getType() {
         String type = element.attributeValue("type");
-        return Type.fromString(type);
+        if (type == null) {
+            return null;
+        }
+        else {
+            return Type.valueOf(type);
+        }
     }
 
     /**
@@ -71,34 +89,27 @@ public class Presence extends Packet {
      * @see Type
      */
     public void setType(Type type) {
-        if (type == Type.AVAILABLE) {
-            element.addAttribute("type", null);
-        }
-        else {
-            element.addAttribute("type", type==null?null:type.toString());
-        }
+        element.addAttribute("type", type==null?null:type.toString());
     }
 
     /**
      * Returns the presence "show" value, which specifies a particular availability
      * status. If the &lt;show&gt; element is not present, this method will return
-     * <tt>null</tt>. The show value can only be set if the presence type is
-     * {@link Type#AVAILABLE}.
+     * <tt>null</tt>. The show value can only be set if the presence type is "avaialble".
      *
      * @return the presence show value..
      * @see Show
      */
     public Show getShow() {
-        return Show.fromString(element.elementText("show"));
+        return Show.valueOf(element.elementText("show"));
     }
 
     /**
      * Sets the presence "show" value, which specifies a particular availability
-     * status. The show value can only be set if the presence type is
-     * {@link Type#AVAILABLE}.
+     * status. The show value can only be set if the presence type is "available".
      *
      * @param show the presence show value.
-     * @throws IllegalArgumentException if the presence type is not {@link Type#AVAILABLE};
+     * @throws IllegalArgumentException if the presence type is not available.
      * @see Show
      */
     public void setShow(Show show) {
@@ -109,7 +120,7 @@ public class Presence extends Packet {
             return;
         }
         if (showElement == null) {
-            if (getType() != Type.AVAILABLE) {
+            if (!isAvailable()) {
                 throw new IllegalArgumentException("Cannot set 'show' if 'type' attribute is set.");
             }
             showElement = element.addElement("show");
@@ -238,160 +249,102 @@ public class Presence extends Packet {
     }
 
     /**
-     * Represents the type of a presence packet. The types are:
+     * Represents the type of a presence packet. Note: the presence is assumed
+     * to be "available" when the type attribute of the packet is <tt>null</tt>.
+     * The valid types are:
      *
      *  <ul>
-     *      <li>Presence.Type.AVAILABLE -- (default) the sender is available. Note: the
-     *          available type is assumed whenever the type attribute of the packet is
-     *          <tt>null</tt> is assumed.
-     *      <li>Presence.Type.UNAVAILABLE -- signals that the entity is no
-     *          longer available for communication.
-     *      <li>Presence.Type.SUBSCRIBE -- the sender wishes to subscribe to the
-     *          recipient's presence.
-     *      <li>Presence.Type.SUBSCRIBED -- the sender has allowed the recipient to
-     *          receive their presence.
-     *      <li>Presence.Type.UNSUBSCRIBE -- the sender is unsubscribing from
-     *          another entity's presence.
-     *      <li>Presence.Type.UNSUBSCRIBED -- the subscription request has been
-     *          denied or a previously-granted subscription has been cancelled.
-     *      <li>Presence.Type.PROBE -- a request for an entity's current presence; SHOULD be
-     *          generated only by a server on behalf of a user.
-     *      <li>Presence.Type.ERROR -- an error has occurred regarding processing or delivery
-     *          of a previously-sent presence stanza.
+     *      <li>{@link #unavailable Presence.Type.unavailable} -- signals that the
+     *          entity is no longer available for communication.
+     *      <li>{@link #subscribe Presence.Type.subscribe} -- the sender wishes to
+     *          subscribe to the recipient's presence.
+     *      <li>{@link #subscribed Presence.Type.subscribed} -- the sender has allowed
+     *          the recipient to receive their presence.
+     *      <li>{@link #unsubscribe Presence.Type.unsubscribe} -- the sender is
+     *          unsubscribing from another entity's presence.
+     *      <li>{@link #unsubscribed Presence.Type.unsubcribed} -- the subscription
+     *          request has been denied or a previously-granted subscription has been cancelled.
+     *      <li>{@link #probe Presence.Type.probe} -- a request for an entity's current
+     *          presence; SHOULD be generated only by a server on behalf of a user.
+     *      <li>{@link #error Presence.Type.error} -- an error has occurred regarding
+     *          processing or delivery of a previously-sent presence stanza.
      * </ul>
      */
-    public static class Type {
-
-        /**
-         * (Default) the sender is available. Note: the available type is assumed
-         * whenever the type attribute of the packet is <tt>null</tt> is assumed.
-         */
-        public static final Type AVAILABLE = new Type("");
+    public enum Type {
 
         /**
          * Typically short text message used in line-by-line chat interfaces.
          */
-        public static final Type UNAVAILABLE = new Type("unavailable");
+        unavailable,
 
         /**
          * The sender wishes to subscribe to the recipient's presence.
          */
-        public static final Type SUBSCRIBE = new Type("subscribe");
+        subscribe,
 
         /**
          * The sender has allowed the recipient to receive their presence.
          */
-        public static final Type SUBSCRIBED = new Type("subscribed");
+        subscribed,
 
         /**
          * The sender is unsubscribing from another entity's presence.
          */
-        public static final Type UNSUBSCRIBE = new Type("unsubscribe");
+        unsubscribe,
 
         /**
          * The subscription request has been denied or a previously-granted
          * subscription has been cancelled.
          */
-        public static final Type UNSUBSCRIBED = new Type("unsubscribed");
+        unsubscribed,
 
         /**
          * A request for an entity's current presence; SHOULD be
          * generated only by a server on behalf of a user.
          */
-        public static final Type PROBE = new Type("probe");
+        probe,
 
         /**
          * An error has occurred regarding processing or delivery
          * of a previously-sent presence stanza.
          */
-        public static final Type ERROR = new Type("error");
-
-        /**
-         * Converts a String value into its Type representation.
-         *
-         * @param type the String value.
-         * @return the Type corresponding to the String.
-         */
-        public static Type fromString(String type) {
-            if (type == null) {
-                return AVAILABLE;
-            }
-            type = type.toLowerCase();
-            if (UNAVAILABLE.toString().equals(type)) {
-                return UNAVAILABLE;
-            }
-            else if (SUBSCRIBE.toString().equals(type)) {
-                return SUBSCRIBE;
-            }
-            else if (SUBSCRIBED.toString().equals(type)) {
-                return SUBSCRIBED;
-            }
-            else if (UNSUBSCRIBE.toString().equals(type)) {
-                return UNSUBSCRIBED;
-            }
-            else if (PROBE.toString().equals(type)) {
-                return PROBE;
-            }
-            else if (ERROR.toString().equals(type)) {
-                return ERROR;
-            }
-            return null;
-        }
-
-        private String value;
-
-        private Type(String value) {
-            this.value = value;
-        }
-
-        public String toString() {
-            return value;
-        }
+        error;
     }
 
     /**
-     * Represents the presence "show" value.
+     * Represents the presence "show" value. Valid values are:
+     *
+     * <ul>
+     *      <li>{@link #chat Presence.Show.chat} -- the entity or resource is actively
+     *          interested in chatting.
+     *      <li>{@link #away Presence.Show.away} -- the entity or resource is
+     *          temporarily away.
+     *      <li>{@link #dnd Presence.Show.dnd} -- the entity or resource is busy
+     *          (dnd = "Do Not Disturb").
+     *      <li>{@link #xa Presence.Show.xa} -- the entity or resource is away for an
+     *          extended period (xa = "eXtended Away").
+     * </ul>
      */
-    public static class Show {
-
-        public static final Show CHAT = new Show("chat");
-        public static final Show AWAY =  new Show("away");
-        public static final Show EXTENDED_AWAY = new Show("xa");
-        public static final Show DO_NOT_DISTURB = new Show("dnd");
-
-        private String value;
-
-        private Show(String value) {
-            this.value = value;
-        }
-
-        public String toString() {
-            return value;
-        }
+    public enum Show {
 
         /**
-         * Returns the constant associated with the String value.
+         * The entity or resource is actively interested in chatting.
          */
-        public static Show fromString(String value) {
-            if (value == null) {
-                return null;
-            }
-            value = value.toLowerCase();
-            if (value.equals("chat")) {
-                return CHAT;
-            }
-            else if (value.equals("away")) {
-                return AWAY;
-            }
-            else if (value.equals("xa")) {
-                return EXTENDED_AWAY;
-            }
-            else if (value.equals("dnd")) {
-                return DO_NOT_DISTURB;
-            }
-            else {
-                return null;
-            }
-        }
+        chat,
+
+        /**
+         * The entity or resource is temporarily away.
+         */
+        away,
+
+        /**
+         * The entity or resource is away for an extended period (xa = "eXtended Away").
+         */
+        xa,
+
+        /**
+         * The entity or resource is busy (dnd = "Do Not Disturb").
+         */
+        dnd;
     }
 }

@@ -82,7 +82,7 @@ public class PacketError {
     public Type getType() {
         String type = element.attributeValue("type");
         if (type != null) {
-            return Type.fromString(type);
+            return Type.fromXMPP(type);
         }
         else {
             return null;
@@ -96,7 +96,7 @@ public class PacketError {
      * @see Type
      */
     public void setType(Type type) {
-        element.addAttribute("type", type==null?null:type.toString());
+        element.addAttribute("type", type==null?null:type.toXMPP());
     }
 
     /**
@@ -111,7 +111,7 @@ public class PacketError {
             if (el.getNamespaceURI().equals("urn:ietf:params:xml:ns:xmpp-stanzas") &&
                     !el.getName().equals("text"))
             {
-                return Condition.fromString(el.getName());
+                return Condition.fromXMPP(el.getName());
             }
         }
         return null;
@@ -140,7 +140,7 @@ public class PacketError {
             element.remove(conditionElement);
         }
 
-        conditionElement = docFactory.createElement(condition.toString(),
+        conditionElement = docFactory.createElement(condition.toXMPP(),
                 "urn:ietf:params:xml:ns:xmpp-stanzas");
         element.add(conditionElement);
     }
@@ -189,37 +189,43 @@ public class PacketError {
     }
 
     /**
-     * Error condition.
+     * Type-safe enumeration for the error condition.<p>
+     *
+     * Implementation note: XMPP error conditions use "-" characters in
+     * their names such as "bad-request". Because "-" characters are not valid
+     * identifier parts in Java, they have been converted to "_" characters in
+     * the  enumeration names, such as <tt>bad_request</tt>. The {@link #toXMPP()} and
+     * {@link #fromXMPP(String)} methods can be used to convert between the
+     * enumertation values and XMPP error code strings.
      */
-    public static class Condition {
+    public enum Condition {
 
         /**
          * The sender has sent XML that is malformed or that cannot be processed
          * (e.g., an IQ stanza that includes an unrecognized value of the 'type'
          * attribute); the associated error type SHOULD be "modify".
          */
-        public static final Condition BAD_REQUEST = new Condition("bad-request");
+        bad_request("bad-request"),
 
         /**
          * Access cannot be granted because an existing resource or session
          * exists with the same name or address; the associated error type
          * SHOULD be "cancel".
          */
-        public static final Condition CONFLICT = new Condition("conflict");
+        conflict("conflict"),
 
         /**
          * The feature requested is not implemented by the recipient or
          * server and therefore cannot be processed; the associated error
          * type SHOULD be "cancel".
          */
-        public static final Condition FEATURE_NOT_IMPLEMENTED = new Condition(
-                "feature-not-implemented");
+        feature_not_implemented("feature-not-implemented"),
 
         /**
          * The requesting entity does not possess the required permissions to
          * perform the action; the associated error type SHOULD be "auth".
          */
-        public static final Condition FORBIDDEN = new Condition("forbidden");
+        forbidden("forbidden"),
 
         /**
          * The recipient or server can no longer be contacted at this address
@@ -227,21 +233,20 @@ public class PacketError {
          * data of the <gone/> element); the associated error type SHOULD be
          * "modify".
          */
-        public static final Condition GONE = new Condition("gone");
+        gone("gone"),
 
         /**
          * The server could not process the stanza because of a misconfiguration
          * or an otherwise-undefined internal server error; the associated error
          * type SHOULD be "wait".
          */
-        public static final Condition INTERNAL_SERVER_ERROR = new Condition(
-                "internal-server-error");
+        internal_server_error("internal-server-error"),
 
         /**
          * The addressed JID or item requested cannot be found; the associated
          * error type SHOULD be "cancel".
          */
-        public static final Condition ITEM_NOT_FOUND = new Condition("item-not-found");
+        item_not_found("item-not-found"),
 
         /**
          * The sending entity has provided or communicated an XMPP address
@@ -250,7 +255,7 @@ public class PacketError {
          * in Addressing Scheme (Section 3); the associated error type SHOULD
          * be "modify".
          */
-        public static final Condition JID_MALFORMED = new Condition("jid-malformed");
+        jid_malformed("jid-malformed"),
 
         /**
          * The recipient or server understands the request but is refusing
@@ -258,27 +263,27 @@ public class PacketError {
          * recipient or server (e.g., a local policy regarding acceptable
          * words in messages); the associated error type SHOULD be "modify".
          */
-        public static final Condition NOT_ACCEPTABLE = new Condition("not-acceptable");
+        not_acceptable("not-acceptable"),
 
         /**
          * The recipient or server does not allow any entity to perform
          * the action; the associated error type SHOULD be "cancel".
          */
-        public static final Condition NOT_ALLOWED = new Condition("not-allowed");
+        not_allowed("not-allowed"),
 
         /**
          * The sender must provide proper credentials before being allowed
          * to perform the action, or has provided improper credentials;
          * the associated error type SHOULD be "auth".
          */
-        public static final Condition NOT_AUTHORIZED = new Condition("not-authorized");
+        not_authorized("not-authorized"),
 
         /**
          * The requesting entity is not authorized to access the requested
          * service because payment is required; the associated error type
          * SHOULD be "auth".
          */
-        public static final Condition PAYMENT_REQUIRED = new Condition("payment-required");
+        payment_required("payment-required"),
 
         /**
          * The intended recipient is temporarily unavailable; the associated
@@ -287,7 +292,7 @@ public class PacketError {
          * recipient's network availability to an entity that is not authorized
          * to know such information).
          */
-        public static final Condition RECIPIENT_UNAVAILABLE = new Condition("recipient-unavailable");
+        recipient_unavailable("recipient-unavailable"),
 
         /**
          * The recipient or server is redirecting requests for this
@@ -296,22 +301,21 @@ public class PacketError {
          * valid JID, in the XML character data of the &lt;redirect/&gt; element);
          * the associated error type SHOULD be "modify".
          */
-        public static final Condition REDIRECT = new Condition("redirect");
+        redirect("redirect"),
 
         /**
          * The requesting entity is not authorized to access the requested
          * service because registration is required; the associated error
          * type SHOULD be "auth".
          */
-        public static final Condition REGISTRATION_REQUIRED = new Condition("registration-required");
+        registration_required("registration-required"),
 
         /**
          * A remote server or service specified as part or all of the JID
          * of the intended recipient does not exist; the associated error
          * type SHOULD be "cancel".
          */
-        public static final Condition REMOTE_SERVER_NOT_FOUND = new Condition(
-                "remote-server-not-found");
+        remote_server_not_found("remote-server-not-found"),
 
         /**
          * A remote server or service specified as part or all of the JID of
@@ -319,27 +323,26 @@ public class PacketError {
          * be contacted within a reasonable amount of time; the associated
          * error type SHOULD be "wait".
          */
-        public static final Condition REMOTE_SERVER_TIMEOUT = new Condition(
-                "remote-server-timeout");
+        remote_server_timeout("remote-server-timeout"),
 
         /**
          * The server or recipient lacks the system resources necessary to
          * service the request; the associated error type SHOULD be "wait".
          */
-        public static final Condition RESOURCE_CONSTRAINT = new Condition("resource-constraint");
+        resource_constraint("resource-constraint"),
 
         /**
          * The server or recipient does not currently provide the requested
          * service; the associated error type SHOULD be "cancel".
          */
-        public static final Condition SERVICE_UNAVAILABLE = new Condition("service-unavailable");
+        service_unavailable("service-unavailable"),
 
         /**
          * The requesting entity is not authorized to access the requested
          * service because a subscription is required; the associated error
          * type SHOULD be "auth".
          */
-        public static final Condition SUBSCRIPTION_REQUIRED = new Condition("subscription-required");
+        subscription_required("subscription-required"),
 
         /**
          * The error condition is not one of those defined by the other
@@ -347,14 +350,14 @@ public class PacketError {
          * this condition, and it SHOULD be used only in conjunction with
          * an application-specific condition.
          */
-        public static final Condition UNDEFINED_REQUEST = new Condition("undefined-condition");
+        undefined_condition("undefined-condition"),
 
         /**
          * The recipient or server understood the request but was not
          * expecting it at this time (e.g., the request was out of order);
          * the associated error type SHOULD be "wait".
          */
-        public static final Condition UNEXPECTED_CONDITION = new Condition("unexpected-condition");
+        unexpected_condition("unexpected-condition");
 
         /**
          * Converts a String value into its Condition representation.
@@ -362,76 +365,76 @@ public class PacketError {
          * @param condition the String value.
          * @return the condition corresponding to the String.
          */
-        public static Condition fromString(String condition) {
+        public static Condition fromXMPP(String condition) {
             if (condition == null) {
                 throw new NullPointerException();
             }
             condition = condition.toLowerCase();
-            if (BAD_REQUEST.toString().equals(condition)) {
-                return BAD_REQUEST;
+            if (bad_request.toXMPP().equals(condition)) {
+                return bad_request;
             }
-            else if (CONFLICT.toString().equals(condition)) {
-                return CONFLICT;
+            else if (conflict.toXMPP().equals(condition)) {
+                return conflict;
             }
-            else if (FEATURE_NOT_IMPLEMENTED.toString().equals(condition)) {
-                return FEATURE_NOT_IMPLEMENTED;
+            else if (feature_not_implemented.toXMPP().equals(condition)) {
+                return feature_not_implemented;
             }
-            else if (FORBIDDEN.toString().equals(condition)) {
-                return FORBIDDEN;
+            else if (forbidden.toXMPP().equals(condition)) {
+                return forbidden;
             }
-            else if (GONE.toString().equals(condition)) {
-                return GONE;
+            else if (gone.toXMPP().equals(condition)) {
+                return gone;
             }
-            else if (INTERNAL_SERVER_ERROR.toString().equals(condition)) {
-                return INTERNAL_SERVER_ERROR;
+            else if (internal_server_error.toXMPP().equals(condition)) {
+                return internal_server_error;
             }
-            else if (ITEM_NOT_FOUND.toString().equals(condition)) {
-                return ITEM_NOT_FOUND;
+            else if (item_not_found.toXMPP().equals(condition)) {
+                return item_not_found;
             }
-            else if (JID_MALFORMED.toString().equals(condition)) {
-                return JID_MALFORMED;
+            else if (jid_malformed.toXMPP().equals(condition)) {
+                return jid_malformed;
             }
-            else if (NOT_ACCEPTABLE.toString().equals(condition)) {
-                return NOT_ACCEPTABLE;
+            else if (not_acceptable.toXMPP().equals(condition)) {
+                return not_acceptable;
             }
-            else if (NOT_ALLOWED.toString().equals(condition)) {
-                return NOT_ALLOWED;
+            else if (not_allowed.toXMPP().equals(condition)) {
+                return not_allowed;
             }
-            else if (NOT_AUTHORIZED.toString().equals(condition)) {
-                return NOT_AUTHORIZED;
+            else if (not_authorized.toXMPP().equals(condition)) {
+                return not_authorized;
             }
-            else if (PAYMENT_REQUIRED.toString().equals(condition)) {
-                return PAYMENT_REQUIRED;
+            else if (payment_required.toXMPP().equals(condition)) {
+                return payment_required;
             }
-            else if (RECIPIENT_UNAVAILABLE.toString().equals(condition)) {
-                return RECIPIENT_UNAVAILABLE;
+            else if (recipient_unavailable.toXMPP().equals(condition)) {
+                return recipient_unavailable;
             }
-            else if (REDIRECT.toString().equals(condition)) {
-                return REDIRECT;
+            else if (redirect.toXMPP().equals(condition)) {
+                return redirect;
             }
-            else if (REGISTRATION_REQUIRED.toString().equals(condition)) {
-                return REGISTRATION_REQUIRED;
+            else if (registration_required.toXMPP().equals(condition)) {
+                return registration_required;
             }
-            else if (REMOTE_SERVER_NOT_FOUND.toString().equals(condition)) {
-                return REMOTE_SERVER_NOT_FOUND;
+            else if (remote_server_not_found.toXMPP().equals(condition)) {
+                return remote_server_not_found;
             }
-            else if (REMOTE_SERVER_TIMEOUT.toString().equals(condition)) {
-                return REMOTE_SERVER_TIMEOUT;
+            else if (remote_server_timeout.toXMPP().equals(condition)) {
+                return remote_server_timeout;
             }
-            else if (RESOURCE_CONSTRAINT.toString().equals(condition)) {
-                return RESOURCE_CONSTRAINT;
+            else if (resource_constraint.toXMPP().equals(condition)) {
+                return resource_constraint;
             }
-            else if (SERVICE_UNAVAILABLE.toString().equals(condition)) {
-                return SERVICE_UNAVAILABLE;
+            else if (service_unavailable.toXMPP().equals(condition)) {
+                return service_unavailable;
             }
-            else if (SUBSCRIPTION_REQUIRED.toString().equals(condition)) {
-                return SUBSCRIPTION_REQUIRED;
+            else if (subscription_required.toXMPP().equals(condition)) {
+                return subscription_required;
             }
-            else if (UNDEFINED_REQUEST.toString().equals(condition)) {
-                return UNDEFINED_REQUEST;
+            else if (undefined_condition.toXMPP().equals(condition)) {
+                return undefined_condition;
             }
-            else if (UNEXPECTED_CONDITION.toString().equals(condition)) {
-                return UNEXPECTED_CONDITION;
+            else if (unexpected_condition.toXMPP().equals(condition)) {
+                return unexpected_condition;
             }
             else {
                 throw new IllegalArgumentException("Condition invalid:" + condition);
@@ -444,7 +447,12 @@ public class PacketError {
             this.value = value;
         }
 
-        public String toString() {
+        /**
+         * Returns the error code as a valid XMPP error code string.
+         *
+         * @return the XMPP error code value.
+         */
+        public String toXMPP() {
             return value;
         }
     }
@@ -452,65 +460,74 @@ public class PacketError {
     /**
      * Error type. Valid types are:<ul>
      *
-     *      <li>Error.Type.CANCEL -- do not retry (the error is unrecoverable).
-     *      <li>Error.Type.CONTINUE -- proceed (the condition was only a warning).
-     *      <li>Error.Type.MODIFY -- retry after changing the data sent.
-     *      <li>Eror.Type.AUTH -- retry after providing credentials.
-     *      <li>Error.Type.WAIT -- retry after waiting (the error is temporary).
+     *      <li>{@link #cancel Error.Type.cancel} -- do not retry (the error is unrecoverable).
+     *      <li>{@link #continue_processing Error.Type.continue_processing}  -- proceed
+     *          (the condition was only a warning). Equivalent to the XMPP error type
+     *          "continue".
+     *      <li>{@link #modify Error.Type.modify} -- retry after changing the data sent.
+     *      <li>{@link #auth Eror.Type.auth} -- retry after providing credentials.
+     *      <li>{@link #wait Error.Type.wait} -- retry after waiting (the error is temporary).
      * </ul>
+     *
+     * Implementation note: one of the XMPP error types is "continue". Because "continue"
+     * is a reserved Java keyword, the enum name is <tt>continue_processing</tt>. The
+     * {@link #toXMPP()} and {@link #fromXMPP(String)} methods can be used to convert
+     * between the enumertation values and XMPP error type strings.
      */
-    public static class Type {
+    public enum Type {
 
         /**
          * Do not retry (the error is unrecoverable).
          */
-        public static final Type CANCEL = new Type("cancel");
+        cancel("cancel"),
 
         /**
-         * Proceed (the condition was only a warning).
+         * Proceed (the condition was only a warning). This represents
+         * the "continue" error code in XMPP; because "continue" is a
+         * reserved keyword in Java the enum name has been changed.
          */
-        public static final Type CONTINUE = new Type("continue");
+        continue_processing("continue"),
 
         /**
          * Retry after changing the data sent.
          */
-        public static final Type MODIFY = new Type("modify");
+        modify("modify"),
 
         /**
          * Retry after providing credentials.
          */
-        public static final Type AUTH = new Type("auth");
+        auth("auth"),
 
         /**
          * Retry after waiting (the error is temporary).
          */
-        public static final Type WAIT = new Type("wait");
+        wait("wait");
 
         /**
          * Converts a String value into its Type representation.
          *
          * @param type the String value.
-         * @return the type corresponding to the String.
+         * @return the condition corresponding to the String.
          */
-        public static Type fromString(String type) {
+        public static Type fromXMPP(String type) {
             if (type == null) {
                 throw new NullPointerException();
             }
             type = type.toLowerCase();
-            if (CANCEL.toString().equals(type)) {
-                return CANCEL;
+            if (cancel.toXMPP().equals(type)) {
+                return cancel;
             }
-            else if (CONTINUE.toString().equals(type)) {
-                return CONTINUE;
+            else if (continue_processing.toXMPP().equals(type)) {
+                return continue_processing;
             }
-            else if (MODIFY.toString().equals(type)) {
-                return MODIFY;
+            else if (modify.toXMPP().equals(type)) {
+                return modify;
             }
-            else if (AUTH.toString().equals(type)) {
-                return AUTH;
+            else if (auth.toXMPP().equals(type)) {
+                return auth;
             }
-            else if (WAIT.toString().equals(type)) {
-                return WAIT;
+            else if (wait.toXMPP().equals(type)) {
+                return wait;
             }
             else {
                 throw new IllegalArgumentException("Type invalid:" + type);
@@ -523,7 +540,12 @@ public class PacketError {
             this.value = value;
         }
 
-        public String toString() {
+        /**
+         * Returns the error code as a valid XMPP error code string.
+         *
+         * @return the XMPP error code value.
+         */
+        public String toXMPP() {
             return value;
         }
     }

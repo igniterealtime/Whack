@@ -20,21 +20,38 @@ public class IQ extends Packet {
     private static Random random = new Random();
 
     /**
-     * Constructs a new IQ with an automatically generated ID.
+     * Constructs a new IQ with an automatically generated ID and a type
+     * of {@link Type#get IQ.Type.get}.
      */
     public IQ() {
         super(docFactory.createDocument().addElement("iq"));
+        String id = String.valueOf(random.nextInt(1000) + "-" + sequence++);
+        setType(Type.get);
+        setID(id);
+    }
+
+    /**
+     * Constructs a new IQ using the specified type. A packet ID will
+     * be automatically generated.
+     *
+     * @param type the IQ type.
+     */
+    public IQ(Type type) {
+        super(docFactory.createDocument().addElement("iq"));
+        setType(type);
         String id = String.valueOf(random.nextInt(1000) + "-" + sequence++);
         setID(id);
     }
 
     /**
-     * Constructs a new IQ.
+     * Constructs a new IQ using the specified type and ID.
      *
      * @param ID the packet ID of the IQ.
+     * @param type the IQ type.
      */
-    public IQ(String ID) {
+    public IQ(Type type, String ID) {
         super(docFactory.createDocument().addElement("iq"));
+        setType(type);
         setID(ID);
     }
 
@@ -57,7 +74,7 @@ public class IQ extends Packet {
     public Type getType() {
         String type = element.attributeValue("type");
         if (type != null) {
-            return Type.fromString(type);
+            return Type.valueOf(type);
         }
         else {
             return null;
@@ -160,31 +177,30 @@ public class IQ extends Packet {
     }
 
     /**
-     * Convenience method to create a new {@link Type#RESULT IQ.Type.RESULT} IQ based
-     * on a {@link Type#GET IQ.Type.GET} or {@link Type#SET IQ.Type.SET} IQ. The new
+     * Convenience method to create a new {@link Type#result IQ.Type.result} IQ based
+     * on a {@link Type#get IQ.Type.get} or {@link Type#set IQ.Type.set} IQ. The new
      * packet will be initialized with:<ul>
      *
      *      <li>The sender set to the recipient of the originating IQ.
      *      <li>The recipient set to the sender of the originating IQ.
-     *      <li>The type set to {@link Type#RESULT IQ.Type.RESULT}.
+     *      <li>The type set to {@link Type#result IQ.Type.result}.
      *      <li>The id set to the id of the originating IQ.
      *      <li>An empty child element using the same element name and namespace
      *          as the orginiating IQ.
      * </ul>
      *
-     * @param iq the {@link Type#GET IQ.Type.GET} or {@link Type#SET IQ.Type.SET} IQ packet.
+     * @param iq the {@link Type#get IQ.Type.get} or {@link Type#set IQ.Type.set} IQ packet.
      * @throws IllegalArgumentException if the IQ packet does not have a type of
-     *      {@link Type#GET IQ.Type.GET} or {@link Type#SET IQ.Type.SET}.
-     * @return a new {@link Type#RESULT IQ.Type.RESULT} IQ based on the originating IQ.
+     *      {@link Type#get IQ.Type.get} or {@link Type#set IQ.Type.set}.
+     * @return a new {@link Type#result IQ.Type.result} IQ based on the originating IQ.
      */
     public static IQ createResultIQ(IQ iq) {
-        if (!(iq.getType() == Type.GET || iq.getType() == Type.RESULT)) {
+        if (!(iq.getType() == Type.get || iq.getType() == Type.result)) {
             throw new IllegalArgumentException("IQ must be of type 'set' or 'get'.");
         }
-        IQ result = new IQ(iq.getID());
+        IQ result = new IQ(Type.result, iq.getID());
         result.setFrom(iq.getTo());
         result.setTo(iq.getFrom());
-        result.setType(Type.RESULT);
         Element childElement = iq.getChildElement();
         if (childElement != null) {
             Element resultChild = docFactory.createElement(childElement.getName(),
@@ -195,66 +211,45 @@ public class IQ extends Packet {
     }
 
     /**
-     * A class to represent the type of the IQ packet. The types are:
+     * Type-safe enumeration to represent the type of the IQ packet. The types are:
      *
      * <ul>
-     *      <li>IQ.Type.GET -- the stanza is a request for information or requirements.
-     *      <li>IQ.Type.SET -- the stanza provides required data, sets new values, or
+     *      <li>IQ.Type.get -- the IQ is a request for information or requirements.
+     *      <li>IQ.Type.set -- the IQ provides required data, sets new values, or
      *          replaces existing values.
-     *      <li>IQ.Type.RESULT -- the stanza is a response to a successful get or set request.
-     *      <li>IQ.Type.ERROR -- an error has occurred regarding processing or delivery of a
+     *      <li>IQ.Type.result -- the IQ is a response to a successful get or set request.
+     *      <li>IQ.Type.error -- an error has occurred regarding processing or delivery of a
      *          previously-sent get or set.
      * </ul>
      *
-     * If {@link #GET IQ.Type.GET} or {@link #SET IQ.Type.SET} is received the response
-     * must be {@link #RESULT IQ.Type.RESULT} or {@link #ERROR IQ.Type.ERROR}. The id of the
-     * originating {@link #GET IQ.Type.GET} of {@link #SET IQ.Type.SET} IQ must be preserved
-     * when sending {@link #RESULT IQ.Type.RESULT} or {@link #ERROR IQ.Type.ERROR}.
+     * If {@link #get IQ.Type.get} or {@link #set IQ.Type.set} is received the response
+     * must be {@link #result IQ.Type.result} or {@link #error IQ.Type.error}. The id of the
+     * originating {@link #get IQ.Type.get} of {@link #set IQ.Type.set} IQ must be preserved
+     * when sending {@link #result IQ.Type.result} or {@link #error IQ.Type.error}.
      */
-    public static class Type {
-
-        public static final Type GET = new Type("get");
-        public static final Type SET = new Type("set");
-        public static final Type RESULT = new Type("result");
-        public static final Type ERROR = new Type("error");
+    public enum Type {
 
         /**
-         * Converts a String into the corresponding types. Valid String values
-         * that can be converted to types are: "get", "set", "result", and "error".
-         *
-         * @param type the String value to covert.
-         * @return the corresponding Type.
+         * The IQ is a request for information or requirements.
          */
-        public static Type fromString(String type) {
-            if (type == null) {
-                return null;
-            }
-            type = type.toLowerCase();
-            if (GET.toString().equals(type)) {
-                return GET;
-            }
-            else if (SET.toString().equals(type)) {
-                return SET;
-            }
-            else if (ERROR.toString().equals(type)) {
-                return ERROR;
-            }
-            else if (RESULT.toString().equals(type)) {
-                return RESULT;
-            }
-            else {
-                return null;
-            }
-        }
+        get,
 
-        private String value;
+        /**
+         * The IQ provides required data, sets new values, or
+         * replaces existing values.
+         */
+        set,
 
-        private Type(String value) {
-            this.value = value;
-        }
+        /**
+         * The IQ is a response to a successful get or set request.
+         */
+        result,
 
-        public String toString() {
-            return value;
-        }
+        /**
+         * An error has occurred regarding processing or delivery of a
+         * previously-sent get or set.
+         */
+        error;
+
     }
 }
