@@ -102,7 +102,7 @@ public interface Log {
      *
      * @param throwable the Throwable that caused the info message.
      */
-    public void into(Throwable throwable);
+    public void info(Throwable throwable);
 
     /**
      * Logs a debug message.
