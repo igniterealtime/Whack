@@ -53,7 +53,10 @@
     </target>
     <target name="build" depends="init, resources">
         <!--Compiles the java code from ${src} directory into ${build} directory-->
-        <javac destdir="${build}">
+        <javac destdir="${build}"
+            debug="on"
+            source="1.5"
+        >
             <src path="${src}"/>
             <exclude name="**/*Test.java"/>
             <exclude name="**/Test*.java"/>
