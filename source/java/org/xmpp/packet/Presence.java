@@ -96,17 +96,27 @@ public class Presence extends Packet {
      * Returns the presence "show" value, which specifies a particular availability
      * status. If the &lt;show&gt; element is not present, this method will return
      * <tt>null</tt>. The show value can only be set if the presence type is "avaialble".
+     * A <tt>null</tt> show value is used to represent "available", which is the
+     * default.
      *
      * @return the presence show value..
      * @see Show
      */
     public Show getShow() {
-        return Show.valueOf(element.elementText("show"));
+        String show = element.elementText("show");
+        if (show == null) {
+            return null;
+        }
+        else {
+            return Show.valueOf(show);
+        }
     }
 
     /**
      * Sets the presence "show" value, which specifies a particular availability
      * status. The show value can only be set if the presence type is "available".
+     * A <tt>null</tt> show value is used to represent "available", which is the
+     * default.
      *
      * @param show the presence show value.
      * @throws IllegalArgumentException if the presence type is not available.
@@ -323,7 +333,8 @@ public class Presence extends Packet {
     }
 
     /**
-     * Represents the presence "show" value. Valid values are:
+     * Represents the presence "show" value. Note: a <tt>null</tt> "show" value is the
+     * default, which means "available". Valid values are:
      *
      * <ul>
      *      <li>{@link #chat Presence.Show.chat} -- the entity or resource is actively
