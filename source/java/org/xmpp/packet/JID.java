@@ -199,7 +199,8 @@ public class JID implements Comparable {
             this.resource = Stringprep.resourceprep(resource);
         }
         catch (Exception e) {
-            throw new IllegalArgumentException("Illegal JID format: " + e.getMessage());
+            String errorMessage = "Offending JID:"+node+"@"+domain+"/"+resource;
+            throw new IllegalArgumentException("Illegal JID format: "+errorMessage+": "+ e.getMessage());
         }
 
         // Validate each field is not greater than 1023 bytes. UTF-8 characters use two bytes.
