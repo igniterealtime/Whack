@@ -25,6 +25,7 @@
         <!--creates the build directory-->
         <mkdir dir="${build}"/>
         <mkdir dir="${dist}"/>
+        <mkdir dir="${dist}/lib"/>
     </target>
     <target name="build" depends="init">
         <!--Compiles the java code from ${src} directory into ${build} directory-->
