@@ -23,6 +23,8 @@ package org.xmpp.packet;
 import org.jivesoftware.stringprep.IDNA;
 import org.jivesoftware.stringprep.Stringprep;
 
+import java.util.*;
+
 /**
  * An XMPP address (JID). A JID is made up of a node (generally a username), a domain,
  * and a resource. The node and resource are optional; domain is required. In simple
@@ -44,6 +46,11 @@ import org.jivesoftware.stringprep.Stringprep;
  * @author Matt Tucker
  */
 public class JID implements Comparable {
+
+    // Stringprep operations are very expensive. Therefore, we cache node, domain and
+    // resource values that have already had stringprep applied so that we can check
+    // incoming values against the cache.
+    private static Map stringprepCache = Collections.synchronizedMap(new Cache(1000));
 
     private String node;
     private String domain;
@@ -190,16 +197,49 @@ public class JID implements Comparable {
         }
         // Stringprep (node prep, resourceprep, etc).
         try {
-            this.node = Stringprep.nodeprep(node);
+            if (!stringprepCache.containsKey(node)) {
+                this.node = Stringprep.nodeprep(node);
+                // Validate field is not greater than 1023 bytes. UTF-8 characters use two bytes.
+                if (node != null && node.length()*2 > 1023) {
+                    throw new IllegalArgumentException("Node cannot be larger than 1023 bytes. " +
+                            "Size is " + (node.length() * 2) + " bytes.");
+                }
+                stringprepCache.put(node, null);
+            }
+            else {
+                this.node = node;
+            }
             // XMPP specifies that domains should be run through IDNA and
             // that they should be run through nameprep before doing any
             // comparisons. We always run the domain through nameprep to
             // make comparisons easier later.
-            this.domain = Stringprep.nameprep(IDNA.toASCII(domain), false);
-            this.resource = Stringprep.resourceprep(resource);
+            if (!stringprepCache.containsKey(domain)) {
+                this.domain = Stringprep.nameprep(IDNA.toASCII(domain), false);
+                // Validate field is not greater than 1023 bytes. UTF-8 characters use two bytes.
+                if (domain.length()*2 > 1023) {
+                    throw new IllegalArgumentException("Domain cannot be larger than 1023 bytes. " +
+                            "Size is " + (domain.length() * 2) + " bytes.");
+                }
+                stringprepCache.put(domain, null);
+            }
+            else {
+                this.domain = domain;
+            }
+            if (!stringprepCache.containsKey(resource)) {
+                this.resource = Stringprep.resourceprep(resource);
+                // Validate field is not greater than 1023 bytes. UTF-8 characters use two bytes.
+                if (resource != null && resource.length()*2 > 1023) {
+                    throw new IllegalArgumentException("Resource cannot be larger than 1023 bytes. " +
+                            "Size is " + (resource.length() * 2) + " bytes.");
+                }
+                stringprepCache.put(resource, null);
+            }
+            else {
+                this.resource = resource;
+            }
         }
         catch (Exception e) {
-            StringBuffer buf = new StringBuffer();
+            StringBuilder buf = new StringBuilder();
             if (node != null) {
                 buf.append(node).append("@");
             }
@@ -208,20 +248,6 @@ public class JID implements Comparable {
                 buf.append("/").append(resource);
             }
             throw new IllegalArgumentException("Illegal JID: " + buf.toString(), e);
-        }
-
-        // Validate each field is not greater than 1023 bytes. UTF-8 characters use two bytes.
-        if (node != null && node.length()*2 > 1023) {
-            throw new IllegalArgumentException("Node cannot be larger than 1023 bytes. Size is " +
-                    (node.length() * 2) + " bytes.");
-        }
-        if (domain.length()*2 > 1023) {
-            throw new IllegalArgumentException("Domain cannot be larger than 1023 bytes. Size is " +
-                    (domain.length() * 2) + " bytes.");
-        }
-        if (resource != null && resource.length()*2 > 1023) {
-            throw new IllegalArgumentException("Resource cannot be larger than 1023 bytes. Size is " +
-                    (resource.length() * 2) + " bytes.");
         }
     }
 
@@ -259,7 +285,7 @@ public class JID implements Comparable {
      * @return the bare JID.
      */
     public String toBareJID() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         if (node != null) {
             buf.append(node).append("@");
         }
@@ -273,7 +299,7 @@ public class JID implements Comparable {
      * @return a String representation of the JID.
      */
     public String toString() {
-        StringBuffer buf = new StringBuffer();
+        StringBuilder buf = new StringBuilder();
         if (node != null) {
             buf.append(node).append("@");
         }
@@ -293,6 +319,9 @@ public class JID implements Comparable {
             return false;
         }
         JID jid = (JID)object;
+        if (jid == object) {
+            return true;
+        }
         // Node. If node isn't null, compare.
         if (node != null) {
             if (!node.equals(jid.node)) {
@@ -355,5 +384,23 @@ public class JID implements Comparable {
      */
     public static boolean equals(String jid1, String jid2) {
         return new JID(jid1).equals(new JID(jid2));
+    }
+
+    /**
+     * A simple cache class that extends LinkedHashMap. It uses an LRU policy to
+     * keep the cache at a maximum size.
+     */
+    private static class Cache extends LinkedHashMap {
+
+        private int maxSize;
+
+        public Cache(int maxSize) {
+            super(64, .75f, true);
+            this.maxSize = maxSize;
+        }
+
+        protected boolean removeEldestEntry(Map.Entry eldest) {
+            return size() > maxSize;
+        }
     }
 }
