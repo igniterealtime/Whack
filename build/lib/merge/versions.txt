@@ -1,1 +1,2 @@
 dom4j.jar -- 1.5.1
+stringprep.jar -- based on libidn 0.5.6
