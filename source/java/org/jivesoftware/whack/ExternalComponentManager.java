@@ -54,7 +54,9 @@ public class ExternalComponentManager implements ComponentManager {
     /**
      * Keeps a map that associates a component with the wrapping ExternalComponent.
      */
-    private Map<Component, ExternalComponent> components  = new Hashtable<Component,ExternalComponent>();;
+    private Map<Component, ExternalComponent> components  = new Hashtable<Component,ExternalComponent>();
+
+    private Log logger;
 
     /**
      * Constructs a new ExternalComponentManager that will make connections
@@ -77,6 +79,8 @@ public class ExternalComponentManager implements ComponentManager {
         this.domain = domain;
         this.port = port;
         this.preferencesPrefix = "whack." + domain + ".";
+
+        createDummyLogger();
     }
 
     /**
@@ -167,6 +171,62 @@ public class ExternalComponentManager implements ComponentManager {
     }
 
     public Log getLog() {
-        return null;
+        return logger;
+    }
+
+    private void createDummyLogger() {
+        this.logger = new Log() {
+            public void error(String message) {
+                System.out.println(message);
+            }
+
+            public void error(String message, Throwable throwable) {
+                System.err.println(message);
+                throwable.printStackTrace();
+            }
+
+            public void error(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+
+            public void warn(String message) {
+                System.out.println(message);
+            }
+
+            public void warn(String message, Throwable throwable) {
+                System.out.println(message);
+                throwable.printStackTrace();
+            }
+
+            public void warn(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+
+            public void info(String message) {
+                System.out.println(message);
+            }
+
+            public void info(String message, Throwable throwable) {
+                System.out.println(message);
+                throwable.printStackTrace();
+            }
+
+            public void info(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+
+            public void debug(String message) {
+                System.out.println(message);
+            }
+
+            public void debug(String message, Throwable throwable) {
+                System.out.println(message);
+                throwable.printStackTrace();
+            }
+
+            public void debug(Throwable throwable) {
+                throwable.printStackTrace();
+            }
+        };
     }
 }
