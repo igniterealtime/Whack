@@ -230,6 +230,7 @@ public class Message extends Packet {
          * @return the Type corresponding to the String.
          */
         public static Type fromString(String type) {
+            // No type attribute means "normal".
             if (type == null) {
                 return NORMAL;
             }
@@ -246,8 +247,11 @@ public class Message extends Packet {
             else if (ERROR.toString().equals(type)) {
                 return ERROR;
             }
+            // From the XMPP spec: [if] the application does not understand the
+            // value of the 'type' attribute provided, it MUST consider the message
+            // to be of type "normal".
             else {
-                return null;
+                return NORMAL;
             }
         }
 
