@@ -265,7 +265,7 @@ public class Presence extends Packet {
      */
     public Presence createCopy() {
         Element elementCopy = element.createCopy();
-        docFactory.createDocument().add(element.createCopy());
+        docFactory.createDocument().add(elementCopy);
         return new Presence(elementCopy);
     }
 

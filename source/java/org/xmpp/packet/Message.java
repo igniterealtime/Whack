@@ -234,7 +234,7 @@ public class Message extends Packet {
      */
     public Message createCopy() {
         Element elementCopy = element.createCopy();
-        docFactory.createDocument().add(element.createCopy());
+        docFactory.createDocument().add(elementCopy);
         return new Message(elementCopy);
     }
 
