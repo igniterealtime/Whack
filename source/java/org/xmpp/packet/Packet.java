@@ -28,9 +28,9 @@ import org.dom4j.io.OutputFormat;
 import java.io.StringWriter;
 
 /**
- * An XMPP Packet. Each packet is backed by a DOM4J Element. A set of
- * convenience methods allows easy manipulation of the Element, or the
- * Element can be accessed directly and manipulated.
+ * An XMPP packet (also referred to as a stanza). Each packet is backed by a
+ * DOM4J Element. A set of convenience methods allows easy manipulation of
+ * the Element, or the Element can be accessed directly and manipulated.
  *
  * @author Matt Tucker
  */
@@ -183,7 +183,7 @@ public abstract class Packet {
      * representation of the packet and can be manipulated directly to change
      * packet contents.
      *
-     * @return the DOM4J Element.
+     * @return the DOM4J Element that represents the packet.
      */
     public Element getElement() {
         return element;

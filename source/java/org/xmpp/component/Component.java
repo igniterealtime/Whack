@@ -21,18 +21,53 @@
 package org.xmpp.component;
 
 import org.xmpp.packet.Packet;
+import org.xmpp.packet.JID;
 
 /**
+ * A component, which enhances the functionality of an XMPP server.
  *
+ * Components are JavaBeans and will have their properties exposed as ad-hoc commands.
  *
+ * @author Matt Tucker
  */
 public interface Component {
 
+    /**
+     * Returns the name of this component.
+     *
+     * @return the name of this component.
+     */
     public String getName();
 
+    /**
+     * Returns the description of this component.
+     *
+     * @return the description of this component.
+     */
     public String getDescription();
 
+    /**
+     * Processes a packet sent to this Component.
+     *
+     * @param packet the packet.
+     * @see ComponentManager#sendPacket(Packet)
+     */
     public void processPacket(Packet packet);
 
-    public void setComponentManager(ComponentManager componentManager);
+    /**
+     * Initializes this component with a ComponentManager and the JID
+     * that this component is available at (e.g. <tt>service.example.com</tt>).
+     * After being initialized, this Component must be ready to process
+     * incoming packets.
+     *
+     * @param jid the XMPP address that this component is available at.
+     * @param componentManager the component manager.
+     */
+    public void initialize(JID jid, ComponentManager componentManager);
+
+    /**
+     * Shuts down this component. All component resources must be released as
+     * part of shutdown.
+     */
+    public void shutdown();
 }

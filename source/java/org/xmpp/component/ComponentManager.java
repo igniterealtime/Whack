@@ -23,9 +23,16 @@ package org.xmpp.component;
 import org.xmpp.packet.Packet;
 
 /**
+ * Manages components.
  *
+ * @author Matt Tucker
  */
 public interface ComponentManager {
 
+    /**
+     * Sends a packet to the XMPP server.
+     *
+     * @param packet
+     */
     public void sendPacket(Packet packet);
 }
