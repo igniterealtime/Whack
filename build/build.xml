@@ -1,94 +1,97 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project name="Whack" default="dist" basedir=".">
-  <description>Whack Build File</description>
-  <!--set global properties for this build-->
-  <property name="src" location="../source/java" />
-  <property name="build" location="classes" />
-  <property name="dist" location="dist" />
-  <property name="docs" location="docs" />
-  <property name="docsapi" location="docs/api" />
-  <property name="libs" location="lib/merge"/>
+    <description>Whack Build File</description>
+    <!--set global properties for this build-->
+    <property name="src" location="../source/java"/>
+    <property name="build" location="classes"/>
+    <property name="dist" location="../target"/>
+    <property name="docs" location="${dist}/docs"/>
+    <property name="docsapi" location="docs/api"/>
+    <property name="libs" location="lib/merge"/>
 
-  <target name="release">
-      <antcall target="dist" />
-      <antcall target="doc" />
-      <antcall target="clean_classes" />
-  </target>
-  <target name="clean">
-    <!--Delete created directory trees-->
-    <delete dir="${build}" includeEmptyDirs="true" />
-    <delete includeEmptyDirs="true">
-      <fileset dir="${dist}" excludes="lib/**" />
-    </delete>
-    <delete dir="${docs}" includeEmptyDirs="true" />
-    <delete dir="${docsapi}" includeEmptyDirs="true" />
-  </target>
+    <target name="release">
+        <antcall target="dist"/>
+        <antcall target="doc"/>
+        <antcall target="clean_classes"/>
+    </target>
+    <target name="clean">
+        <!--Delete created directory trees-->
+        <delete dir="${build}" includeEmptyDirs="true"/>
+        <delete includeEmptyDirs="true">
+            <fileset dir="${dist}" excludes="lib/**"/>
+        </delete>
+        <delete dir="${docs}" includeEmptyDirs="true"/>
+        <delete dir="${docsapi}" includeEmptyDirs="true"/>
+    </target>
     <target name="clean_classes">
-    <!--Delete created directory trees-->
-    <delete dir="${build}" includeEmptyDirs="true" />
-  </target>
-  <target name="init">
-    <!--creates the build directory-->
-    <mkdir dir="${build}" />
-    <mkdir dir="${dist}" />
-    <mkdir dir="${docs}" />
-    <mkdir dir="${docsapi}" />
-  </target>
-  <target name="resources">
-    <copy todir="${build}">
-      <fileset dir="${src}">
-        <include name="**/*.jpe" />
-        <include name="**/*.jpeg" />
-        <include name="**/*.rmf" />
-        <include name="**/*.wav" />
-        <include name="**/*.mid" />
-        <include name="**/*.midi" />
-        <include name="**/*.au" />
-        <include name="**/*.gif" />
-        <include name="**/*.png" />
-        <include name="**/*.aiff" />
-        <include name="**/*.properties" />
-      </fileset>
-    </copy>
-  </target>
-  <target name="build" depends="init, resources">
-    <!--Compiles the java code from ${src} directory into ${build} directory-->
-    <javac destdir="${build}">
-      <src path="${src}" />
-      <exclude name="**/*Test.java" />
-      <exclude name="**/Test*.java" />
-      <classpath path="lib/merge/dom4j.jar" />
-      <classpath path="lib/merge/stringprep.jar" />
-    </javac>
-  </target>
-  <target name="dist" depends="build">
-    <!--Put everything in ${build} into the MyProject-${DSTAMP}.jar file-->
-    <tstamp />
-    <jar jarfile="${dist}/Whack.jar" basedir="${build}" >
-       <zipgroupfileset dir="${libs}" includes="*.jar"/>
-    </jar>
-      <antcall target="clean_classes" />
-  </target>
-  <target name="doc" depends="init">
-    <javadoc destdir="${docsapi}" author="true" version="true" use="true" windowtitle="API for Whack">
-      <fileset dir="${src}" defaultexcludes="yes">
-        <exclude name="**/*Test.java" />
-        <exclude name="**/Test*.java" />
-      </fileset>
-      <classpath path="lib/merge/dom4j.jar" />
-      <classpath path="lib/merge/stringprep.jar" />
-    </javadoc>
-  </target>
-  <target name="build_tests" depends="init">
-    <!--Compiles the tests into ${tests} directory-->
-    <javac destdir="${tests}">
-      <src path="${src}" />
-      <include name="**/*Test.java" />
-      <include name="**/Test*.java" />
-      <src path="${src}" />
-      <classpath path="lib/merge/dom4j.jar" />
-      <classpath path="lib/merge/stringprep.jar" />
-    </javac>
-  </target>
+        <!--Delete created directory trees-->
+        <delete dir="${build}" includeEmptyDirs="true"/>
+    </target>
+    <target name="init">
+        <!--creates the build directory-->
+        <mkdir dir="${build}"/>
+        <mkdir dir="${dist}"/>
+        <mkdir dir="${docs}"/>
+        <mkdir dir="${docsapi}"/>
+    </target>
+    <target name="resources">
+        <copy todir="${build}">
+            <fileset dir="${src}">
+                <include name="**/*.jpe"/>
+                <include name="**/*.jpeg"/>
+                <include name="**/*.rmf"/>
+                <include name="**/*.wav"/>
+                <include name="**/*.mid"/>
+                <include name="**/*.midi"/>
+                <include name="**/*.au"/>
+                <include name="**/*.gif"/>
+                <include name="**/*.png"/>
+                <include name="**/*.aiff"/>
+                <include name="**/*.properties"/>
+            </fileset>
+        </copy>
+    </target>
+    <target name="build" depends="init, resources">
+        <!--Compiles the java code from ${src} directory into ${build} directory-->
+        <javac destdir="${build}">
+            <src path="${src}"/>
+            <exclude name="**/*Test.java"/>
+            <exclude name="**/Test*.java"/>
+            <classpath path="lib/merge/dom4j.jar"/>
+            <classpath path="lib/merge/stringprep.jar"/>
+        </javac>
+    </target>
+    <target name="dist" depends="build">
+        <!--Put everything in ${build} into the MyProject-${DSTAMP}.jar file-->
+        <tstamp/>
+        <jar jarfile="${dist}/whack-full.jar" basedir="${build}">
+            <zipgroupfileset dir="${libs}" includes="*.jar"/>
+        </jar>
+        <jar jarfile="${dist}/whack.jar" basedir="${build}">
+             <zipgroupfileset dir="${libs}" includes="stringprep.jar"/>
+        </jar>
+        <antcall target="clean_classes"/>
+    </target>
+    <target name="doc" depends="init">
+        <javadoc destdir="${docsapi}" author="true" version="true" use="true" windowtitle="API for Whack">
+            <fileset dir="${src}" defaultexcludes="yes">
+                <exclude name="**/*Test.java"/>
+                <exclude name="**/Test*.java"/>
+            </fileset>
+            <classpath path="lib/merge/dom4j.jar"/>
+            <classpath path="lib/merge/stringprep.jar"/>
+        </javadoc>
+    </target>
+    <target name="build_tests" depends="init">
+        <!--Compiles the tests into ${tests} directory-->
+        <javac destdir="${tests}">
+            <src path="${src}"/>
+            <include name="**/*Test.java"/>
+            <include name="**/Test*.java"/>
+            <src path="${src}"/>
+            <classpath path="lib/merge/dom4j.jar"/>
+            <classpath path="lib/merge/stringprep.jar"/>
+        </javac>
+    </target>
 </project>
 
