@@ -104,11 +104,18 @@ public class IQ extends Packet {
      * A class to represent the type of the IQ packet. The types are:
      *
      * <ul>
-     *      <li>IQ.Type.GET
-     *      <li>IQ.Type.SET
-     *      <li>IQ.Type.RESULT
-     *      <li>IQ.Type.ERROR
+     *      <li>IQ.Type.GET -- the stanza is a request for information or requirements.
+     *      <li>IQ.Type.SET -- the stanza provides required data, sets new values, or
+     *          replaces existing values.
+     *      <li>IQ.Type.RESULT -- the stanza is a response to a successful get or set request.
+     *      <li>IQ.Type.ERROR -- an error has occurred regarding processing or delivery of a
+     *          previously-sent get or set.
      * </ul>
+     *
+     * If {@link #GET IQ.Type.GET} or {@link #SET IQ.Type.SET} is received the response
+     * must be {@link #RESULT IQ.Type.RESULT} or {@link #ERROR IQ.Type.ERROR}. The id of the
+     * originating {@link #GET IQ.Type.GET} of {@link #SET IQ.Type.SET} IQ must be preserved
+     * when sending {@link #RESULT IQ.Type.RESULT} or {@link #ERROR IQ.Type.ERROR}.
      */
     public static class Type {
 
