@@ -22,7 +22,7 @@ public class IQ extends Packet {
      * @param ID the packet ID of the IQ.
      */
     public IQ(String ID) {
-        super(docFactory.createElement("iq"));
+        super(docFactory.createDocument().addElement("iq"));
         setID(ID);
     }
 

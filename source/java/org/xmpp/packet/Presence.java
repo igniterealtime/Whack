@@ -38,7 +38,7 @@ public class Presence extends Packet {
      * Constructs a new Presence.
      */
     public Presence() {
-        super(docFactory.createElement("presence"));
+        super(docFactory.createDocument().addElement("presence"));
     }
 
     /**

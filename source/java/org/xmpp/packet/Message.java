@@ -50,7 +50,7 @@ public class Message extends Packet {
      * Constructs a new Message.
      */
     public Message() {
-        super(docFactory.createElement("message"));
+        super(docFactory.createDocument().addElement("message"));
     }
 
      /**
