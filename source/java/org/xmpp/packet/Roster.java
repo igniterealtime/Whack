@@ -113,7 +113,7 @@ public class Roster extends IQ {
      * @return the newly created item.
      */
     public Item addItem(JID jid, Subscription subscription)  {
-        if (getType() != IQ.Type.result || getType() != IQ.Type.set) {
+        if (getType() != IQ.Type.result && getType() != IQ.Type.set) {
             throw new IllegalStateException("IQ type must be 'result' or 'set'");
         }
         if (jid == null) {
@@ -161,7 +161,7 @@ public class Roster extends IQ {
         if (item == null) {
             item = query.addElement("item");
         }
-        item.addAttribute("jid", jid.toString());
+        item.addAttribute("jid", jid.toBareJID());
         item.addAttribute("name", name);
         if (ask != null) {
             item.addAttribute("ask", ask.toString());
