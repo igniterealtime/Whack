@@ -350,6 +350,32 @@ public class JID implements Comparable {
         return true;
     }
 
+    public boolean equalsBareAddress(Object object) {
+        if (!(object instanceof JID)) {
+            return false;
+        }
+        if (this == object) {
+            return true;
+        }
+        JID jid = (JID)object;
+        // Node. If node isn't null, compare.
+        if (node != null) {
+            if (!node.equals(jid.node)) {
+                return false;
+            }
+        }
+        // Otherwise, jid.node must be null.
+        else if (jid.node != null) {
+            return false;
+        }
+        // Compare domain, which must be null.
+        if (!domain.equals(jid.domain)) {
+            return false;
+        }
+        // Passed all checks, so equal.
+        return true;
+    }
+
     public int compareTo(Object o) {
         if (!(o instanceof JID)) {
             throw new ClassCastException("Ojbect not instanceof JID: " + o);
