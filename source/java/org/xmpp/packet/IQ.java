@@ -206,7 +206,7 @@ public class IQ extends Packet {
      * @return a new {@link Type#result IQ.Type.result} IQ based on the originating IQ.
      */
     public static IQ createResultIQ(IQ iq) {
-        if (!(iq.getType() == Type.get || iq.getType() == Type.result)) {
+        if (!(iq.getType() == Type.get || iq.getType() == Type.set)) {
             throw new IllegalArgumentException("IQ must be of type 'set' or 'get'.");
         }
         IQ result = new IQ(Type.result, iq.getID());
