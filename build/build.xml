@@ -62,6 +62,7 @@
             <exclude name="**/Test*.java"/>
             <classpath path="lib/merge/dom4j.jar"/>
             <classpath path="lib/merge/stringprep.jar"/>
+            <classpath path="lib/merge/xpp3.jar"/>
         </javac>
     </target>
     <target name="dist" depends="build">
@@ -83,6 +84,7 @@
             </fileset>
             <classpath path="lib/merge/dom4j.jar"/>
             <classpath path="lib/merge/stringprep.jar"/>
+            <classpath path="lib/merge/xpp3.jar"/>
         </javadoc>
     </target>
     <target name="build_tests" depends="init">
@@ -94,6 +96,7 @@
             <src path="${src}"/>
             <classpath path="lib/merge/dom4j.jar"/>
             <classpath path="lib/merge/stringprep.jar"/>
+            <classpath path="lib/merge/xpp3.jar"/>
         </javac>
     </target>
 </project>

@@ -20,12 +20,16 @@
 
 package org.jivesoftware.whack;
 
-import org.xmpp.component.*;
-import org.xmpp.packet.Packet;
+import org.xmpp.component.Component;
+import org.xmpp.component.ComponentException;
+import org.xmpp.component.ComponentManager;
+import org.xmpp.component.Log;
 import org.xmpp.packet.JID;
+import org.xmpp.packet.Packet;
 
-import java.util.Map;
+import javax.net.SocketFactory;
 import java.util.Hashtable;
+import java.util.Map;
 import java.util.prefs.Preferences;
 
 /**
@@ -42,7 +46,15 @@ public class ExternalComponentManager implements ComponentManager {
     private Map<String, String> secretKeys = new Hashtable<String,String>();
     Preferences preferences = Preferences.userRoot();
     private String preferencesPrefix;
-    private Map<String, Component> components = new Hashtable<String,Component>();
+
+    /**
+     * Keeps a map that associates a domain with the external component thas is handling the domain.
+     */
+    private Map<String, ExternalComponent> componentsByDomain = new Hashtable<String,ExternalComponent>();
+    /**
+     * Keeps a map that associates a component with the wrapping ExternalComponent.
+     */
+    private Map<Component, ExternalComponent> components  = new Hashtable<Component,ExternalComponent>();;
 
     /**
      * Constructs a new ExternalComponentManager that will make connections
@@ -81,6 +93,22 @@ public class ExternalComponentManager implements ComponentManager {
     }
 
     /**
+     * Returns the secret key for a sub-domain. If no key was found then the default secret key
+     * will be returned.
+     *
+     * @param subdomain the subdomain to return its secret key.
+     * @return the secret key for a sub-domain.
+     */
+    public String getSecretKey(String subdomain) {
+        // Find the proper secret key to connect as the subdomain.
+        String secretKey = secretKeys.get(subdomain);
+        if (secretKey == null) {
+            secretKey = defaultSecretKey;
+        }
+        return secretKey;
+    }
+
+    /**
      * Sets the default secret key, which will be used when connecting if a
      * specific secret key for the component hasn't been sent. Keys are used
      * as an authentication mechanism when connecting to the server. Some servers
@@ -99,25 +127,31 @@ public class ExternalComponentManager implements ComponentManager {
         if (secretKey == null) {
             secretKey = defaultSecretKey;
         }
-        // TODO: connect over network to domain and register component
+        // Create a wrapping ExternalComponent on the component
+        ExternalComponent externalComponent = new ExternalComponent(component, this);
+        // Ask the ExternalComponent to connect with the remote server
+        externalComponent.connect(domain, port, SocketFactory.getDefault(), subdomain);
 
         // TODO: actual JID should come from server
         JID componentJID = new JID(null, subdomain + domain, null);
 
-        component.initialize(componentJID, this);
-        components.put(subdomain, component);
+        externalComponent.initialize(componentJID, this);
+        componentsByDomain.put(subdomain, externalComponent);
+        components.put(component, externalComponent);
     }
 
     public void removeComponent(String subdomain) throws ComponentException {
-        Component component = components.remove(subdomain);
-        if (component != null) {
-            component.shutdown();
-            // TODO: shut down network connection
+        ExternalComponent externalComponent = componentsByDomain.remove(subdomain);
+        components.remove(externalComponent.getComponent());
+        if (externalComponent != null) {
+            externalComponent.shutdown();
         }
     }
 
     public void sendPacket(Component component, Packet packet) {
-
+        // Get the ExternalComponent that is wrapping the specified component and ask it to
+        // send the packet
+        components.get(component).send(packet);
     }
 
     public String getProperty(String name) {

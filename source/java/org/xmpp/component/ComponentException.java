@@ -20,12 +20,16 @@
 
 package org.xmpp.component;
 
+import org.xmpp.packet.StreamError;
+
 /**
  * Thrown when an exception occors with a Component.
  *
  * @author Matt Tucker
  */
 public class ComponentException extends Exception {
+
+    private StreamError streamError;
 
     public ComponentException() {
         super();
@@ -41,5 +45,19 @@ public class ComponentException extends Exception {
 
     public ComponentException(Throwable cause) {
         super(cause);
+    }
+
+    public ComponentException(String message, StreamError streamError) {
+        super(message);
+        this.streamError = streamError;
+    }
+
+    public ComponentException(StreamError streamError) {
+        super(streamError.getCondition().toXMPP());
+        this.streamError = streamError;
+    }
+
+    public StreamError getStreamError() {
+        return streamError;
     }
 }
