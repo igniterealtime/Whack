@@ -76,7 +76,6 @@ public abstract class Packet {
      * @param ID the packet ID.
      */
     public void setID(String ID) {
-        element.attribute("id");
         element.addAttribute("id", ID);
     }
 
