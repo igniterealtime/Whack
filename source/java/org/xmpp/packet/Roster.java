@@ -218,8 +218,10 @@ public class Roster extends IQ {
                     Element group = (Element)j.next();
                     groups.add(group.getTextTrim());
                 }
-                items.add(new Item(new JID(jid), name, Ask.valueOf(ask),
-                        Subscription.valueOf(subscription), groups));
+                Ask askStatus = ask == null ? null : Ask.valueOf(ask);
+                Subscription subStatus = subscription == null ?
+                        null : Subscription.valueOf(subscription);
+                items.add(new Item(new JID(jid), name, askStatus, subStatus, groups));
             }
         }
         return Collections.unmodifiableCollection(items);
