@@ -104,18 +104,6 @@ public class JID implements Comparable {
     }
 
     /**
-     * Constructs a JID given a node and domain.
-     *
-     * @param node the node.
-     * @param domain the domain, which must not be <tt>null</tt>.
-     * @throws IllegalArgumentException if the JID is not valid.
-     *
-     */
-    public JID(String node, String domain) {
-        this(node, domain, null);
-    }
-
-    /**
      * Constructs a JID given a node, domain, and resource.
      *
      * @param node the node.
