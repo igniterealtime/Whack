@@ -63,13 +63,10 @@ class SocketReadThread extends Thread {
             // Normal disconnect
         }
         catch (SocketException se) {
-            // The socket was closed. The server may close the connection for several reasons (e.g.
-            // user requested to remove his account). Do nothing here. 
+            component.getManager().getLog().error(se);
         }
         catch (XmlPullParserException ie) {
-            // It is normal for clients to abruptly cut a connection
-            // rather than closing the stream document
-            // Since this is normal behavior, we won't log it as an error
+            component.getManager().getLog().error(ie);
         }
         catch (Exception e) {
             component.getManager().getLog().warn(e);
