@@ -1,18 +1,60 @@
+/**
+ * $RCSfile$
+ * $Revision$
+ * $Date$
+ *
+ * Copyright 2004 Jive Software.
+ *
+ * All rights reserved. Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.xmpp.packet;
 
 import org.jivesoftware.stringprep.IDNA;
 import org.jivesoftware.stringprep.Stringprep;
 
 /**
+ * An XMPP address (JID). A JID is made up of a node (generally a username), a domain,
+ * and a resource. The node and resource are optional; domain is required. In simple
+ * ABNF form:
  *
- * @author Matt
+ * <ul><tt>jid = [ node "@" ] domain [ "/" resource ]</tt></ul>
+ *
+ * Some sample JID's:
+ * <ul>
+ *      <li><tt>user@example.com</tt></li>
+ *      <li><tt>user@example.com/home</tt></li>
+ *      <li><tt>example.com</tt></li>
+ * </ul>
+ *
+ * Each allowable portion of a JID (node, domain, and resource) must not be more
+ * than 1023 bytes in length, resulting in a maximum total size (including the '@'
+ * and '/' separators) of 3071 bytes.
+ *
+ * @author Matt Tucker
  */
-public class JID {
+public class JID implements Comparable {
 
     private String node;
     private String domain;
     private String resource;
 
+    /**
+     * Constructs a JID from it's String representation.
+     *
+     * @param jid a valid JID.
+     * @throws IllegalArgumentException if the JID is not valid.
+     */
     public JID(String jid) {
         if (jid == null) {
             throw new NullPointerException("JID cannot be null");
@@ -58,44 +100,132 @@ public class JID {
             resource = jid.substring(slashIndex + 1);
         }
 
-        try {
-            this.node = Stringprep.nodeprep(node);
-            this.domain = IDNA.toASCII(domain);
-            this.resource = Stringprep.resourceprep(resource);
-        }
-        catch (Exception e) {
-            throw new IllegalArgumentException("Illegal JID format.", e);
-        }
+        init(node, domain,resource);
     }
 
+    /**
+     * Constructs a JID given a node and domain.
+     *
+     * @param node the node.
+     * @param domain the domain, which must not be <tt>null</tt>.
+     * @throws IllegalArgumentException if the JID is not valid.
+     *
+     */
     public JID(String node, String domain) {
         this(node, domain, null);
     }
 
+    /**
+     * Constructs a JID given a node, domain, and resource.
+     *
+     * @param node the node.
+     * @param domain the domain, which must not be <tt>null</tt>.
+     * @param resource the resource.
+     * @throws IllegalArgumentException if the JID is not valid.
+     */
     public JID(String node, String domain, String resource) {
         if (domain == null) {
             throw new NullPointerException("Domain cannot be null");
         }
+        init(node, domain, resource);
+    }
+
+    /**
+     * Transforms the JID parts using the appropriate Stringprep profiles, then
+     * validates them. If they are fully valid, the field values are saved, otherwise
+     * an IllegalArgumentException is thrown.
+     *
+     * @param node the node.
+     * @param domain the domain.
+     * @param resource the resource.
+     */
+    private void init(String node, String domain, String resource) {
+        // Stringprep (node prep, resourceprep, etc).
         try {
             this.node = Stringprep.nodeprep(node);
-            this.domain = IDNA.toASCII(domain);
+            // XMPP specifies that domains should be run through IDNA and
+            // that they should be run through nameprep before doing any
+            // comparisons. We always run the domain through nameprep to
+            // make comparisons easier later.
+            this.domain = Stringprep.nameprep(IDNA.toASCII(domain), false);
             this.resource = Stringprep.resourceprep(resource);
         }
         catch (Exception e) {
-            throw new IllegalArgumentException("Illegal JID format.", e);
+            throw new IllegalArgumentException("Illegal JID format: " + e.getMessage());
+        }
+
+        // Validate each field is not greater than 1023 bytes. UTF-8 characters use two bytes.
+        if (node != null && node.length()*2 > 1023) {
+            throw new IllegalArgumentException("Node cannot be larger than 1023 bytes. Size is " +
+                    (node.length() * 2) + " bytes.");
+        }
+        if (domain.length()*2 > 1023) {
+            throw new IllegalArgumentException("Domain cannot be larger than 1023 bytes. Size is " +
+                    (domain.length() * 2) + " bytes.");
+        }
+        if (resource != null && resource.length()*2 > 1023) {
+            throw new IllegalArgumentException("Resource cannot be larger than 1023 bytes. Size is " +
+                    (resource.length() * 2) + " bytes.");
         }
     }
 
+    /**
+     * Returns the node, or <tt>null</tt> if this JID does not contain node information.
+     *
+     * @return the node.
+     */
     public String getNode() {
         return node;
     }
 
+    /**
+     * Returns the domain.
+     *
+     * @return the domain.
+     */
     public String getDomain() {
         return domain;
     }
 
+    /**
+     * Returns the resource, or <tt>null</tt> if this JID does not contain resource information.
+     *
+     * @return the resource.
+     */
     public String getResource() {
         return resource;
+    }
+
+    /**
+     * Returns the String representation of the bare JID, which is the JID with
+     * resource information removed.
+     *
+     * @return the bare JID.
+     */
+    public String toBareJID() {
+        StringBuffer buf = new StringBuffer();
+        if (node != null) {
+            buf.append(node).append("@");
+        }
+        buf.append(domain);
+        return buf.toString();
+    }
+
+    /**
+     * Returns a String representation of the JID.
+     *
+     * @return a String representation of the JID.
+     */
+    public String toString() {
+        StringBuffer buf = new StringBuffer();
+        if (node != null) {
+            buf.append(node).append("@");
+        }
+        buf.append(domain);
+        if (resource != null) {
+            buf.append("/").append(resource);
+        }
+        return buf.toString();
     }
 
     public boolean equals(Object object) {
@@ -131,18 +261,38 @@ public class JID {
         return true;
     }
 
-    public String toString() {
-        StringBuffer buf = new StringBuffer();
-        if (node != null) {
-            buf.append(node).append("@");
+    public int compareTo(Object o) {
+        if (!(o instanceof JID)) {
+            throw new ClassCastException("Ojbect not instanceof JID: " + o);
         }
-        buf.append(domain);
-        if (resource != null) {
-            buf.append("/").append(resource);
+        JID jid = (JID)o;
+
+        // Comparison order is domain, node, resource.
+        int compare = domain.compareTo(jid.domain);
+        if (compare == 0 && node != null && jid.node != null) {
+            compare = node.compareTo(jid.node);
         }
-        return buf.toString();
+        if (compare == 0 && resource != null && jid.resource != null) {
+            compare = resource.compareTo(jid.resource);
+        }
+        return compare;
     }
 
+    /**
+     * Returns true if two JID's are equivalent. The JID components are compared using
+     * the following rules:<ul>
+     *      <li>Nodes are normalized using nodeprep (case insensitive).
+     *      <li>Domains are normalized using IDNA and then nameprep (case insensitive).
+     *      <li>Resources are normalized using resourceprep (case sensitive).</ul>
+     *
+     * These normalization rules ensure, for example, that
+     * <tt>User@EXAMPLE.com/home</tt> is considered equal to <tt>user@example.com/home</tt>.
+     *
+     * @param jid1 a JID.
+     * @param jid2 a JID.
+     * @return true if the JIDs are equivalent; false otherwise.
+     * @throws IllegalArgumentException if either JID is not valid.
+     */
     public static boolean equals(String jid1, String jid2) {
         return new JID(jid1).equals(new JID(jid2));
     }
