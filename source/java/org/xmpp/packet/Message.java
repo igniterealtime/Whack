@@ -71,7 +71,7 @@ public class Message extends Packet {
             return Type.valueOf(type);
         }
         else {
-            return null;
+            return Type.normal;
         }
     }
 
