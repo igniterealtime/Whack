@@ -37,7 +37,6 @@ package org.xmpp.component;
  */
 public class ComponentManagerFactory {
 
-    private static String managerClass = null;
     private static ComponentManager componentManager;
 
     /**
@@ -69,9 +68,9 @@ public class ComponentManagerFactory {
     /**
      * Sets the ComponentManager instance that will be used.
      *
-     * @param componnetManager the ComponentManager instance.
+     * @param manager the ComponentManager instance.
      */
-    public static void setComponentManager(ComponentManager componnetManager) {
-        ComponentManagerFactory.componentManager = componentManager;
+    public static void setComponentManager(ComponentManager manager) {
+        componentManager = manager;
     }
 }
