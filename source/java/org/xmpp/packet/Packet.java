@@ -187,7 +187,14 @@ public abstract class Packet {
         // Add the error element.
         element.add(error.getElement());
     }
-    
+
+    /**
+     * Creates a deep copy of this packet.
+     *
+     * @return a deep copy of this packet.
+     */
+    public abstract Packet createCopy();
+
     /**
      * Returns the DOM4J Element that backs the packet. The element is the definitive
      * representation of the packet and can be manipulated directly to change
@@ -199,7 +206,7 @@ public abstract class Packet {
         return element;
     }
 
-    public String toString() {
+     public String toString() {
         StringWriter out = new StringWriter();
         XMLWriter writer = new XMLWriter(out, OutputFormat.createPrettyPrint());
         try {

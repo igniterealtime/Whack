@@ -249,6 +249,17 @@ public class Presence extends Packet {
     }
 
     /**
+     * Returns a deep copy of this Presence.
+     *
+     * @return a deep copy of this Presence.
+     */
+    public Presence createCopy() {
+        Element elementCopy = element.createCopy();
+        docFactory.createDocument().add(element.createCopy());
+        return new Presence(elementCopy);
+    }
+
+    /**
      * Represents the type of a presence packet. Note: the presence is assumed
      * to be "available" when the type attribute of the packet is <tt>null</tt>.
      * The valid types are:

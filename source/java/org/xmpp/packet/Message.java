@@ -228,6 +228,17 @@ public class Message extends Packet {
     }
 
     /**
+     * Returns a deep copy of this Message.
+     *
+     * @return a deep copy of this Message.
+     */
+    public Message createCopy() {
+        Element elementCopy = element.createCopy();
+        docFactory.createDocument().add(element.createCopy());
+        return new Message(elementCopy);
+    }
+
+    /**
      * Type-safe enumeration for the type of a message. The types are:
      *
      *  <ul>

@@ -177,6 +177,17 @@ public class IQ extends Packet {
     }
 
     /**
+     * Returns a deep copy of this IQ.
+     *
+     * @return a deep copy of this IQ.
+     */
+    public IQ createCopy() {
+        Element elementCopy = element.createCopy();
+        docFactory.createDocument().add(element.createCopy());
+        return new IQ(elementCopy);
+    }
+
+    /**
      * Convenience method to create a new {@link Type#result IQ.Type.result} IQ based
      * on a {@link Type#get IQ.Type.get} or {@link Type#set IQ.Type.set} IQ. The new
      * packet will be initialized with:<ul>

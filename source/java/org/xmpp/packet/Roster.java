@@ -215,6 +215,17 @@ public class Roster extends IQ {
     }
 
     /**
+     * Returns a deep copy of this Roster.
+     *
+     * @return a deep copy of this Roster.
+     */
+    public Roster createCopy() {
+        Element elementCopy = element.createCopy();
+        docFactory.createDocument().add(element.createCopy());
+        return new Roster(elementCopy);
+    }
+
+    /**
      * Item in a roster, which represents an individual contact. Each contact
      * has a JID, an optional nickname, a subscription type, and can belong to
      * one ore more groups.

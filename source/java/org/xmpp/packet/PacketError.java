@@ -205,27 +205,27 @@ public class PacketError {
          * (e.g., an IQ stanza that includes an unrecognized value of the 'type'
          * attribute); the associated error type SHOULD be "modify".
          */
-        bad_request("bad-request"),
+        bad_request("bad-request", 400),
 
         /**
          * Access cannot be granted because an existing resource or session
          * exists with the same name or address; the associated error type
          * SHOULD be "cancel".
          */
-        conflict("conflict"),
+        conflict("conflict", 409),
 
         /**
          * The feature requested is not implemented by the recipient or
          * server and therefore cannot be processed; the associated error
          * type SHOULD be "cancel".
          */
-        feature_not_implemented("feature-not-implemented"),
+        feature_not_implemented("feature-not-implemented", 501),
 
         /**
          * The requesting entity does not possess the required permissions to
          * perform the action; the associated error type SHOULD be "auth".
          */
-        forbidden("forbidden"),
+        forbidden("forbidden", 403),
 
         /**
          * The recipient or server can no longer be contacted at this address
@@ -233,20 +233,20 @@ public class PacketError {
          * data of the <gone/> element); the associated error type SHOULD be
          * "modify".
          */
-        gone("gone"),
+        gone("gone", 302),
 
         /**
          * The server could not process the stanza because of a misconfiguration
          * or an otherwise-undefined internal server error; the associated error
          * type SHOULD be "wait".
          */
-        internal_server_error("internal-server-error"),
+        internal_server_error("internal-server-error", 500),
 
         /**
          * The addressed JID or item requested cannot be found; the associated
          * error type SHOULD be "cancel".
          */
-        item_not_found("item-not-found"),
+        item_not_found("item-not-found", 404),
 
         /**
          * The sending entity has provided or communicated an XMPP address
@@ -255,7 +255,7 @@ public class PacketError {
          * in Addressing Scheme (Section 3); the associated error type SHOULD
          * be "modify".
          */
-        jid_malformed("jid-malformed"),
+        jid_malformed("jid-malformed", 400),
 
         /**
          * The recipient or server understands the request but is refusing
@@ -263,27 +263,27 @@ public class PacketError {
          * recipient or server (e.g., a local policy regarding acceptable
          * words in messages); the associated error type SHOULD be "modify".
          */
-        not_acceptable("not-acceptable"),
+        not_acceptable("not-acceptable", 406),
 
         /**
          * The recipient or server does not allow any entity to perform
          * the action; the associated error type SHOULD be "cancel".
          */
-        not_allowed("not-allowed"),
+        not_allowed("not-allowed", 405),
 
         /**
          * The sender must provide proper credentials before being allowed
          * to perform the action, or has provided improper credentials;
          * the associated error type SHOULD be "auth".
          */
-        not_authorized("not-authorized"),
+        not_authorized("not-authorized", 401),
 
         /**
          * The requesting entity is not authorized to access the requested
          * service because payment is required; the associated error type
          * SHOULD be "auth".
          */
-        payment_required("payment-required"),
+        payment_required("payment-required", 402),
 
         /**
          * The intended recipient is temporarily unavailable; the associated
@@ -292,7 +292,7 @@ public class PacketError {
          * recipient's network availability to an entity that is not authorized
          * to know such information).
          */
-        recipient_unavailable("recipient-unavailable"),
+        recipient_unavailable("recipient-unavailable", 404),
 
         /**
          * The recipient or server is redirecting requests for this
@@ -301,21 +301,21 @@ public class PacketError {
          * valid JID, in the XML character data of the &lt;redirect/&gt; element);
          * the associated error type SHOULD be "modify".
          */
-        redirect("redirect"),
+        redirect("redirect", 302),
 
         /**
          * The requesting entity is not authorized to access the requested
          * service because registration is required; the associated error
          * type SHOULD be "auth".
          */
-        registration_required("registration-required"),
+        registration_required("registration-required", 407),
 
         /**
          * A remote server or service specified as part or all of the JID
          * of the intended recipient does not exist; the associated error
          * type SHOULD be "cancel".
          */
-        remote_server_not_found("remote-server-not-found"),
+        remote_server_not_found("remote-server-not-found", 404),
 
         /**
          * A remote server or service specified as part or all of the JID of
@@ -323,26 +323,26 @@ public class PacketError {
          * be contacted within a reasonable amount of time; the associated
          * error type SHOULD be "wait".
          */
-        remote_server_timeout("remote-server-timeout"),
+        remote_server_timeout("remote-server-timeout", 504),
 
         /**
          * The server or recipient lacks the system resources necessary to
          * service the request; the associated error type SHOULD be "wait".
          */
-        resource_constraint("resource-constraint"),
+        resource_constraint("resource-constraint", 500),
 
         /**
          * The server or recipient does not currently provide the requested
          * service; the associated error type SHOULD be "cancel".
          */
-        service_unavailable("service-unavailable"),
+        service_unavailable("service-unavailable", 503),
 
         /**
          * The requesting entity is not authorized to access the requested
          * service because a subscription is required; the associated error
          * type SHOULD be "auth".
          */
-        subscription_required("subscription-required"),
+        subscription_required("subscription-required", 407),
 
         /**
          * The error condition is not one of those defined by the other
@@ -350,14 +350,14 @@ public class PacketError {
          * this condition, and it SHOULD be used only in conjunction with
          * an application-specific condition.
          */
-        undefined_condition("undefined-condition"),
+        undefined_condition("undefined-condition", 500),
 
         /**
          * The recipient or server understood the request but was not
          * expecting it at this time (e.g., the request was out of order);
          * the associated error type SHOULD be "wait".
          */
-        unexpected_condition("unexpected-condition");
+        unexpected_condition("unexpected-condition", 400);
 
         /**
          * Converts a String value into its Condition representation.
@@ -441,10 +441,97 @@ public class PacketError {
             }
         }
 
-        private String value;
+        public static Condition fromLegacyCode(int code) {
+            if (bad_request.getLegacyCode() == code) {
+                return bad_request;
+            }
+            else if (conflict.getLegacyCode() == code) {
+                return conflict;
+            }
+            else if (feature_not_implemented.getLegacyCode() == code) {
+                return feature_not_implemented;
+            }
+            else if (forbidden.getLegacyCode() == code) {
+                return forbidden;
+            }
+            else if (gone.getLegacyCode() == code) {
+                return gone;
+            }
+            else if (internal_server_error.getLegacyCode() == code) {
+                return internal_server_error;
+            }
+            else if (item_not_found.getLegacyCode() == code) {
+                return item_not_found;
+            }
+            else if (jid_malformed.getLegacyCode() == code) {
+                return jid_malformed;
+            }
+            else if (not_acceptable.getLegacyCode() == code) {
+                return not_acceptable;
+            }
+            else if (not_allowed.getLegacyCode() == code) {
+                return not_allowed;
+            }
+            else if (not_authorized.getLegacyCode() == code) {
+                return not_authorized;
+            }
+            else if (payment_required.getLegacyCode() == code) {
+                return payment_required;
+            }
+            else if (recipient_unavailable.getLegacyCode() == code) {
+                return recipient_unavailable;
+            }
+            else if (redirect.getLegacyCode() == code) {
+                return redirect;
+            }
+            else if (registration_required.getLegacyCode() == code) {
+                return registration_required;
+            }
+            else if (remote_server_not_found.getLegacyCode() == code) {
+                return remote_server_not_found;
+            }
+            else if (remote_server_timeout.getLegacyCode() == code) {
+                return remote_server_timeout;
+            }
+            else if (resource_constraint.getLegacyCode() == code) {
+                return resource_constraint;
+            }
+            else if (service_unavailable.getLegacyCode() == code) {
+                return service_unavailable;
+            }
+            else if (subscription_required.getLegacyCode() == code) {
+                return subscription_required;
+            }
+            else if (undefined_condition.getLegacyCode() == code) {
+                return undefined_condition;
+            }
+            else if (unexpected_condition.getLegacyCode() == code) {
+                return unexpected_condition;
+            }
+            else {
+                throw new IllegalArgumentException("Code invalid:" + code);
+            }
+        }
 
-        private Condition(String value) {
+        private String value;
+        private int code;
+
+        private Condition(String value, int code) {
             this.value = value;
+            this.code = code;
+        }
+
+        /**
+         * Returns the legacy error code associated with the error. Error code mappings
+         * are based on <a href="http://www.jabber.org/jeps/jep-0086.html">JEP-0086</a>.
+         * Support for legacy error codes is necessary since many "Jabber" clients
+         * do not understand XMPP error codes. The {@link #fromLegacyCode(int)} method
+         * will convert numeric error codes into Conditions.
+         *
+         * @return the legacy error code.
+         */
+        public int getLegacyCode() {
+            return code;
         }
 
         /**
