@@ -276,6 +276,10 @@ public class JID implements Comparable {
         return buf.toString();
     }
 
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
     public boolean equals(Object object) {
         if (!(object instanceof JID)) {
             return false;
