@@ -187,7 +187,7 @@ public abstract class Packet {
         // Add the error element.
         element.add(error.getElement());
     }
-
+    
     /**
      * Returns the DOM4J Element that backs the packet. The element is the definitive
      * representation of the packet and can be manipulated directly to change

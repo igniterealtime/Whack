@@ -52,7 +52,7 @@ public class Presence extends Packet {
     }
 
     /**
-     * Returns the presence type.
+     * Returns the type of this presence.
      *
      * @return the presence type.
      * @see Type
@@ -63,7 +63,7 @@ public class Presence extends Packet {
     }
 
     /**
-     * Sets the presence type.
+     * Sets the type of this presence.
      *
      * @param type the presence type.
      * @see Type
@@ -116,7 +116,7 @@ public class Presence extends Packet {
     }
 
     /**
-     * Returns the status of the presence packet, a natural-language description
+     * Returns the status of this presence packet, a natural-language description
      * of availability status.
      *
      * @return the status.
@@ -126,7 +126,7 @@ public class Presence extends Packet {
     }
 
     /**
-     * Sets the status of the presence packet, a natural-language description
+     * Sets the status of this presence packet, a natural-language description
      * of availability status.
      *
      * @param status the status.

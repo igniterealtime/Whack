@@ -64,7 +64,7 @@ public class Message extends Packet {
     }
 
     /**
-     * Returns the message type.
+     * Returns the type of this message
      *
      * @return the message type.
      * @see Type
@@ -80,7 +80,7 @@ public class Message extends Packet {
     }
 
     /**
-     * Sets the message type.
+     * Sets the type of this message.
      *
      * @param type the message type.
      * @see Type
@@ -90,7 +90,7 @@ public class Message extends Packet {
     }
 
     /**
-     * Returns the subject of the message or <tt>null</tt> if there is no subject..
+     * Returns the subject of this message or <tt>null</tt> if there is no subject..
      *
      * @return the subject.
      */
@@ -99,7 +99,7 @@ public class Message extends Packet {
     }
 
     /**
-     * Sets the subject of the message.
+     * Sets the subject of this message.
      *
      * @param subject the subject.
      */
@@ -118,7 +118,7 @@ public class Message extends Packet {
     }
 
     /**
-     * Returns the body of the message or <tt>null</tt> if there is no body.
+     * Returns the body of this message or <tt>null</tt> if there is no body.
      *
      * @return the body.
      */
@@ -127,7 +127,7 @@ public class Message extends Packet {
     }
 
     /**
-     * Sets the body of the message.
+     * Sets the body of this message.
      *
      * @param body the body.
      */
@@ -148,7 +148,7 @@ public class Message extends Packet {
     }
 
     /**
-     * Returns this message's thread value, an identifier that is used for
+     * Returns the thread value of this message, an identifier that is used for
      * tracking a conversation thread ("instant messaging session")
      * between two entities. If the thread is not set, <tt>null</tt> will be
      * returned.
@@ -160,7 +160,7 @@ public class Message extends Packet {
     }
 
     /**
-     * Sets this message's thread value, an identifier that is used for
+     * Sets the thread value of this message, an identifier that is used for
      * tracking a conversation thread ("instant messaging session")
      * between two entities.
      *
