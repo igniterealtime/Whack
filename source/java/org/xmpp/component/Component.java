@@ -24,7 +24,7 @@ import org.xmpp.packet.Packet;
 import org.xmpp.packet.JID;
 
 /**
- * A component, which enhances the functionality of an XMPP server.
+ * Component enhance the functionality of an XMPP server.
  *
  * Components are JavaBeans and will have their properties exposed as ad-hoc commands.
  *
@@ -50,7 +50,7 @@ public interface Component {
      * Processes a packet sent to this Component.
      *
      * @param packet the packet.
-     * @see ComponentManager#sendPacket(Packet)
+     * @see ComponentManager#sendPacket(Component, Packet)
      */
     public void processPacket(Packet packet);
 
