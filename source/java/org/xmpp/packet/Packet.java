@@ -61,6 +61,15 @@ public abstract class Packet {
     }
 
     /**
+     * Constructs a new Packet with no element data. This method is used by
+     * extensions of this class that require a more optimized path for creating
+     * new packets.
+     */
+    protected Packet() {
+
+    }
+
+    /**
      * Returns the packet ID, or <tt>null</tt> if the packet does not have an ID.
      * Packet ID's are optional, except for IQ packets.
      *

@@ -40,7 +40,7 @@ public class Presence extends Packet {
      * Constructs a new Presence.
      */
     public Presence() {
-        super(docFactory.createDocument().addElement("presence"));
+        this.element = docFactory.createDocument().addElement("presence");
     }
 
     /**
@@ -51,6 +51,18 @@ public class Presence extends Packet {
      */
     public Presence(Element element) {
         super(element);
+    }
+
+    /**
+     * Constructs a new Presence that is a copy of an existing Presence.
+     *
+     * @param presence the presence packet.
+     * @see #createCopy() 
+     */
+    private Presence(Presence presence) {
+        Element elementCopy = presence.element.createCopy();
+        docFactory.createDocument().add(elementCopy);
+        this.element = elementCopy;
     }
 
     /**
@@ -268,9 +280,7 @@ public class Presence extends Packet {
      * @return a deep copy of this Presence.
      */
     public Presence createCopy() {
-        Element elementCopy = element.createCopy();
-        docFactory.createDocument().add(elementCopy);
-        return new Presence(elementCopy);
+        return new Presence(this);
     }
 
     /**

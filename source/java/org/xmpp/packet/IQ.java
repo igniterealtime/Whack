@@ -24,7 +24,7 @@ public class IQ extends Packet {
      * of {@link Type#get IQ.Type.get}.
      */
     public IQ() {
-        super(docFactory.createDocument().addElement("iq"));
+        this.element = docFactory.createDocument().addElement("iq");
         String id = String.valueOf(random.nextInt(1000) + "-" + sequence++);
         setType(Type.get);
         setID(id);
@@ -37,7 +37,7 @@ public class IQ extends Packet {
      * @param type the IQ type.
      */
     public IQ(Type type) {
-        super(docFactory.createDocument().addElement("iq"));
+        this.element = docFactory.createDocument().addElement("iq");
         setType(type);
         String id = String.valueOf(random.nextInt(1000) + "-" + sequence++);
         setID(id);
@@ -50,7 +50,7 @@ public class IQ extends Packet {
      * @param type the IQ type.
      */
     public IQ(Type type, String ID) {
-        super(docFactory.createDocument().addElement("iq"));
+        this.element = docFactory.createDocument().addElement("iq");
         setType(type);
         setID(ID);
     }
@@ -63,6 +63,18 @@ public class IQ extends Packet {
      */
     public IQ(Element element) {
         super(element);
+    }
+
+    /**
+     * Constructs a new IQ that is a copy of an existing IQ.
+     *
+     * @param iq the iq packet.
+     * @see #createCopy()
+     */
+    private IQ(IQ iq) {
+        Element elementCopy = iq.element.createCopy();
+        docFactory.createDocument().add(elementCopy);
+        this.element = elementCopy;
     }
 
     /**
@@ -182,9 +194,7 @@ public class IQ extends Packet {
      * @return a deep copy of this IQ.
      */
     public IQ createCopy() {
-        Element elementCopy = element.createCopy();
-        docFactory.createDocument().add(elementCopy);
-        return new IQ(elementCopy.createCopy());
+        return new IQ(this);
     }
 
     /**

@@ -67,6 +67,18 @@ public class Roster extends IQ {
     }
 
     /**
+     * Constructs a new Roster that is a copy of an existing Roster.
+     *
+     * @param roster the roster packet.
+     * @see #createCopy()
+     */
+    private Roster(Roster roster) {
+        Element elementCopy = roster.element.createCopy();
+        docFactory.createDocument().add(elementCopy);
+        this.element = elementCopy;
+    }
+
+    /**
      * Constructs a new Roster using an existing Element. This is useful
      * for parsing incoming roster Elements into Roster objects.
      *
@@ -233,9 +245,7 @@ public class Roster extends IQ {
      * @return a deep copy of this Roster.
      */
     public Roster createCopy() {
-        Element elementCopy = element.createCopy();
-        docFactory.createDocument().add(element.createCopy());
-        return new Roster(elementCopy);
+        return new Roster(this);
     }
 
     /**

@@ -46,7 +46,7 @@ public class Message extends Packet {
      * Constructs a new Message.
      */
     public Message() {
-        super(docFactory.createDocument().addElement("message"));
+        this.element = docFactory.createDocument().addElement("message");
     }
 
      /**
@@ -57,6 +57,18 @@ public class Message extends Packet {
      */
     public Message(Element element) {
         super(element);
+    }
+
+    /**
+     * Constructs a new Message that is a copy of an existing Message.
+     *
+     * @param message the message packet.
+     * @see #createCopy()
+     */
+    private Message(Message message) {
+        Element elementCopy = message.element.createCopy();
+        docFactory.createDocument().add(elementCopy);
+        this.element = elementCopy;
     }
 
     /**
@@ -239,9 +251,7 @@ public class Message extends Packet {
      * @return a deep copy of this Message.
      */
     public Message createCopy() {
-        Element elementCopy = element.createCopy();
-        docFactory.createDocument().add(elementCopy);
-        return new Message(elementCopy);
+        return new Message(this);
     }
 
     /**
