@@ -112,8 +112,7 @@ public class Message extends Packet {
         }
 
         if (subjectElement == null) {
-            subjectElement = docFactory.createElement("subject");
-            element.add(subjectElement);
+            subjectElement = element.addElement("subject");
         }
         subjectElement.setText(subject);
     }
@@ -143,8 +142,7 @@ public class Message extends Packet {
         }
 
         if (bodyElement == null) {
-            bodyElement = docFactory.createElement("body");
-            element.add(bodyElement);
+            bodyElement = element.addElement("body");
         }
         bodyElement.setText(body);
     }
@@ -179,8 +177,7 @@ public class Message extends Packet {
         }
 
         if (threadElement == null) {
-            threadElement = docFactory.createElement("thread");
-            element.add(threadElement);
+            threadElement = element.addElement("thread");
         }
         threadElement.setText(thread);
     }

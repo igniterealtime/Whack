@@ -28,7 +28,9 @@ import org.dom4j.io.OutputFormat;
 import java.io.StringWriter;
 
 /**
- * An XMPP Packet.
+ * An XMPP Packet. Each packet is backed by a DOM4J Element. A set of
+ * convenience methods allows easy manipulation of the Element, or the
+ * Element can be accessed directly and manipulated.
  *
  * @author Matt Tucker
  */

@@ -110,8 +110,7 @@ public class Presence extends Packet {
             if (getType() != Type.AVAILABLE) {
                 throw new IllegalArgumentException("Cannot set 'show' if 'type' attribute is set.");
             }
-            showElement = docFactory.createElement("show");
-            element.add(showElement);
+            showElement = element.addElement("show");
         }
         showElement.setText(show.toString());
     }
@@ -141,8 +140,7 @@ public class Presence extends Packet {
         }
 
         if (statusElement == null) {
-            statusElement = docFactory.createElement("status");
-            element.add(statusElement);
+            statusElement = element.addElement("status");
         }
         statusElement.setText(status);
     }
@@ -183,8 +181,7 @@ public class Presence extends Packet {
         }
         Element priorityElement = element.element("priority");
         if (priorityElement == null) {
-            priorityElement = docFactory.createElement("priority");
-            element.add(priorityElement);
+            priorityElement = element.addElement("priority");
         }
         priorityElement.setText(Integer.toString(priority));
     }
