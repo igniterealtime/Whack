@@ -183,8 +183,8 @@ public class IQ extends Packet {
      */
     public IQ createCopy() {
         Element elementCopy = element.createCopy();
-        docFactory.createDocument().add(element.createCopy());
-        return new IQ(elementCopy);
+        docFactory.createDocument().add(elementCopy);
+        return new IQ(elementCopy.createCopy());
     }
 
     /**
@@ -212,12 +212,6 @@ public class IQ extends Packet {
         IQ result = new IQ(Type.result, iq.getID());
         result.setFrom(iq.getTo());
         result.setTo(iq.getFrom());
-        Element childElement = iq.getChildElement();
-        if (childElement != null) {
-            Element resultChild = docFactory.createElement(childElement.getName(),
-                    childElement.getNamespaceURI());
-            result.setChildElement(resultChild);
-        }
         return result;
     }
 
