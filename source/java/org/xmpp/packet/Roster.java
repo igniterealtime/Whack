@@ -87,15 +87,16 @@ public class Roster extends IQ {
      *
      * @param jid the JID.
      * @param subscription the subscription type.
+     * @return the newly created item.
      */
-    public void addItem(String jid, Subscription subscription) {
+    public Item addItem(String jid, Subscription subscription) {
         if (getType() == IQ.Type.get || getType() == IQ.Type.error) {
             throw new IllegalStateException("IQ type must be 'result' or 'set'");
         }
         if (jid == null) {
             throw new NullPointerException("JID cannot be null");
         }
-        addItem(new JID(jid), null, subscription, null);
+        return addItem(new JID(jid), null, null, subscription, null);
     }
 
     /**
@@ -109,15 +110,16 @@ public class Roster extends IQ {
      *
      * @param jid the JID.
      * @param subscription the subscription type.
+     * @return the newly created item.
      */
-    public void addItem(JID jid, Subscription subscription)  {
+    public Item addItem(JID jid, Subscription subscription)  {
         if (getType() != IQ.Type.result || getType() != IQ.Type.set) {
             throw new IllegalStateException("IQ type must be 'result' or 'set'");
         }
         if (jid == null) {
             throw new NullPointerException("JID cannot be null");
         }
-        addItem(jid, null, subscription, null);
+        return addItem(jid, null, null, subscription, null);
     }
 
     /**
@@ -131,10 +133,13 @@ public class Roster extends IQ {
      *
      * @param jid the JID.
      * @param name the nickname.
+     * @param ask the ask type.
      * @param subscription the subscription type.
      * @param groups a Collection of groups.
+     * @return the newly created item.
      */
-    public void addItem(JID jid, String name, Subscription subscription, Collection<String> groups)
+    public Item addItem(JID jid, String name, Ask ask, Subscription subscription,
+                        Collection<String> groups)
     {
         if (jid == null) {
             throw new NullPointerException("JID cannot be null");
@@ -158,6 +163,9 @@ public class Roster extends IQ {
         }
         item.addAttribute("jid", jid.toString());
         item.addAttribute("name", name);
+        if (ask != null) {
+            item.addAttribute("ask", ask.toString());
+        }
         item.addAttribute("subscription", subscription.toString());
         // Erase existing groups in case the item previously existed.
         for (Iterator i=item.elementIterator("group"); i.hasNext(); ) {
@@ -169,6 +177,7 @@ public class Roster extends IQ {
                 item.addElement("group").setText(group);
             }
         }
+        return new Item(jid, name, ask, subscription, groups);
     }
 
     /**
@@ -202,13 +211,15 @@ public class Roster extends IQ {
                 Element item = (Element)i.next();
                 String jid = item.attributeValue("jid");
                 String name = item.attributeValue("name");
+                String ask = item.attributeValue("ask");
                 String subscription = item.attributeValue("subscription");
                 Collection<String> groups = new ArrayList<String>();
                 for (Iterator j=item.elementIterator("group"); j.hasNext(); ) {
                     Element group = (Element)j.next();
                     groups.add(group.getTextTrim());
                 }
-                items.add(new Item(new JID(jid), name, Subscription.valueOf(subscription), groups));
+                items.add(new Item(new JID(jid), name, Ask.valueOf(ask),
+                        Subscription.valueOf(subscription), groups));
             }
         }
         return Collections.unmodifiableCollection(items);
@@ -234,6 +245,7 @@ public class Roster extends IQ {
 
         private JID jid;
         private String name;
+        private Ask ask;
         private Subscription subscription;
         private Collection<String> groups;
 
@@ -242,12 +254,15 @@ public class Roster extends IQ {
          *
          * @param jid the JID.
          * @param name the nickname.
+         * @param ask the ask state.
          * @param subscription the subscription state.
          * @param groups the item groups.
          */
-        private Item(JID jid, String name, Subscription subscription, Collection<String> groups) {
+        private Item(JID jid, String name, Ask ask, Subscription subscription,
+                     Collection<String> groups) {
             this.jid = jid;
             this.name = name;
+            this.ask = ask;
             this.subscription = subscription;
             this.groups = groups;
         }
@@ -271,6 +286,15 @@ public class Roster extends IQ {
          */
         public String getName() {
             return name;
+        }
+
+        /**
+         * Returns the ask state of this item.
+         *
+         * @return the ask state of this item.
+         */
+        public Ask getAsk() {
+            return ask;
         }
 
         /**
@@ -330,8 +354,10 @@ public class Roster extends IQ {
      *      <li>{@link #from Roster.Subscription.from} -- the contact has a subscription
      *          to the user's presence information, but the user does not have a
      *          subscription to the contact's presence information.
-     *      <li>{@link #both Roster.Subscription both} -- both the user and the contact
+     *      <li>{@link #both Roster.Subscription.both} -- both the user and the contact
      *          have subscriptions to each other's presence information.
+     *      <li>{@link #remove Roster.Subscription.remove} -- the user is removing a
+     *          contact from his or her roster.
      * </ul>
      */
     public enum Subscription {
@@ -358,6 +384,42 @@ public class Roster extends IQ {
          * Both the user and the contact have subscriptions to each other's presence
          * information.
          */
-        both;
+        both,
+
+        /**
+         * The user is removing a contact from his or her roster. The user's server will
+         * 1) automatically cancel any existing presence subscription between the user and the
+         * contact, 2) remove the roster item from the user's roster and inform all of the user's
+         * available resources that have requested the roster of the roster item removal, 3) inform
+         * the resource that initiated the removal of success and 4) send unavailable presence from
+         * all of the user's available resources to the contact.
+         */
+        remove;
+    }
+
+    /**
+     * Type-safe enumeration for the roster ask type. Valid ask types:
+     *
+     * <ul>
+     *      <li>{@link #subscribe Roster.Ask.subscribe} -- the roster item has been asked
+     *          for permission to subscribe to their presence but no response has been received.
+     *      <li>{@link #unsubscribe Roster.Ask.unsubscribe} -- the roster owner has asked
+     *          to the roster item to unsubscribe from it's presence but has not received
+     *          confirmation.
+     * </ul>
+     */
+    public enum Ask {
+
+        /**
+         * The roster item has been asked for permission to subscribe to their presence
+         * but no response has been received.
+         */
+        subscribe,
+
+        /**
+         * The roster owner has asked to the roster item to unsubscribe from it's
+         * presence but has not received confirmation.
+         */
+        unsubscribe;
     }
 }
