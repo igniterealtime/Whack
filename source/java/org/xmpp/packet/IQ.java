@@ -37,7 +37,7 @@ public class IQ extends Packet {
     }
 
     /**
-     * Returns the IQ type.
+     * Returns the type of this IQ.
      *
      * @return the IQ type.
      * @see Type
@@ -53,7 +53,7 @@ public class IQ extends Packet {
     }
 
     /**
-     * Sets the IQ type.
+     * Sets the type of this IQ.
      *
      * @param type the IQ type.
      * @see Type
@@ -63,7 +63,7 @@ public class IQ extends Packet {
     }
 
     /**
-     * Returns the child element of the IQ. IQ packets may have a single child
+     * Returns the child element of this IQ. IQ packets may have a single child
      * element in an extended namespace. This method is a convenience method
      * to avoid manipulating the underlying packet's Element instance directly.
      *
@@ -90,7 +90,7 @@ public class IQ extends Packet {
     }
 
     /**
-     * Sets the child element of the IQ. IQ packets may have a single child
+     * Sets the child element of this IQ. IQ packets may have a single child
      * element in an extended namespace. This method is a convenience method
      * to avoid manipulating the underlying packet's Element instance directly.<p>
      *
@@ -108,6 +108,31 @@ public class IQ extends Packet {
             element.remove((Element)i.next());
         }
         element.add(childElement);
+    }
+
+    /**
+     * Sets the child element of this IQ by constructing a new Element with the
+     * given name and namespace. The newly created child element is returned.
+     * IQ packets may have a single child element in an extended namespace.
+     * This method is a convenience method to avoid manipulating the underlying
+     * packet's Element instance directly.<p>
+     *
+     * A sample use of this method might look like the following:
+     * <pre>
+     * IQ iq = new IQ("time_1");
+     * iq.setTo("mary@example.com");
+     * iq.setType(IQ.Type.GET);
+     * iq.setChildElement("query", "jabber:iq:time");</pre>
+     *
+     * @param name the child element name.
+     * @param namespace the child element namespace.
+     * @return the newly created child element.
+     */
+    public Element setChildElement(String name, String namespace) {
+        for (Iterator i=element.elementIterator(); i.hasNext(); ) {
+            element.remove((Element)i.next());
+        }
+        return element.addElement(name, namespace);
     }
 
     /**
