@@ -39,7 +39,17 @@ public abstract class Packet {
     protected Element element;
 
     /**
+     * Constructs a new Packet.
+     *
+     * @param element the XML Element that contains the packet contents.
+     */
+    public Packet(Element element) {
+        this.element = element;
+    }
+
+    /**
      * Returns the packet ID, or <tt>null</tt> if the packet does not have an ID.
+     * Packet ID's are optional, except for IQ packets.
      *
      * @return the packet ID.
      */
@@ -48,22 +58,13 @@ public abstract class Packet {
     }
 
     /**
-     * Sets the packet ID.
+     * Sets the packet ID. Packet ID's are optional, except for IQ packets.
      *
      * @param ID the packet ID.
      */
     public void setID(String ID) {
         element.attribute("id");
         element.addAttribute("id", ID);
-    }
-
-    /**
-     * Constructs a new Packet.
-     *
-     * @param element the XML element that contains the packet contents.
-     */
-    public Packet(Element element) {
-        this.element = element;
     }
 
     /**
@@ -75,7 +76,13 @@ public abstract class Packet {
      *      if not set.
      */
     public JID getTo() {
-        return new JID(element.attributeValue("to"));
+        String to = element.attributeValue("to");
+        if (to == null) {
+            return null;
+        }
+        else {
+            return new JID(to);
+        }
     }
 
     /**
@@ -107,7 +114,13 @@ public abstract class Packet {
      *      if not set.
      */
     public JID getFrom() {
-        return new JID(element.attributeValue("from"));
+        String from = element.attributeValue("from");
+        if (from == null) {
+            return null;
+        }
+        else {
+            return new JID(from);
+        }
     }
 
     /**
