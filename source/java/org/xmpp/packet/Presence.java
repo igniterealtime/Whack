@@ -125,8 +125,10 @@ public class Presence extends Packet {
     public void setShow(Show show) {
         Element showElement = element.element("show");
         // If show is null, clear the subject.
-        if (show == null && showElement != null) {
-            element.remove(showElement);
+        if (show == null) {
+            if (showElement != null) {
+                element.remove(showElement);
+            }
             return;
         }
         if (showElement == null) {
@@ -157,8 +159,10 @@ public class Presence extends Packet {
     public void setStatus(String status) {
         Element statusElement = element.element("status");
         // If subject is null, clear the subject.
-        if (status == null && statusElement != null) {
-            element.remove(statusElement);
+        if (status == null) {
+            if (statusElement != null) {
+                element.remove(statusElement);
+            }
             return;
         }
 
