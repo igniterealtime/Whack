@@ -131,4 +131,8 @@ public class ExternalComponentManager implements ComponentManager {
     public boolean isExternalMode() {
         return true;
     }
+
+    public Log getLog() {
+        return null;
+    }
 }
