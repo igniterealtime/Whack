@@ -70,13 +70,13 @@ public class StreamError {
      *
      * @param condition the error condition.
      * @param text the text description of the error.
-     * @param lang the language code of the error description (e.g. "en").
+     * @param language the language code of the error description (e.g. "en").
      */
-    public StreamError(Condition condition, String text, String lang) {
+    public StreamError(Condition condition, String text, String language) {
         this.element = docFactory.createElement(docFactory.createQName("error", "stream",
                 "http://etherx.jabber.org/streams"));
         setCondition(condition);
-        setText(text, lang);
+        setText(text, language);
     }
 
     /**
@@ -158,10 +158,10 @@ public class StreamError {
      * can be specified to indicate the language of the description.
      *
      * @param text the text description of the error.
-     * @param lang the language code of the description, or <tt>null</tt> to specify
+     * @param language the language code of the description, or <tt>null</tt> to specify
      *      no language code.
      */
-    public void setText(String text, String lang) {
+    public void setText(String text, String language) {
         Element textElement = element.element("text");
         // If text is null, clear the text.
         if (text == null) {
@@ -173,9 +173,9 @@ public class StreamError {
 
         if (textElement == null) {
             textElement = docFactory.createElement("text", ERROR_NAMESPACE);
-            if (lang != null) {
+            if (language != null) {
                 textElement.addAttribute(QName.get("lang", "xml",
-                        "http://www.w3.org/XML/1998/namespace"), lang);
+                        "http://www.w3.org/XML/1998/namespace"), language);
             }
             element.add(textElement);
         }
@@ -188,7 +188,7 @@ public class StreamError {
      *
      * @return the language code of the text description, if it exists.
      */
-    public String getTextLang() {
+    public String getTextLanguage() {
         Element textElement = element.element("text");
         if (textElement != null) {
             return textElement.attributeValue(QName.get("lang", "xml",
