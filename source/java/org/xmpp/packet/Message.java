@@ -57,7 +57,7 @@ public class Message extends Packet {
      * Constructs a new Message using an existing Element. This is useful
      * for parsing incoming message Elements into Message objects.
      *
-     * @param element the Message Element.
+     * @param element the message Element.
      */
     public Message(Element element) {
         super(element);
@@ -219,7 +219,7 @@ public class Message extends Packet {
         public static final Type HEADLINE = new Type("headline");
 
         /**
-         * indicates a messaging error.
+         * Indicates a messaging error.
          */
         public static final Type ERROR = new Type("error");
 
@@ -247,7 +247,7 @@ public class Message extends Packet {
                 return ERROR;
             }
             else {
-                return NORMAL;
+                return null;
             }
         }
 
