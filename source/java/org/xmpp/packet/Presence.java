@@ -23,7 +23,12 @@ package org.xmpp.packet;
 import org.dom4j.Element;
 
 /**
- * Presence packet.
+ * Presence packet. Presence packets are used to express an entity's current
+ * network availability and to notify other entities of that availability.
+ * Presence packets are also used to negotiate and manage subscriptions to the
+ * presence of other entities.<p>
+ *
+ * A presence optionally has a {@link Type}.
  *
  * @author Matt Tucker
  */
@@ -75,7 +80,8 @@ public class Presence extends Packet {
     /**
      * Returns the presence "show" value, which specifies a particular availability
      * status. If the &lt;show&gt; element is not present, this method will return
-     * <tt>null</tt>.
+     * <tt>null</tt>. The show value can only be set if the presence type is
+     * {@link Type#AVAILABLE}.
      *
      * @return the presence show value..
      * @see Show
@@ -143,6 +149,8 @@ public class Presence extends Packet {
 
     /**
      * Returns the priority. The valid priority range is -128 through 128.
+     * If no priority element exists in the packet, this method will return
+     * the default value of 0.
      *
      * @return the priority.
      */
