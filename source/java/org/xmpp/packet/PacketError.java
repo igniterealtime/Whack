@@ -114,6 +114,18 @@ public class PacketError {
                 return Condition.fromXMPP(el.getName());
             }
         }
+        // Looking for XMPP condition failed. See if a legacy error code exists,
+        // which can be mapped into an XMPP error condition.
+        String code = element.attributeValue("code");
+        if (code != null) {
+            try {
+                return Condition.fromLegacyCode(Integer.parseInt(code));
+            }
+            catch (Exception e) {
+                // Ignore -- unable to map legacy code into a valid condition
+                // so return null.
+            }
+        }
         return null;
     }
 
@@ -127,6 +139,9 @@ public class PacketError {
         if (condition == null) {
             throw new NullPointerException("Condition cannot be null");
         }
+        // Set the error code for legacy support.
+        element.addAttribute("code", Integer.toString(condition.getLegacyCode()));
+
         Element conditionElement = null;
         for (Iterator i=element.elementIterator(); i.hasNext(); ) {
             Element el = (Element)i.next();
