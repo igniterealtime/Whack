@@ -39,6 +39,9 @@ import javax.net.SocketFactory;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * ExternalComponents are responsible for connecting and authenticating with a remote server and
@@ -67,9 +70,24 @@ public class ExternalComponent implements Component {
     private String connectionID;
     private String domain;
 
+    /**
+     * Pool of threads that are available for processing the requests.
+     */
+    private ThreadPoolExecutor threadPool;
+
     public ExternalComponent(Component component, ExternalComponentManager manager) {
+        // Be default create a pool of 25 threads to process the received requests
+        this(component, manager, 25);
+    }
+
+    public ExternalComponent(Component component, ExternalComponentManager manager, int maxThreads) {
         this.component = component;
         this.manager = manager;
+
+        // Create a pool of threads that will process requests received by this component. If more
+        // threads are required then the command will be executed on the SocketReadThread process
+        threadPool = new ThreadPoolExecutor(1, maxThreads, 15, TimeUnit.SECONDS,
+                        new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.CallerRunsPolicy());
     }
 
     /**
@@ -190,9 +208,12 @@ public class ExternalComponent implements Component {
         return manager;
     }
 
-    public void processPacket(Packet packet) {
-        // TODO Use ThreadPoolExecutor so we can have parallel processing
-        component.processPacket(packet);
+    public void processPacket(final Packet packet) {
+        threadPool.execute(new Runnable() {
+            public void run() {
+                component.processPacket(packet);
+            }
+        });
     }
 
     public void send(Packet packet) {
@@ -217,6 +238,7 @@ public class ExternalComponent implements Component {
     }
 
     public void shutdown() {
+        threadPool.shutdown();
         // TODO Stop the SocketReadThread
         if (socket != null && !socket.isClosed()) {
             try {
