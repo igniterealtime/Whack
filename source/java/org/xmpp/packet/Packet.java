@@ -126,7 +126,7 @@ public abstract class Packet {
             element.addAttribute("to", null);
         }
         else {
-            setTo(to.toString());
+            element.addAttribute("to", to.toString());
         }
     }
 
@@ -177,7 +177,7 @@ public abstract class Packet {
             element.addAttribute("from", null);
         }
         else {
-            setFrom(from.toString());
+            element.addAttribute("from", from.toString());
         }
     }
 
