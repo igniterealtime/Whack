@@ -66,14 +66,23 @@ public class ExternalComponent implements Component {
     private XmlPullParserFactory factory = null;
     private XPPPacketReader reader = null;
     private Writer writer = null;
+    private boolean shutdown = false;
 
     private String connectionID;
-    private String domain;
+    private String subdomain;
+    private String host;
+    private int port;
+    private SocketFactory socketFactory;
 
     /**
      * Pool of threads that are available for processing the requests.
      */
     private ThreadPoolExecutor threadPool;
+    /**
+     * Thread that will read the XML from the socket and ask this component to process the read
+     * packets.
+     */
+    private SocketReadThread readerThread;
 
     public ExternalComponent(Component component, ExternalComponentManager manager) {
         // Be default create a pool of 25 threads to process the received requests
@@ -97,15 +106,19 @@ public class ExternalComponent implements Component {
      * @param host          the host to connect with.
      * @param port          the port to use.
      * @param socketFactory SocketFactory to be used for generating the socket.
-     * @param domain        the domain that this component will be handling.
+     * @param subdomain     the subdomain that this component will be handling.
      * @throws ComponentException if an error happens during the connection and authentication steps.
      */
-    public void connect(String host, int port, SocketFactory socketFactory, String domain)
+    public void connect(String host, int port, SocketFactory socketFactory, String subdomain)
             throws ComponentException {
         try {
             // Open a socket to the server
             this.socket = socketFactory.createSocket(host, port);
-            this.domain = domain;
+            this.subdomain = subdomain;
+            // Keep these variables that will be used in case a reconnection is required
+            this.host= host;
+            this.port = port;
+            this.socketFactory = socketFactory;
 
             try {
                 factory = XmlPullParserFactory.newInstance();
@@ -124,7 +137,7 @@ public class ExternalComponent implements Component {
                 stream.append("<stream:stream");
                 stream.append(" xmlns=\"jabber:component:accept\"");
                 stream.append(" xmlns:stream=\"http://etherx.jabber.org/streams\"");
-                stream.append(" to=\"" + domain + "\">");
+                stream.append(" to=\"" + subdomain + "\">");
                 writer.write(stream.toString());
                 writer.flush();
                 stream = null;
@@ -137,12 +150,15 @@ public class ExternalComponent implements Component {
 
                 // Set the streamID returned from the server
                 connectionID = xpp.getAttributeValue("", "id");
+                if (xpp.getAttributeValue("", "from") != null) {
+                    this.subdomain = xpp.getAttributeValue("", "from");
+                }
                 xmlSerializer = new XMLWriter(writer);
 
                 // Handshake with the server
                 stream = new StringBuilder();
                 stream.append("<handshake>");
-                stream.append(StringUtils.hash(connectionID + manager.getSecretKey(domain)));
+                stream.append(StringUtils.hash(connectionID + manager.getSecretKey(subdomain)));
                 stream.append("</handshake>");
                 writer.write(stream.toString());
                 writer.flush();
@@ -161,7 +177,7 @@ public class ExternalComponent implements Component {
                     }
 
                     // Everything went fine so start reading packets from the server
-                    SocketReadThread readerThread = new SocketReadThread(this, reader);
+                    readerThread = new SocketReadThread(this, reader);
                     readerThread.setDaemon(true);
                     readerThread.start();
 
@@ -200,6 +216,18 @@ public class ExternalComponent implements Component {
     }
 
     /**
+     * Returns the subdomain provided by this component in the connected server. Before
+     * establishing the connection the returned subdomain will be the intended subdomain to serve
+     * but if the connection has been established then the returned subdomain will be the one
+     * answered by the server when the connection was established.
+     *
+     * @return the subdomain provided by this component in the connected server.
+     */
+    public String getSubdomain() {
+        return subdomain;
+    }
+
+    /**
      * Returns the ComponentManager that created this component.
      *
      * @return the ComponentManager that created this component.
@@ -225,7 +253,7 @@ public class ExternalComponent implements Component {
             catch (IOException e) {
                 manager.getLog().error(e);
                 try {
-                    manager.removeComponent(domain);
+                    manager.removeComponent(subdomain);
                 } catch (ComponentException e1) {
                     manager.getLog().error(e);
                 }
@@ -238,8 +266,15 @@ public class ExternalComponent implements Component {
     }
 
     public void shutdown() {
+        shutdown = true;
+        disconnect();
+    }
+
+    private void disconnect() {
+        if (readerThread != null) {
+            readerThread.shutdown();
+        }
         threadPool.shutdown();
-        // TODO Stop the SocketReadThread
         if (socket != null && !socket.isClosed()) {
             try {
                 synchronized (writer) {
@@ -258,6 +293,34 @@ public class ExternalComponent implements Component {
             }
             catch (Exception e) {
                 manager.getLog().error(e);
+            }
+        }
+    }
+
+    /**
+     * Notification message that the connection with the server was lost unexpectedly. We will try
+     * to reestablish the connection for ever until the connection has been reestablished or this
+     * thread has been stopped.
+     */
+    public void connectionLost() {
+        readerThread = null;
+        boolean isConnected = false;
+        while (!isConnected && !shutdown) {
+            try {
+                connect(host, port, socketFactory, subdomain);
+                isConnected = true;
+                // It may be possible that while a new connection was being established the
+                // component was required to shutdown so in this case we need to close the new
+                // connection
+                if (shutdown) {
+                    disconnect();
+                }
+            } catch (ComponentException e) {
+                manager.getLog().error("Error trying to reconnect with the server", e);
+                // Wait for 5 seconds until the next retry
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e1) {}
             }
         }
     }

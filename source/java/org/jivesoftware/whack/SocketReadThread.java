@@ -36,6 +36,7 @@ import java.net.SocketException;
 class SocketReadThread extends Thread {
 
     private ExternalComponent component;
+    private boolean shutdown = false;
 
     XPPPacketReader reader = null;
 
@@ -63,7 +64,12 @@ class SocketReadThread extends Thread {
             // Normal disconnect
         }
         catch (SocketException se) {
-            component.getManager().getLog().error(se);
+            // Do nothing if the exception occured while shutting down the component otherwise
+            // log the error and try to establish a new connection
+            if (!shutdown) {
+                component.getManager().getLog().error(se);
+                component.connectionLost();
+            }
         }
         catch (XmlPullParserException ie) {
             component.getManager().getLog().error(ie);
@@ -77,7 +83,7 @@ class SocketReadThread extends Thread {
      * Read the incoming stream until it ends.
      */
     private void readStream() throws Exception {
-        while (true) {
+        while (!shutdown) {
             Element doc = reader.parseDocument().getRootElement();
 
             if (doc == null) {
@@ -113,5 +119,17 @@ class SocketReadThread extends Thread {
         else {
             return new IQ(doc);
         }
+    }
+
+    /**
+     * Aks the thread to stop reading packets. The thread may not stop immediatelly so if a socket
+     * exception occurs because the connection was lost then no exception will be logged nor the
+     * component will try to reestablish the connection.<p>
+     *
+     * Once this method was sent this instance should be discarded and created a new one if a new
+     * connection with the server is established.
+     */
+    public void shutdown() {
+        shutdown = true;
     }
 }

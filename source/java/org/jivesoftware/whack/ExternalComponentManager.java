@@ -136,11 +136,10 @@ public class ExternalComponentManager implements ComponentManager {
         // Ask the ExternalComponent to connect with the remote server
         externalComponent.connect(domain, port, SocketFactory.getDefault(), subdomain);
 
-        // TODO: actual JID should come from server
-        JID componentJID = new JID(null, subdomain + domain, null);
+        JID componentJID = new JID(null, externalComponent.getSubdomain() + domain, null);
 
         externalComponent.initialize(componentJID, this);
-        componentsByDomain.put(subdomain, externalComponent);
+        componentsByDomain.put(externalComponent.getSubdomain(), externalComponent);
         components.put(component, externalComponent);
     }
 
