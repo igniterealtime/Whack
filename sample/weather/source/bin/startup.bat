@@ -1,0 +1,1 @@
+java -cp ..\lib\weather-comp.jar org.jivesoftware.weather.ExternalWeatherComponent
