@@ -2,8 +2,7 @@ package org.xmpp.packet;
 
 import org.dom4j.Element;
 
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * IQ (Info/Query) packet. IQ packets are used to get and set information
@@ -15,6 +14,19 @@ import java.util.List;
  * namespace.
  */
 public class IQ extends Packet {
+
+    // Sequence and random number generator used for creating unique ID's.
+    private static int sequence = 0;
+    private static Random random = new Random();
+
+    /**
+     * Constructs a new IQ with an automatically generated ID.
+     */
+    public IQ() {
+        super(docFactory.createDocument().addElement("iq"));
+        String id = String.valueOf(random.nextInt(1000) + "-" + sequence++);
+        setID(id);
+    }
 
     /**
      * Constructs a new IQ.
