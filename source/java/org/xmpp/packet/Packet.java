@@ -104,7 +104,12 @@ public abstract class Packet {
      * @param to the XMPP address (JID) that the packet is addressed to.
      */
     public void setTo(JID to) {
-        setTo(to.toString());
+        if (to == null) {
+            element.addAttribute("to", null);
+        }
+        else {
+            setTo(to.toString());
+        }
     }
 
     /**
@@ -142,7 +147,12 @@ public abstract class Packet {
      * @param from the XMPP address (JID) that the packet comes from.
      */
     public void setFrom(JID from) {
-        element.addAttribute("from", from.toString());
+        if (from == null) {
+            element.addAttribute("from", null);
+        }
+        else {
+            setFrom(from.toString());
+        }
     }
 
     /**

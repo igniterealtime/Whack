@@ -75,7 +75,17 @@ public class IQ extends Packet {
             return null;
         }
         else {
-            return (Element)elements.get(0);
+            // Search for a child element that is in a different namespace.
+            for (int i=0; i<elements.size(); i++) {
+                Element element = (Element)elements.get(i);
+                String namespace = element.getNamespaceURI();
+                if (!namespace.equals("") && !namespace.equals("jabber:client") &&
+                        !namespace.equals("jabber:server"))
+                {
+                    return element;
+                }
+            }
+            return null;
         }
     }
 
@@ -98,6 +108,41 @@ public class IQ extends Packet {
             element.remove((Element)i.next());
         }
         element.add(childElement);
+    }
+
+    /**
+     * Convenience method to create a new {@link Type#RESULT IQ.Type.RESULT} IQ based
+     * on a {@link Type#GET IQ.Type.GET} or {@link Type#SET IQ.Type.SET} IQ. The new
+     * packet will be initialized with:<ul>
+     *
+     *      <li>The sender set to the recipient of the originating IQ.
+     *      <li>The recipient set to the sender of the originating IQ.
+     *      <li>The type set to {@link Type#RESULT IQ.Type.RESULT}.
+     *      <li>The id set to the id of the originating IQ.
+     *      <li>An empty child element using the same element name and namespace
+     *          as the orginiating IQ.
+     * </ul>
+     *
+     * @param iq the {@link Type#GET IQ.Type.GET} or {@link Type#SET IQ.Type.SET} IQ packet.
+     * @throws IllegalArgumentException if the IQ packet does not have a type of
+     *      {@link Type#GET IQ.Type.GET} or {@link Type#SET IQ.Type.SET}.
+     * @return a new {@link Type#RESULT IQ.Type.RESULT} IQ based on the originating IQ.
+     */
+    public static IQ createResultIQ(IQ iq) {
+        if (!(iq.getType() == Type.GET || iq.getType() == Type.RESULT)) {
+            throw new IllegalArgumentException("IQ must be of type 'set' or 'get'.");
+        }
+        IQ result = new IQ(iq.getID());
+        result.setFrom(iq.getTo());
+        result.setTo(iq.getFrom());
+        result.setType(Type.RESULT);
+        Element childElement = iq.getChildElement();
+        if (childElement != null) {
+            Element resultChild = docFactory.createElement(childElement.getName(),
+                    childElement.getNamespaceURI());
+            result.setChildElement(resultChild);
+        }
+        return result;
     }
 
     /**
