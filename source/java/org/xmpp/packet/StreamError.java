@@ -20,46 +20,70 @@
 
 package org.xmpp.packet;
 
-import org.dom4j.DocumentFactory;
-import org.dom4j.Element;
-import org.dom4j.QName;
-import org.dom4j.io.OutputFormat;
+import org.dom4j.*;
 import org.dom4j.io.XMLWriter;
+import org.dom4j.io.OutputFormat;
 
-import java.io.StringWriter;
 import java.util.Iterator;
+import java.io.StringWriter;
 
 /**
- * A packet stream error. Errors must have a condition. Optionally, they
- * can include explanation text.<p>
+ * A stream error. Stream errors have a condition and they
+ * can optionally include explanation text.
  *
- * Stream errors are not recoverable so when a client (external component or xmpp client) receives
- * a stream error the underlying TCP connection will be terminated. Before closing the connection
- * the server will also send a stream closing tag. 
- *
- * @author Gaston Dombiak
+ * @author Matt Tucker
  */
 public class StreamError {
+
+    private static final String ERROR_NAMESPACE = "urn:ietf:params:xml:ns:xmpp-streams";
+
     private static DocumentFactory docFactory = DocumentFactory.getInstance();
 
     private Element element;
 
     /**
-     * Construcs a new PacketError with the specified condition. The error
-     * type will be set to the default for the specified condition.
+     * Construcs a new StreamError with the specified condition.
      *
      * @param condition the error condition.
      */
-    public StreamError(StreamError.Condition condition) {
-        this.element = docFactory.createElement(QName.get("stream:error", (String) null));
+    public StreamError(Condition condition) {
+        this.element = docFactory.createElement(docFactory.createQName("error", "stream",
+                "http://etherx.jabber.org/streams"));
         setCondition(condition);
+    }
+
+    /**
+     * Constructs a new StreamError with the specified condition and error text.
+     *
+     * @param condition the error condition.
+     * @param text the text description of the error.
+     */
+    public StreamError(Condition condition, String text) {
+        this.element = docFactory.createElement(docFactory.createQName("error", "stream",
+                "http://etherx.jabber.org/streams"));
+        setCondition(condition);
+        setText(text, null);
+    }
+
+    /**
+     * Constructs a new StreamError with the specified condition and error text.
+     *
+     * @param condition the error condition.
+     * @param text the text description of the error.
+     * @param lang the language code of the error description (e.g. "en").
+     */
+    public StreamError(Condition condition, String text, String lang) {
+        this.element = docFactory.createElement(docFactory.createQName("error", "stream",
+                "http://etherx.jabber.org/streams"));
+        setCondition(condition);
+        setText(text, lang);
     }
 
     /**
      * Constructs a new StreamError using an existing Element. This is useful
      * for parsing incoming error Elements into StreamError objects.
      *
-     * @param element the IQ Element.
+     * @param element the stream error Element.
      */
     public StreamError(Element element) {
         this.element = element;
@@ -69,15 +93,15 @@ public class StreamError {
      * Returns the error condition.
      *
      * @return the error condition.
-     * @see org.xmpp.packet.StreamError.Condition
+     * @see Condition
      */
-    public StreamError.Condition getCondition() {
+    public Condition getCondition() {
         for (Iterator i=element.elementIterator(); i.hasNext(); ) {
             Element el = (Element)i.next();
-            if (el.getNamespaceURI().equals("urn:ietf:params:xml:ns:xmpp-stanzas") &&
+            if (el.getNamespaceURI().equals(ERROR_NAMESPACE) &&
                     !el.getName().equals("text"))
             {
-                return StreamError.Condition.fromXMPP(el.getName());
+                return Condition.fromXMPP(el.getName());
             }
         }
         return null;
@@ -87,17 +111,16 @@ public class StreamError {
      * Sets the error condition.
      *
      * @param condition the error condition.
-     * @see org.xmpp.packet.StreamError.Condition
+     * @see Condition
      */
-    public void setCondition(StreamError.Condition condition) {
+    public void setCondition(Condition condition) {
         if (condition == null) {
             throw new NullPointerException("Condition cannot be null");
         }
-
         Element conditionElement = null;
         for (Iterator i=element.elementIterator(); i.hasNext(); ) {
             Element el = (Element)i.next();
-            if (el.getNamespaceURI().equals("urn:ietf:params:xml:ns:xmpp-stanzas") &&
+            if (el.getNamespaceURI().equals(ERROR_NAMESPACE) &&
                     !el.getName().equals("text"))
             {
                 conditionElement = el;
@@ -107,8 +130,7 @@ public class StreamError {
             element.remove(conditionElement);
         }
 
-        conditionElement = docFactory.createElement(condition.toXMPP(),
-                "urn:ietf:params:xml:ns:xmpp-stanzas");
+        conditionElement = docFactory.createElement(condition.toXMPP(), ERROR_NAMESPACE);
         element.add(conditionElement);
     }
 
@@ -128,6 +150,18 @@ public class StreamError {
      * @param text the text description of the error.
      */
     public void setText(String text) {
+        setText(text, null);
+    }
+
+    /**
+     * Sets the text description of the error. Optionally, a language code
+     * can be specified to indicate the language of the description.
+     *
+     * @param text the text description of the error.
+     * @param lang the language code of the description, or <tt>null</tt> to specify
+     *      no language code.
+     */
+    public void setText(String text, String lang) {
         Element textElement = element.element("text");
         // If text is null, clear the text.
         if (text == null) {
@@ -138,10 +172,29 @@ public class StreamError {
         }
 
         if (textElement == null) {
-            textElement = docFactory.createElement("text", "urn:ietf:params:xml:ns:xmpp-stanzas");
+            textElement = docFactory.createElement("text", ERROR_NAMESPACE);
+            if (lang != null) {
+                textElement.addAttribute(QName.get("lang", "xml",
+                        "http://www.w3.org/XML/1998/namespace"), lang);
+            }
             element.add(textElement);
         }
         textElement.setText(text);
+    }
+
+    /**
+     * Returns the text description's language code, or <tt>null</tt> if there
+     * is no language code associated with the description text.
+     *
+     * @return the language code of the text description, if it exists.
+     */
+    public String getTextLang() {
+        Element textElement = element.element("text");
+        if (textElement != null) {
+            return textElement.attributeValue(QName.get("lang", "xml",
+                        "http://www.w3.org/XML/1998/namespace"));
+        }
+        return null;
     }
 
     /**
@@ -156,9 +209,9 @@ public class StreamError {
     }
 
     /**
-     * Returns the textual XML representation of this packet.
+     * Returns the textual XML representation of this stream error.
      *
-     * @return the textual XML representation of this packet.
+     * @return the textual XML representation of this stream error.
      */
     public String toXML() {
         return element.asXML();
@@ -195,40 +248,38 @@ public class StreamError {
         bad_format("bad-format"),
 
         /**
-         * The entity has sent a namespace prefix that is unsupported, or has
-         * sent no namespace prefix on an element that requires such a prefix.
+         * The entity has sent a namespace prefix that is unsupported, or has sent no
+         * namespace prefix on an element that requires such a prefix.
          */
         bad_namespace_prefix("bad-namespace-prefix"),
 
         /**
-         * The server is closing the active stream for this entity because a new
-         * stream has been initiated that conflicts with the existing stream.
+         * The server is closing the active stream for this entity because a new stream
+         * has been initiated that conflicts with the existing stream.
          */
         conflict("conflict"),
 
         /**
-         * The entity has not generated any traffic over the stream for some
-         * period of time (configurable according to a local service policy).
+         * The entity has not generated any traffic over the stream for some period of
+         * time (configurable according to a local service policy).
          */
         connection_timeout("connection-timeout"),
 
         /**
-         * The value of the 'to' attribute provided by the initiating entity in
-         * the stream header corresponds to a hostname that is no longer hosted
-         * by the server.
+         * The value of the 'to' attribute provided by the initiating entity in the
+         * stream header corresponds to a hostname that is no longer hosted by the server.
          */
         host_gone("host-gone"),
 
         /**
-         * The value of the 'to' attribute provided by the initiating entity in
-         * the stream header does not correspond to a hostname that is hosted by
-         * the server.
+         * The value of the 'to' attribute provided by the initiating entity in the
+         * stream header does not correspond to a hostname that is hosted by the server.
          */
         host_unknown("host-unknown"),
 
         /**
-         * A stanza sent between two servers lacks a 'to' or 'from' attribute (or
-         * the attribute has no value).
+         * A stanza sent between two servers lacks a 'to' or 'from' attribute
+         * (or the attribute has no value).
          */
         improper_addressing("improper-addressing"),
 
@@ -239,72 +290,65 @@ public class StreamError {
         internal_server_error("internal-server-error"),
 
         /**
-         * The JID or hostname provided in a 'from' address does not match an
-         * authorized JID or validated domain negotiated between servers via
-         * SASL or dialback, or between a client and a server via authentication
-         * and resource binding.
+         * The JID or hostname provided in a 'from' address does not match an authorized
+         * JID or validated domain negotiated between servers via SASL or dialback, or
+         * between a client and a server via authentication and resource binding.
          */
         invalid_from("invalid-from"),
 
         /**
-         * The stream ID or dialback ID is invalid or does not match an ID
-         * previously provided.
+         * The stream ID or dialback ID is invalid or does not match an ID previously provided.
          */
         invalid_id("invalid-id"),
 
         /**
-         * The streams namespace name is something other than
-         * "http://etherx.jabber.org/streams" or the dialback namespace name
-         * is something other than "jabber:server:dialback"
+         * the streams namespace name is something other than "http://etherx.jabber.org/streams"
+         * or the dialback namespace name is something other than "jabber:server:dialback".
          */
         invalid_namespace("invalid-namespace"),
 
         /**
-         * The entity has sent invalid XML over the stream to a server
-         * that performs validation.
+         * The entity has sent invalid XML over the stream to a server that performs validation.
          */
         invalid_xml("invalid-xml"),
 
         /**
-         * The entity has attempted to send data before the stream has been
-         * authenticated, or otherwise is not authorized to perform an action
-         * related to stream negotiation; the receiving entity MUST NOT process
-         * the offending stanza before sending the stream error.
+         * The entity has attempted to send data before the stream has been authenticated,
+         * or otherwise is not authorized to perform an action related to stream
+         * negotiation; the receiving entity MUST NOT process the offending stanza before
+         * sending the stream error.
          */
         not_authorized("not-authorized"),
 
         /**
-         * The entity has violated some local service policy; the server MAY
-         * choose to specify the policy in the &lt;text/&gt; element or an
-         * application-specific condition element.
+         * The entity has violated some local service policy; the server MAY choose to
+         * specify the policy in the <text/> element or an application-specific condition
+         * element.
          */
         policy_violation("policy-violation"),
 
         /**
-         * The server is unable to properly connect to a remote entity that is
-         * required for authentication or authorization.
+         * The server is unable to properly connect to a remote entity that is required for
+         * authentication or authorization.
          */
         remote_connection_failed("remote-connection-failed"),
 
         /**
-         * The server lacks the system resources necessary to service the
-         * stream.
+         * The server lacks the system resources necessary to service the stream.
          */
         resource_constraint("resource-constraint"),
 
         /**
-         * The entity has attempted to send restricted XML features such as
-         * a comment, processing instruction, DTD, entity reference, or
-         * unescaped character.
+         * The entity has attempted to send restricted XML features such as a comment,
+         * processing instruction, DTD, entity reference, or unescaped character.
          */
         restricted_xml("restricted-xml"),
 
         /**
-         * The server will not provide service to the initiating entity but is
-         * redirecting traffic to another host; the server SHOULD specify the
-         * alternate hostname or IP address (which MUST be a valid domain
-         * identifier) as the XML character data of the &lt;see-other-host/&gt;
-         * element.
+         * The server will not provide service to the initiating entity but is redirecting
+         * traffic to another host; the server SHOULD specify the alternate hostname or IP
+         * address (which MUST be a valid domain identifier) as the XML character data of the
+         * &lt;see-other-host/&gt; element.
          */
         see_other_host("see-other-host"),
 
@@ -314,29 +358,28 @@ public class StreamError {
         system_shutdown("system-shutdown"),
 
         /**
-         * The error condition is not one of those defined by the other
-         * conditions in this list; this error condition SHOULD be used
-         * only in conjunction with an application-specific condition.
+         * The error condition is not one of those defined by the other conditions in this
+         * list; this error condition SHOULD be used only in conjunction with an
+         * application-specific condition.
          */
         undefined_condition("undefined-condition"),
 
         /**
-         * The initiating entity has encoded the stream in an encoding
-         * that is not supported by the server.
+         * The initiating entity has encoded the stream in an encoding that is not
+         * supported by the server.
          */
         unsupported_encoding("unsupported-encoding"),
 
         /**
-         * The initiating entity has sent a first-level child of the stream
-         * that is not supported by the server.
+         * The initiating entity has sent a first-level child of the stream that is
+         * not supported by the server.
          */
         unsupported_stanza_type("unsupported-stanza-type"),
 
         /**
-         * The value of the 'version' attribute provided by the initiating
-         * entity in the stream header specifies a version of XMPP that is
-         * not supported by the server; the server MAY specify the version(s)
-         * it supports in the &lt;text/&gt; element.
+         * the value of the 'version' attribute provided by the initiating entity in the
+         * stream header specifies a version of XMPP that is not supported by the server;
+         * the server MAY specify the version(s) it supports in the &lt;text/&gt; element.
          */
         unsupported_version("unsupported-version"),
 
@@ -351,7 +394,7 @@ public class StreamError {
          * @param condition the String value.
          * @return the condition corresponding to the String.
          */
-        public static StreamError.Condition fromXMPP(String condition) {
+        public static Condition fromXMPP(String condition) {
             if (condition == null) {
                 throw new NullPointerException();
             }
@@ -432,6 +475,7 @@ public class StreamError {
                 throw new IllegalArgumentException("Condition invalid:" + condition);
             }
         }
+
         private String value;
 
         private Condition(String value) {
