@@ -20,16 +20,17 @@
 
 package org.jivesoftware.whack;
 
-import org.xmpp.component.ComponentManager;
-import org.xmpp.component.Component;
+import org.xmpp.component.*;
 import org.xmpp.packet.Packet;
+import org.xmpp.packet.JID;
 
 import java.util.Map;
 import java.util.Hashtable;
-
+import java.util.prefs.Preferences;
 
 /**
  * Implementation of the ComponentManager interface for external components.
+ * This implementation follows JEP-0014.
  *
  * @author Matt Tucker
  */
@@ -39,14 +40,31 @@ public class ExternalComponentManager implements ComponentManager {
     private int port;
     private String defaultSecretKey;
     private Map<String, String> secretKeys = new Hashtable<String,String>();
+    Preferences preferences = Preferences.userRoot();
+    private String preferencesPrefix;
+    private Map<String, Component> components = new Hashtable<String,Component>();
 
+    /**
+     * Constructs a new ExternalComponentManager that will make connections
+     * to the specified XMPP server on the default port (5222).
+     *
+     * @param domain the domain of the XMPP server to connect to (e.g. "example.com").
+     */
     public ExternalComponentManager(String domain) {
-        this(domain, 5223);
+        this(domain, 5222);
     }
 
+    /**
+     * Constructs a new ExternalComponentManager that will make connections to
+     * the specified XMPP server on the given port.
+     *
+     * @param domain the domain of the XMPP server to connect to (e.g. "example.com").
+     * @param port the port to connect on.
+     */
     public ExternalComponentManager(String domain, int port) {
         this.domain = domain;
         this.port = port;
+        this.preferencesPrefix = "whack." + domain + ".";
     }
 
     /**
@@ -55,9 +73,8 @@ public class ExternalComponentManager implements ComponentManager {
      * when connecting to the server. Some servers may require a different
      * key for each component, while others may use a global secret key.
      *
-     *
-     * @param subdomain
-     * @param secretKey
+     * @param subdomain the sub-domain.
+     * @param secretKey the secret key
      */
     public void setSecretKey(String subdomain, String secretKey) {
         secretKeys.put(subdomain, secretKey);
@@ -70,18 +87,33 @@ public class ExternalComponentManager implements ComponentManager {
      * may require a different key for each component, while others may use
      * a global secret key.
      *
-     * @param secretKey
+     * @param secretKey the default secret key.
      */
     public void setDefaultSecretKey(String secretKey) {
         this.defaultSecretKey = secretKey;
     }
 
-    public void addComponent(String subdomain, Component component) {
+    public void addComponent(String subdomain, Component component) throws ComponentException {
+        // Find the proper secret key to connect as the subdomain.
+        String secretKey = secretKeys.get(subdomain);
+        if (secretKey == null) {
+            secretKey = defaultSecretKey;
+        }
+        // TODO: connect over network to domain and register component
 
+        // TODO: actual JID should come from server
+        JID componentJID = new JID(null, subdomain + domain, null);
+
+        component.initialize(componentJID, this);
+        components.put(subdomain, component);
     }
 
-    public void removeComponent(String subdomain) {
-
+    public void removeComponent(String subdomain) throws ComponentException {
+        Component component = components.remove(subdomain);
+        if (component != null) {
+            component.shutdown();
+            // TODO: shut down network connection
+        }
     }
 
     public void sendPacket(Component component, Packet packet) {
@@ -89,15 +121,14 @@ public class ExternalComponentManager implements ComponentManager {
     }
 
     public String getProperty(String name) {
-        return null;
+        return preferences.get(preferencesPrefix + name, null);
     }
 
     public void setProperty(String name, String value) {
-
+        preferences.put(preferencesPrefix + name, value);
     }
 
     public boolean isExternalMode() {
         return true;
     }
-
 }

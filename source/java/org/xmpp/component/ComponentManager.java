@@ -39,7 +39,7 @@ public interface ComponentManager {
      * @param subdomain the subdomain of the component's address.
      * @param component the component.
      */
-    public void addComponent(String subdomain, Component component);
+    public void addComponent(String subdomain, Component component) throws ComponentException;
 
     /**
      * Removes a component. The {@link Component#shutdown} method will be called on the
@@ -47,7 +47,7 @@ public interface ComponentManager {
      *
      * @param subdomain the subdomain of the component's address.
      */
-    public void removeComponent(String subdomain);
+    public void removeComponent(String subdomain) throws ComponentException;
 
     /**
      * Sends a packet to the XMPP server. The "from" value of the packet must be in
@@ -58,7 +58,7 @@ public interface ComponentManager {
      * @param component the component sending the packet.
      * @param packet the packet to send.
      */
-    public void sendPacket(Component component, Packet packet);
+    public void sendPacket(Component component, Packet packet) throws ComponentException;
 
     /**
      * Returns a property value specified by name. Properties can be used by
