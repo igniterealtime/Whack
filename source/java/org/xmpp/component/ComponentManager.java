@@ -73,11 +73,11 @@ public interface ComponentManager {
     public String getProperty(String name);
 
     /**
-     * Sets a property value. Properties can be used by
-     * components to store configuration data. It is recommended that each
-     * component qualify property names to prevent overlap. For example a
-     * component that broadcasts messages to groups of users, might prepend
-     * all property names it uses with "broadcast.".
+     * Sets a property value. Properties can be used by components to
+     * store configuration data. It is recommended that each component
+     * qualify property names to prevent overlap. For example a component
+     * that broadcasts messages to groups of users, might prepend all
+     * property names it uses with "broadcast.".
      *
      * @param name the property name.
      * @param value the property value.
@@ -92,4 +92,12 @@ public interface ComponentManager {
      * @return true if the managed components are external components.
      */
     public boolean isExternalMode();
+
+    /**
+     * Returns a Log instance, which can be used by components for logging error,
+     * warning, info, and debug messages.
+     *
+     * @return a Log instance.
+     */
+    public Log getLog();
 }
