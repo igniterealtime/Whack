@@ -76,8 +76,14 @@ public class IQ extends Packet {
 
     /**
      * Returns the child element of this IQ. IQ packets may have a single child
-     * element in an extended namespace. This method is a convenience method
-     * to avoid manipulating the underlying packet's Element instance directly.
+     * element in an extended namespace. This is a convenience method to
+     * avoid manipulating the underlying packet's Element instance directly.<p>
+     *
+     * An IQ child element in extended namespaces is used to extend the features
+     * of XMPP. Although any valid XML can be included in a child element
+     * in an extended namespace, many common features have been standardized
+     * as <a href="http://www.jabber.org/jeps">Jabber Enhancement Proposals</a>
+     * (JEPs).
      *
      * @return the child element.
      */
@@ -103,15 +109,21 @@ public class IQ extends Packet {
 
     /**
      * Sets the child element of this IQ. IQ packets may have a single child
-     * element in an extended namespace. This method is a convenience method
-     * to avoid manipulating the underlying packet's Element instance directly.<p>
+     * element in an extended namespace. This is a convenience method to
+     * avoid manipulating this underlying packet's Element instance directly.<p>
      *
      * A sample use of this method might look like the following:
      * <pre>
      * IQ iq = new IQ("time_1");
      * iq.setTo("mary@example.com");
      * iq.setType(IQ.Type.GET);
-     * iq.setChildElement(docFactory.createElement("query", "jabber:iq:time"));</pre>
+     * iq.setChildElement(docFactory.createElement("query", "jabber:iq:time"));</pre><p>
+     *
+     * An IQ child element in extended namespaces is used to extend the features
+     * of XMPP. Although any valid XML can be included in a child element
+     * in an extended namespace, many common features have been standardized
+     * as <a href="http://www.jabber.org/jeps">Jabber Enhancement Proposals</a>
+     * (JEPs).
      *
      * @param childElement the child element.
      */

@@ -192,7 +192,14 @@ public class Presence extends Packet {
      * Returns the first child element of this packet that matches the
      * given name and namespace. If no matching element is found,
      * <tt>null</tt> will be returned. This is a convenience method to avoid
-     * manipulating this underlying packet's Element instance directly.
+     * manipulating this underlying packet's Element instance directly.<p>
+     *
+     * Child elements in extended namespaces are used to extend the features
+     * of XMPP. Examples include a "user is typing" indicator and invitations to
+     * group chat rooms. Although any valid XML can be included in a child element
+     * in an extended namespace, many common features have been standardized
+     * as <a href="http://www.jabber.org/jeps">Jabber Enhancement Proposals</a>
+     * (JEPs).
      *
      * @param name the element name.
      * @param namespace the element namespace.
@@ -212,8 +219,15 @@ public class Presence extends Packet {
     /**
      * Adds a new child element to this packet with the given name and
      * namespace. The newly created Element is returned. This is a
-     * convenience method to avoid manipulating this underlying packet's Element
-     * instance directly.
+     * convenience method to avoid manipulating this underlying packet's
+     * Element instance directly.<p>
+     *
+     * Child elements in extended namespaces are used to extend the features
+     * of XMPP. Examples include a "user is typing" indicator and invitations to
+     * group chat rooms. Although any valid XML can be included in a child element
+     * in an extended namespace, many common features have been standardized
+     * as <a href="http://www.jabber.org/jeps">Jabber Enhancement Proposals</a>
+     * (JEPs).
      *
      * @param name the element name.
      * @param namespace the element namespace.
