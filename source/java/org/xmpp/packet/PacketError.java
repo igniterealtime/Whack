@@ -68,7 +68,7 @@ public class PacketError {
      * @param condition the error condition.
      * @param text the text description of the error.
      */
-    public PacketError(Type type, Condition condition, String text) {
+    public PacketError(Condition condition, Type type, String text) {
         this.element = docFactory.createElement("error");
         setType(type);
         setCondition(condition);
