@@ -53,6 +53,7 @@ public abstract class Packet {
      * @param ID the packet ID.
      */
     public void setID(String ID) {
+        element.attribute("id");
         element.addAttribute("id", ID);
     }
 
@@ -66,47 +67,67 @@ public abstract class Packet {
     }
 
     /**
-     * Returns the XMPP address that the packet is addressed to, or <tt>null</tt>
+     * Returns the XMPP address (JID) that the packet is addressed to, or <tt>null</tt>
      * if the "to" attribute is not set. The XMPP protocol often makes the "to"
      * attribute optional, so it does not always need to be set.
      *
-     * @return the XMPP address that the packet is addressed to, or <tt>null</tt>
+     * @return the XMPP address (JID) that the packet is addressed to, or <tt>null</tt>
      *      if not set.
      */
-    public String getTo() {
-        return element.attributeValue("to");
+    public JID getTo() {
+        return new JID(element.attributeValue("to"));
     }
 
     /**
-     * Sets the XMPP address that the packet is addressed to. The XMPP protocol
+     * Sets the XMPP address (JID) that the packet is addressed to. The XMPP protocol
      * often makes the "to" attribute optional, so it does not always need to be set.
      *
-     * @param to the XMPP address that the packet is addressed to.
+     * @param to the XMPP address (JID) that the packet is addressed to.
      */
     public void setTo(String to) {
         element.addAttribute("to", to);
     }
 
     /**
-     * Returns the XMPP address that the packet is from, or <tt>null</tt>
+     * Sets the XMPP address (JID) that the packet is address to. The XMPP protocol
+     * often makes the "to" attribute optional, so it does not always need to be set.
+     *
+     * @param to the XMPP address (JID) that the packet is addressed to.
+     */
+    public void setTo(JID to) {
+        setTo(to.toString());
+    }
+
+    /**
+     * Returns the XMPP address (JID) that the packet is from, or <tt>null</tt>
      * if the "from" attribute is not set. The XMPP protocol often makes the "from"
      * attribute optional, so it does not always need to be set.
      *
      * @return the XMPP address that the packet is from, or <tt>null</tt>
      *      if not set.
      */
-    public String getFrom() {
-        return element.attributeValue("from");
+    public JID getFrom() {
+        return new JID(element.attributeValue("from"));
     }
 
     /**
-     * Sets the XMPP address that the packet comes from. The XMPP protocol
+     * Sets the XMPP address (JID) that the packet comes from. The XMPP protocol
      * often makes the "from" attribute optional, so it does not always need to be set.
      *
-     * @param from the XMPP address that the packet comes from.
+     * @param from the XMPP address (JID) that the packet comes from.
      */
     public void setFrom(String from) {
         element.addAttribute("from", from);
+    }
+
+    /**
+     * Sets the XMPP address (JID) that the packet comes from. The XMPP protocol
+     * often makes the "from" attribute optional, so it does not always need to be set.
+     *
+     * @param from the XMPP address (JID) that the packet comes from.
+     */
+    public void setFrom(JID from) {
+        element.addAttribute("from", from.toString());
     }
 
     /**
