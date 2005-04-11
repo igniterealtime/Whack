@@ -69,7 +69,21 @@ public class ExternalComponent implements Component {
     private boolean shutdown = false;
 
     private String connectionID;
+    /**
+     * Hold the full domain of this component. The full domain is composed by the subdomain plus
+     * the domain of the server. E.g. conference.jivesoftware.com. The domain may change after a
+     * connection has been established with the server.
+     */
+    private String domain;
+    /**
+     * Holds the subdomain that is associated to this component. The subdomain is the initial part
+     * of the domain. The subdomain cannot be affected after establishing a connection with the
+     * server. E.g. conference.
+     */
     private String subdomain;
+    /**
+     * Holds the IP address or host name where the connection must be made.
+     */
     private String host;
     private int port;
     private SocketFactory socketFactory;
@@ -114,6 +128,8 @@ public class ExternalComponent implements Component {
         try {
             // Open a socket to the server
             this.socket = socketFactory.createSocket(host, port);
+            // Assume that the host name matches the real name of the XMPP server
+            this.domain = subdomain + "." + host;
             this.subdomain = subdomain;
             // Keep these variables that will be used in case a reconnection is required
             this.host= host;
@@ -137,7 +153,7 @@ public class ExternalComponent implements Component {
                 stream.append("<stream:stream");
                 stream.append(" xmlns=\"jabber:component:accept\"");
                 stream.append(" xmlns:stream=\"http://etherx.jabber.org/streams\"");
-                stream.append(" to=\"" + subdomain + "\">");
+                stream.append(" to=\"" + domain + "\">");
                 writer.write(stream.toString());
                 writer.flush();
                 stream = null;
@@ -151,7 +167,7 @@ public class ExternalComponent implements Component {
                 // Set the streamID returned from the server
                 connectionID = xpp.getAttributeValue("", "id");
                 if (xpp.getAttributeValue("", "from") != null) {
-                    this.subdomain = xpp.getAttributeValue("", "from");
+                    this.domain = xpp.getAttributeValue("", "from");
                 }
                 xmlSerializer = new XMLWriter(writer);
 
@@ -175,12 +191,7 @@ public class ExternalComponent implements Component {
                         // throw the exception with the wrapped error
                         throw new ComponentException(error);
                     }
-
-                    // Everything went fine so start reading packets from the server
-                    readerThread = new SocketReadThread(this, reader);
-                    readerThread.setDaemon(true);
-                    readerThread.start();
-
+                    // Everything went fine
                 } catch (DocumentException e) {
                     try { socket.close(); } catch (IOException ioe) {}
                     throw new ComponentException(e);
@@ -216,10 +227,18 @@ public class ExternalComponent implements Component {
     }
 
     /**
-     * Returns the subdomain provided by this component in the connected server. Before
-     * establishing the connection the returned subdomain will be the intended subdomain to serve
-     * but if the connection has been established then the returned subdomain will be the one
-     * answered by the server when the connection was established.
+     * Returns the domain provided by this component in the connected server. The domain is
+     * composed by the subdomain plus the domain of the server. E.g. conference.jivesoftware.com.
+     * The domain may change after a connection has been established with the server.
+     *
+     * @return the domain provided by this component in the connected server.
+     */
+    public String getDomain() {
+        return domain;
+    }
+
+    /**
+     * Returns the subdomain provided by this component in the connected server. E.g. conference.
      *
      * @return the subdomain provided by this component in the connected server.
      */
@@ -251,7 +270,9 @@ public class ExternalComponent implements Component {
                 xmlSerializer.flush();
             }
             catch (IOException e) {
+                // Log the exception
                 manager.getLog().error(e);
+                // Unbind this component from the serviced subdomain
                 try {
                     manager.removeComponent(subdomain);
                 } catch (ComponentException e1) {
@@ -263,6 +284,13 @@ public class ExternalComponent implements Component {
 
     public void initialize(JID jid, ComponentManager componentManager) {
         component.initialize(jid, componentManager);
+    }
+
+    public void start() {
+        // Everything went fine so start reading packets from the server
+        readerThread = new SocketReadThread(this, reader);
+        readerThread.setDaemon(true);
+        readerThread.start();
     }
 
     public void shutdown() {
