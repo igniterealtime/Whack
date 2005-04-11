@@ -85,6 +85,14 @@ public interface ComponentManager {
     public void setProperty(String name, String value);
 
     /**
+     * Returns the domain of the XMPP server. The domain name may be the IP address or the host
+     * name.
+     *
+     * @return the domain of the XMPP server.
+     */
+    public String getServerName();
+    
+    /**
      * Returns true if components managed by this component manager are external
      * components connected to the server over a network connection. Otherwise,
      * the components are internal to the server.
