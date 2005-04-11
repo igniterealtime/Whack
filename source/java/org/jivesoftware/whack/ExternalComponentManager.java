@@ -20,12 +20,10 @@
 
 package org.jivesoftware.whack;
 
-import org.xmpp.component.Component;
-import org.xmpp.component.ComponentException;
-import org.xmpp.component.ComponentManager;
-import org.xmpp.component.Log;
+import org.xmpp.component.*;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Packet;
+import org.jivesoftware.whack.container.ServerContainer;
 
 import javax.net.SocketFactory;
 import java.util.Hashtable;
@@ -40,7 +38,7 @@ import java.util.prefs.Preferences;
  */
 public class ExternalComponentManager implements ComponentManager {
 
-    private String domain;
+    private String host;
     private int port;
     private String defaultSecretKey;
     private Map<String, String> secretKeys = new Hashtable<String,String>();
@@ -62,25 +60,28 @@ public class ExternalComponentManager implements ComponentManager {
      * Constructs a new ExternalComponentManager that will make connections
      * to the specified XMPP server on the default port (5222).
      *
-     * @param domain the domain of the XMPP server to connect to (e.g. "example.com").
+     * @param host the IP address or name of the XMPP server to connect to (e.g. "example.com").
      */
-    public ExternalComponentManager(String domain) {
-        this(domain, 5222);
+    public ExternalComponentManager(String host) {
+        this(host, 5222);
     }
 
     /**
      * Constructs a new ExternalComponentManager that will make connections to
      * the specified XMPP server on the given port.
      *
-     * @param domain the domain of the XMPP server to connect to (e.g. "example.com").
+     * @param host the IP address or name of the XMPP server to connect to (e.g. "example.com").
      * @param port the port to connect on.
      */
-    public ExternalComponentManager(String domain, int port) {
-        this.domain = domain;
+    public ExternalComponentManager(String host, int port) {
+        this.host = host;
         this.port = port;
-        this.preferencesPrefix = "whack." + domain + ".";
+        this.preferencesPrefix = "whack." + host + ".";
 
         createDummyLogger();
+
+        // Set this ComponentManager as the current component manager
+        ComponentManagerFactory.setComponentManager(this);
     }
 
     /**
@@ -133,14 +134,24 @@ public class ExternalComponentManager implements ComponentManager {
         }
         // Create a wrapping ExternalComponent on the component
         ExternalComponent externalComponent = new ExternalComponent(component, this);
-        // Ask the ExternalComponent to connect with the remote server
-        externalComponent.connect(domain, port, SocketFactory.getDefault(), subdomain);
-
-        JID componentJID = new JID(null, externalComponent.getSubdomain() + domain, null);
-
+        try {
+            // Register the new component
+            componentsByDomain.put(subdomain, externalComponent);
+            components.put(component, externalComponent);
+            // Ask the ExternalComponent to connect with the remote server
+            externalComponent.connect(host, port, SocketFactory.getDefault(), subdomain);
+        } catch (ComponentException e) {
+            // Unregister the new component
+            componentsByDomain.put(subdomain, externalComponent);
+            components.put(component, externalComponent);
+            // Re-throw the exception
+            throw e;
+        }
+        // Initialize the component
+        JID componentJID = new JID(null, externalComponent.getDomain(), null);
         externalComponent.initialize(componentJID, this);
-        componentsByDomain.put(externalComponent.getSubdomain(), externalComponent);
-        components.put(component, externalComponent);
+        // Asl the external component to start processing incoming packets
+        externalComponent.start();
     }
 
     public void removeComponent(String subdomain) throws ComponentException {
@@ -165,8 +176,23 @@ public class ExternalComponentManager implements ComponentManager {
         preferences.put(preferencesPrefix + name, value);
     }
 
+    public String getServerName() {
+        // We are assuming here that the host name (or IP address) matches the name of the
+        // XMPP server
+        return host;
+    }
+
     public boolean isExternalMode() {
         return true;
+    }
+
+    /**
+     * Returns the location of the <code>home</code> directory.
+     *
+     * @return the location of the home directory.
+     */
+    public String getHomeDirectory() {
+        return ServerContainer.getInstance().getHomeDirectory();
     }
 
     public Log getLog() {
