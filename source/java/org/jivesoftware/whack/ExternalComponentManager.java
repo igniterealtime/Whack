@@ -127,6 +127,15 @@ public class ExternalComponentManager implements ComponentManager {
     }
 
     public void addComponent(String subdomain, Component component) throws ComponentException {
+        if (componentsByDomain.containsKey(subdomain)) {
+            if (componentsByDomain.get(subdomain).getComponent() == component) {
+                // Do nothing since the component has already been registered
+                return;
+            }
+            else {
+                throw new IllegalArgumentException("Subdomain already in use by another component");
+            }
+        }
         // Find the proper secret key to connect as the subdomain.
         String secretKey = secretKeys.get(subdomain);
         if (secretKey == null) {
