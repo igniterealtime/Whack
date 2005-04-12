@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--
+    This file stores bootstrap properties needed by Whack.
+    Property names must be in the format: "prop.name.is.blah=value"
+    That will be stored as:
+        <prop>
+            <name>
+                <is>
+                    <blah>value</blah>
+                </is>
+            </name>
+        </prop>
+
+    A property viewer and editor is included in the admin console.
+-->
+<!-- root element, all properties must be under this element -->
+<jive>
+  <adminConsole>
+    <!-- Disable either port by setting the value to -1 -->
+    <port>9190</port>
+    <securePort>9191</securePort>
+    <!-- <inteface>127.0.0.1</inteface> -->
+  </adminConsole>
+  <locale>en</locale>
+  <xmppServer>
+    <host>localhost</host>
+    <port>5222</port>
+    <defaultSecretKey>ThisIsMySecretKey</defaultSecretKey>
+  </xmppServer>
+  <setup>true</setup>
+</jive>
