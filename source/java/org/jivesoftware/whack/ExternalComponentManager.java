@@ -151,8 +151,8 @@ public class ExternalComponentManager implements ComponentManager {
             externalComponent.connect(host, port, SocketFactory.getDefault(), subdomain);
         } catch (ComponentException e) {
             // Unregister the new component
-            componentsByDomain.put(subdomain, externalComponent);
-            components.put(component, externalComponent);
+            componentsByDomain.remove(subdomain);
+            components.remove(component);
             // Re-throw the exception
             throw e;
         }
