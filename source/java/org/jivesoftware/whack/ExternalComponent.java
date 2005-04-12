@@ -205,7 +205,7 @@ public class ExternalComponent implements Component {
             }
         }
         catch (UnknownHostException uhe) {
-            try { socket.close(); } catch (IOException e) {}
+            try { if (socket != null) socket.close(); } catch (IOException e) {}
             throw new ComponentException(uhe);
         }
         catch (IOException ioe) {
