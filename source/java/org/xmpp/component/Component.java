@@ -56,14 +56,28 @@ public interface Component {
 
     /**
      * Initializes this component with a ComponentManager and the JID
-     * that this component is available at (e.g. <tt>service.example.com</tt>).
-     * After being initialized, this Component must be ready to process
-     * incoming packets.
+     * that this component is available at (e.g. <tt>service.example.com</tt>). If a
+     * ComponentException is thrown then the component will not be loaded.<p>
+     *
+     * The initialization code must not rely on receiving packets from the server since
+     * the component has not been fully initialized yet. This means that at this point the
+     * component must not rely on information that is obtained from the server such us
+     * discovered items.
      *
      * @param jid the XMPP address that this component is available at.
      * @param componentManager the component manager.
+     * @throws ComponentException if an error occured while initializing the component.
      */
-    public void initialize(JID jid, ComponentManager componentManager);
+    public void initialize(JID jid, ComponentManager componentManager) throws ComponentException;
+
+    /**
+     * Notification message indicating that the component will start receiving incoming
+     * packets. At this time the component may finish pending initialization issues that
+     * require information obtained from the server.<p>
+     *
+     * It is likely that most of the component will leave this method empty.
+     */
+    public void start();
 
     /**
      * Shuts down this component. All component resources must be released as

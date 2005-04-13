@@ -98,6 +98,9 @@ public class WeatherComponent implements Component {
     public void initialize(JID jid, ComponentManager componentManager) {
     }
 
+    public void start() {
+    }
+
     public void shutdown() {
     }
 }
