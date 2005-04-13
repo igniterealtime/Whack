@@ -282,7 +282,7 @@ public class ExternalComponent implements Component {
         }
     }
 
-    public void initialize(JID jid, ComponentManager componentManager) {
+    public void initialize(JID jid, ComponentManager componentManager) throws ComponentException {
         component.initialize(jid, componentManager);
     }
 
@@ -291,6 +291,8 @@ public class ExternalComponent implements Component {
         readerThread = new SocketReadThread(this, reader);
         readerThread.setDaemon(true);
         readerThread.start();
+        // Notify the component that it will be notified of new received packets 
+        component.start();
     }
 
     public void shutdown() {

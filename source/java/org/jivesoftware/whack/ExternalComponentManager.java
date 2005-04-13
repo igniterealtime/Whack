@@ -149,6 +149,9 @@ public class ExternalComponentManager implements ComponentManager {
             components.put(component, externalComponent);
             // Ask the ExternalComponent to connect with the remote server
             externalComponent.connect(host, port, SocketFactory.getDefault(), subdomain);
+            // Initialize the component
+            JID componentJID = new JID(null, externalComponent.getDomain(), null);
+            externalComponent.initialize(componentJID, this);
         } catch (ComponentException e) {
             // Unregister the new component
             componentsByDomain.remove(subdomain);
@@ -156,10 +159,7 @@ public class ExternalComponentManager implements ComponentManager {
             // Re-throw the exception
             throw e;
         }
-        // Initialize the component
-        JID componentJID = new JID(null, externalComponent.getDomain(), null);
-        externalComponent.initialize(componentJID, this);
-        // Asl the external component to start processing incoming packets
+        // Ask the external component to start processing incoming packets
         externalComponent.start();
     }
 
