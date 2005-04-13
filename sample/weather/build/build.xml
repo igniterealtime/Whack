@@ -13,9 +13,7 @@
     <target name="clean">
         <!--Delete created directory trees-->
         <delete dir="${build}" includeEmptyDirs="true"/>
-        <delete includeEmptyDirs="true">
-            <fileset dir="${dist}" excludes="lib/**"/>
-        </delete>
+        <delete dir="${dist}" includeEmptyDirs="true"/>
     </target>
     <target name="clean_classes">
         <!--Delete created directory trees-->
