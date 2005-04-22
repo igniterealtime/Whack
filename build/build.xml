@@ -82,11 +82,11 @@
         <tstamp/>
         <jar jarfile="${dist}/whack-full.jar" basedir="${build}">
             <zipgroupfileset dir="${libs}" includes="*.jar"/>
-            <zipgroupfileset dir="${src}" includes="*.java" />
+            <fileset dir="${src}" includes="**/*.java" />
         </jar>
         <jar jarfile="${dist}/whack.jar" basedir="${build}">
             <zipgroupfileset dir="${libs}" includes="stringprep.jar"/>
-            <zipgroupfileset dir="${src}" includes="*.java" />
+            <fileset dir="${src}" includes="**/*.java" />
         </jar>
         <antcall target="clean_classes"/>
     </target>
