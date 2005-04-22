@@ -1,20 +1,29 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <project name="Whack" default="dist" basedir=".">
-    <description>Whack Build File</description>
+
+    <description>Whack build script</description>
+
     <!--set global properties for this build-->
     <property name="src" location="../source/java"/>
-    <property name="build" location="classes"/>
+    <property name="build" location="../target/classes"/>
     <property name="dist" location="../target"/>
     <property name="docs" location="${dist}/docs"/>
     <property name="docsapi" location="docs/api"/>
     <property name="libs" location="lib/merge"/>
 
-    <target name="release">
+    <path id="cp">
+        <fileset dir="lib/merge" includes="*.jar" />
+        <fileset dir="lib/dist" includes="*.jar" />
+    </path>
+
+    <target name="release" description="Makes a full release">
         <antcall target="dist"/>
         <antcall target="doc"/>
         <antcall target="clean_classes"/>
     </target>
-    <target name="clean">
+
+    <target name="clean" description="Cleans generated output">
         <!--Delete created directory trees-->
         <delete dir="${build}" includeEmptyDirs="true"/>
         <delete includeEmptyDirs="true">
@@ -23,6 +32,7 @@
         <delete dir="${docs}" includeEmptyDirs="true"/>
         <delete dir="${docsapi}" includeEmptyDirs="true"/>
     </target>
+
     <target name="clean_classes">
         <!--Delete created directory trees-->
         <delete dir="${build}" includeEmptyDirs="true"/>
@@ -34,6 +44,7 @@
         <mkdir dir="${docs}"/>
         <mkdir dir="${docsapi}"/>
     </target>
+
     <target name="resources">
         <copy todir="${build}">
             <fileset dir="${src}">
@@ -51,21 +62,22 @@
             </fileset>
         </copy>
     </target>
-    <target name="build" depends="init, resources">
+
+    <target name="build" depends="init, resources" description="Compiles Whack source">
         <!--Compiles the java code from ${src} directory into ${build} directory-->
         <javac destdir="${build}"
             debug="on"
             source="1.5"
+            includeAntRuntime="no"
+            classpathref="cp"
         >
             <src path="${src}"/>
             <exclude name="**/*Test.java"/>
             <exclude name="**/Test*.java"/>
-            <classpath path="lib/merge/dom4j.jar"/>
-            <classpath path="lib/merge/stringprep.jar"/>
-            <classpath path="lib/merge/xpp3.jar"/>
         </javac>
     </target>
-    <target name="dist" depends="build">
+
+    <target name="dist" depends="build" description="Creates a jar">
         <!--Put everything in ${build} into the MyProject-${DSTAMP}.jar file-->
         <tstamp/>
         <jar jarfile="${dist}/whack-full.jar" basedir="${build}">
@@ -76,7 +88,8 @@
         </jar>
         <antcall target="clean_classes"/>
     </target>
-    <target name="doc" depends="init">
+
+    <target name="doc" depends="init" description="Generates javadoc">
         <javadoc destdir="${docsapi}" author="true" version="true" use="true" windowtitle="API for Whack">
             <fileset dir="${src}" defaultexcludes="yes">
                 <exclude name="**/*Test.java"/>
@@ -87,6 +100,7 @@
             <classpath path="lib/merge/xpp3.jar"/>
         </javadoc>
     </target>
+
     <target name="build_tests" depends="init">
         <!--Compiles the tests into ${tests} directory-->
         <javac destdir="${tests}">
