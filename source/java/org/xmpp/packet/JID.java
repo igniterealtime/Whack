@@ -57,6 +57,142 @@ public class JID implements Comparable {
     private String resource;
 
     /**
+     * Escapes the node portion of a JID according to "JID Escaping" (JEP-0106).
+     * Escaping replaces characters prohibited by node-prep with escape sequences,
+     * as follows:<p>
+     *
+     * <table border="1">
+     * <tr><td><b>Unescaped Character</b></td><td><b>Encoded Sequence</b></td></tr>
+     * <tr><td>&lt;space&gt;</td><td>#20;</td></tr>
+     * <tr><td>"</td><td>#22;</td></tr>
+     * <tr><td>#</td><td>#23;</td></tr>
+     * <tr><td>&</td><td>#26;</td></tr>
+     * <tr><td>'</td><td>#27;</td></tr>
+     * <tr><td>/</td><td>#2f;</td></tr>
+     * <tr><td>:</td><td>#3a;</td></tr>
+     * <tr><td>&lt;</td><td>#3c;</td></tr>
+     * <tr><td>&gt;</td><td>#3e;</td></tr>
+     * <tr><td>@</td><td>#40;</td></tr>
+     * </table><p>
+     *
+     * This process is useful when the node comes from an external source that doesn't
+     * conform to nodeprep. For example, a username in LDAP may be "Joe Smith". Because
+     * the &lt;space&gt; character isn't a valid part of a node, the username should
+     * be escaped to "Joe#20;Smith" before being made into a JID (e.g. "joe#20;smith@example.com"
+     * after case-folding, etc. has been applied).<p>
+     *
+     * All node escaping and un-escaping must be performed manually at the appropriate
+     * time; the JID class will not escape or un-escape automatically.
+     *
+     * @param node the node.
+     * @return the escaped version of the node.
+     */
+    public static String escapeNode(String node) {
+        if (node == null) {
+            return null;
+        }
+        StringBuilder buf = new StringBuilder(node.length() + 8);
+        for (int i=0, n=node.length(); i<n; i++) {
+            char c = node.charAt(i);
+            switch (c) {
+                case '"': buf.append("#22;"); break;
+                case '#': buf.append("#23;"); break;
+                case '&': buf.append("#26;"); break;
+                case '\'': buf.append("#27;"); break;
+                case '/': buf.append("#2f;"); break;
+                case ':': buf.append("#3a;"); break;
+                case '<': buf.append("#3c;"); break;
+                case '>': buf.append("#3e;"); break;
+                case '@': buf.append("#40;"); break;
+                default: {
+                    if (Character.isWhitespace(c)) {
+                        buf.append("#20;");
+                    }
+                    else {
+                        buf.append(c);
+                    }
+                }
+            }
+        }
+        return buf.toString();
+    }
+
+    /**
+     * Un-escapes the node portion of a JID according to "JID Escaping" (JEP-0106).<p>
+     * Escaping replaces characters prohibited by node-prep with escape sequences,
+     * as follows:<p>
+     *
+     * <table border="1">
+     * <tr><td><b>Unescaped Character</b></td><td><b>Encoded Sequence</b></td></tr>
+     * <tr><td>&lt;space&gt;</td><td>#20;</td></tr>
+     * <tr><td>"</td><td>#22;</td></tr>
+     * <tr><td>#</td><td>#23;</td></tr>
+     * <tr><td>&</td><td>#26;</td></tr>
+     * <tr><td>'</td><td>#27;</td></tr>
+     * <tr><td>/</td><td>#2f;</td></tr>
+     * <tr><td>:</td><td>#3a;</td></tr>
+     * <tr><td>&lt;</td><td>#3c;</td></tr>
+     * <tr><td>&gt;</td><td>#3e;</td></tr>
+     * <tr><td>@</td><td>#40;</td></tr>
+     * </table><p>
+     *
+     * This process is useful when the node comes from an external source that doesn't
+     * conform to nodeprep. For example, a username in LDAP may be "Joe Smith". Because
+     * the &lt;space&gt; character isn't a valid part of a node, the username should
+     * be escaped to "Joe#20;Smith" before being made into a JID (e.g. "joe#20;smith@example.com"
+     * after case-folding, etc. has been applied).<p>
+     *
+     * All node escaping and un-escaping must be performed manually at the appropriate
+     * time; the JID class will not escape or un-escape automatically.
+     *
+     * @param node the escaped version of the node.
+     * @return the un-escaped version of the node.
+     */
+    public static String unescapeNode(String node) {
+        if (node == null) {
+            return null;
+        }
+        char [] nodeChars = node.toCharArray();
+        StringBuilder buf = new StringBuilder(nodeChars.length);
+        for (int i=0, n=nodeChars.length; i<n; i++) {
+            compare: {
+                char c = node.charAt(i);
+                if (c == '#' && i+3<n) {
+                    char c2 = nodeChars[i+1];
+                    char c3 = nodeChars[i+2];
+                    char c4 = nodeChars[i+3];
+                    if (c2 == '2' && c4 == ';') {
+                        switch (c3) {
+                            case '0': buf.append(' '); i+=3; break compare;
+                            case '2': buf.append('"'); i+=3; break compare;
+                            case '3': buf.append('#'); i+=3; break compare;
+                            case '6': buf.append('&'); i+=3; break compare;
+                            case '7': buf.append('\''); i+=3; break compare;
+                            case 'f': buf.append('/'); i+=3; break compare;
+                        }
+                    }
+                    else if (c2 == '3' && c4 == ';') {
+                        switch (c3) {
+                            case 'a': buf.append(':'); i+=3; break compare;
+                            case 'c': buf.append('<'); i+=3; break compare;
+                            case 'e': buf.append('>'); i+=3; break compare;
+                        }
+                    }
+                    else if (c2 == '4' && c4 == ';') {
+                        if (c3 == '0') {
+                            buf.append("@");
+                            i+=3;
+                            break compare;
+                        }
+                    }
+                }
+                buf.append(c);
+            }
+        }
+        return buf.toString();
+    }
+
+    /**
      * Constructs a JID from it's String representation.
      *
      * @param jid a valid JID.
