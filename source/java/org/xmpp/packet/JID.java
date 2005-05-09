@@ -345,7 +345,7 @@ public class JID implements Comparable {
                     throw new IllegalArgumentException("Node cannot be larger than 1023 bytes. " +
                             "Size is " + (node.length() * 2) + " bytes.");
                 }
-                stringprepCache.put(node, null);
+                stringprepCache.put(this.node, null);
             }
             else {
                 this.node = node;
@@ -361,7 +361,7 @@ public class JID implements Comparable {
                     throw new IllegalArgumentException("Domain cannot be larger than 1023 bytes. " +
                             "Size is " + (domain.length() * 2) + " bytes.");
                 }
-                stringprepCache.put(domain, null);
+                stringprepCache.put(this.domain, null);
             }
             else {
                 this.domain = domain;
@@ -373,7 +373,7 @@ public class JID implements Comparable {
                     throw new IllegalArgumentException("Resource cannot be larger than 1023 bytes. " +
                             "Size is " + (resource.length() * 2) + " bytes.");
                 }
-                stringprepCache.put(resource, null);
+                stringprepCache.put(this.resource, null);
             }
             else {
                 this.resource = resource;
