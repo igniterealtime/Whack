@@ -20,12 +20,15 @@
 
 package org.xmpp.packet;
 
-import org.dom4j.Element;
 import org.dom4j.DocumentFactory;
-import org.dom4j.io.XMLWriter;
+import org.dom4j.Element;
+import org.dom4j.QName;
 import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
 import java.io.StringWriter;
+import java.lang.reflect.Constructor;
+import java.util.List;
 
 /**
  * An XMPP packet (also referred to as a stanza). Each packet is backed by a
@@ -188,6 +191,68 @@ public abstract class Packet {
         else {
             element.addAttribute("from", from.toString());
         }
+    }
+
+    /**
+     * Adds the element contained in the PacketExtension to the element of this packet.
+     * It is important that this is the first and last time the element contained in
+     * PacketExtension is added to another Packet. Otherwise, a runtime error will be
+     * thrown when trying to add the PacketExtension's element to the Packet's element.
+     * Future modifications to the PacketExtension will be reflected in this Packet.
+     *
+     * @param extension the PacketExtension whose element will be added to this Packet's element.
+     */
+    public void addExtension(PacketExtension extension) {
+        element.add(extension.getElement());
+    }
+
+    /**
+     * Returns a {@link PacketExtension} on the first element found in this packet
+     * for the specified <tt>name</tt> and <tt>namespace</tt> or <tt>null</tt> if
+     * none was found.
+     *
+     * @param name the child element name.
+     * @param namespace the child element namespace.
+     * @return a PacketExtension on the first element found in this packet for the specified
+     *         name and namespace or null if none was found.
+     */
+    public PacketExtension getExtension(String name, String namespace) {
+        List extensions = element.elements(QName.get(name, namespace));
+        if (!extensions.isEmpty()) {
+            Class extensionClass = PacketExtension.getExtensionClass(name, namespace);
+            if (extensionClass != null) {
+                try {
+                    Constructor constructor = extensionClass.getDeclaredConstructor(new Class[]{
+                        Element.class});
+                    return (PacketExtension) constructor.newInstance(new Object[]{
+                        extensions.get(0)});
+                } catch (Exception e) {
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Deletes the first element whose element name and namespace matches the specified
+     * element name and namespace.<p>
+     *
+     * Notice that this method may remove any child element that matches the specified
+     * element name and namespace even if that element was not added to the Packet using a
+     * {@link PacketExtension}.
+     *
+     *
+     * @param name the child element name.
+     * @param namespace the child element namespace.
+     * @return true if a child element was removed.
+     */
+    public boolean deleteExtension(String name, String namespace) {
+        List extensions = element.elements(QName.get(name, namespace));
+        if (!extensions.isEmpty()) {
+            element.remove((Element) extensions.get(0));
+            return true;
+        }
+        return false;
     }
 
     /**

@@ -1,8 +1,12 @@
 package org.xmpp.packet;
 
 import org.dom4j.Element;
+import org.dom4j.QName;
 
-import java.util.*;
+import java.lang.reflect.Constructor;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
 
 /**
  * IQ (Info/Query) packet. IQ packets are used to get and set information
@@ -186,6 +190,51 @@ public class IQ extends Packet {
             element.remove((Element)i.next());
         }
         return element.addElement(name, namespace);
+    }
+
+    public void addExtension(PacketExtension extension) {
+        Element childElement = getChildElement();
+        if (childElement == null) {
+            throw new IllegalStateException("Child element cannot be null");
+        }
+        // Add the extension to the child element
+        childElement.add(extension.getElement());
+    }
+
+    public PacketExtension getExtension(String name, String namespace) {
+        Element childElement = getChildElement();
+        if (childElement == null) {
+            throw new IllegalStateException("Child element cannot be null");
+        }
+        // Search for extensions in the child element
+        List extensions = childElement.elements(QName.get(name, namespace));
+        if (!extensions.isEmpty()) {
+            Class extensionClass = PacketExtension.getExtensionClass(name, namespace);
+            if (extensionClass != null) {
+                try {
+                    Constructor constructor = extensionClass.getDeclaredConstructor(new Class[]{
+                        Element.class});
+                    return (PacketExtension) constructor.newInstance(new Object[]{
+                        extensions.get(0)});
+                } catch (Exception e) {
+                }
+            }
+        }
+        return null;
+    }
+
+    public boolean deleteExtension(String name, String namespace) {
+        Element childElement = getChildElement();
+        if (childElement == null) {
+            throw new IllegalStateException("Child element cannot be null");
+        }
+        // Delete extensions in the child element
+        List extensions = childElement.elements(QName.get(name, namespace));
+        if (!extensions.isEmpty()) {
+            childElement.remove((Element) extensions.get(0));
+            return true;
+        }
+        return false;
     }
 
     /**
