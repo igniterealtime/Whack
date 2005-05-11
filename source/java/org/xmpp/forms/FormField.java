@@ -96,7 +96,7 @@ public class FormField {
      * @param type an indicative of the format for the data to answer.
      */
     public void setType(Type type) {
-        element.addAttribute("type", type==null?null:type.toString());
+        element.addAttribute("type", type==null?null:type.toXMPP());
     }
 
     /**
@@ -208,7 +208,7 @@ public class FormField {
     public Type getType() {
         String type = element.attributeValue("type");
         if (type != null) {
-            Type.valueOf(type);
+            Type.fromXMPP(type);
         }
         return null;
     }
@@ -237,7 +237,14 @@ public class FormField {
     }
 
     /**
-     * Type-safe enumeration to represent the field type of the Data forms.
+     * Type-safe enumeration to represent the field type of the Data forms.<p>
+     *
+     * Implementation note: XMPP error conditions use "-" characters in
+     * their names such as "jid-multi". Because "-" characters are not valid
+     * identifier parts in Java, they have been converted to "_" characters in
+     * the  enumeration names, such as <tt>jid_multi</tt>. The {@link #toXMPP()} and
+     * {@link #fromXMPP(String)} methods can be used to convert between the
+     * enumertation values and Type code strings.
      */
     public enum Type {
         /**
@@ -245,7 +252,7 @@ public class FormField {
          * options. The allowable values are 1 for yes/true/assent and 0 for no/false/decline.
          * The default value is 0.
          */
-        boolean_type,
+        boolean_type("boolean"),
 
         /**
          * The field is intended for data description (e.g., human-readable text such as
@@ -253,51 +260,113 @@ public class FormField {
          * SHOULD NOT contain newlines (the \n and \r characters); instead an application
          * SHOULD generate multiple fixed fields, each with one <value/> child.
          */
-        fixed,
+        fixed("fixed"),
 
         /**
          * The field is not shown to the entity providing information, but instead is
          * returned with the form.
          */
-        hidden,
+        hidden("hidden"),
 
         /**
          * The field enables an entity to gather or provide multiple Jabber IDs.
          */
-        jid_multi,
+        jid_multi("jid-multi"),
 
         /**
          * The field enables an entity to gather or provide multiple Jabber IDs.
          */
-        jid_single,
+        jid_single("jid-single"),
 
         /**
          * The field enables an entity to gather or provide one or more options from
          * among many.
          */
-        list_multi,
+        list_multi("list-multi"),
 
         /**
          * The field enables an entity to gather or provide one option from among many.
          */
-        list_single,
+        list_single("list-single"),
 
         /**
          * The field enables an entity to gather or provide multiple lines of text.
          */
-        text_multi,
+        text_multi("text-multi"),
 
         /**
          * The field enables an entity to gather or provide a single line or word of text,
          * which shall be obscured in an interface (e.g., *****).
          */
-        text_private,
+        text_private("text-private"),
 
         /**
          * The field enables an entity to gather or provide a single line or word of text,
          * which may be shown in an interface. This field type is the default and MUST be
          * assumed if an entity receives a field type it does not understand.
          */
-        text_single;
+        text_single("text-single");
+
+        /**
+         * Converts a String value into its Type representation.
+         *
+         * @param type the String value.
+         * @return the type corresponding to the String.
+         */
+        public static Type fromXMPP(String type) {
+            if (type == null) {
+                throw new NullPointerException();
+            }
+            type = type.toLowerCase();
+            if (boolean_type.toXMPP().equals(type)) {
+                return boolean_type;
+            }
+            else if (fixed.toXMPP().equals(type)) {
+                return fixed;
+            }
+            else if (hidden.toXMPP().equals(type)) {
+                return hidden;
+            }
+            else if (jid_multi.toXMPP().equals(type)) {
+                return jid_multi;
+            }
+            else if (jid_single.toXMPP().equals(type)) {
+                return jid_single;
+            }
+            else if (list_multi.toXMPP().equals(type)) {
+                return list_multi;
+            }
+            else if (list_single.toXMPP().equals(type)) {
+                return list_single;
+            }
+            else if (text_multi.toXMPP().equals(type)) {
+                return text_multi;
+            }
+            else if (text_private.toXMPP().equals(type)) {
+                return text_private;
+            }
+            else if (text_single.toXMPP().equals(type)) {
+                return text_single;
+            }
+            else {
+                throw new IllegalArgumentException("Type invalid:" + type);
+            }
+        }
+
+        private String value;
+
+        private Type(String value) {
+            this.value = value;
+        }
+
+        /**
+         * Returns the Field Type as a valid Field Type code string.
+         *
+         * @return the Field Type value.
+         */
+        public String toXMPP() {
+            return value;
+        }
+
     }
 }
