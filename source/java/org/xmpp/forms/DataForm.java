@@ -79,6 +79,25 @@ public class DataForm extends PacketExtension {
         return UTC_FORMAT.parse(date);
     }
 
+    /**
+     * Returns the String representation of an Object to be used as a field value.
+     *
+     * @param object the object to encode.
+     * @return the String representation of an Object to be used as a field value.
+     */
+    static String encode(Object object) {
+        if (object instanceof String) {
+            return object.toString();
+        }
+        else if (object instanceof Date) {
+            return UTC_FORMAT.format(object);
+        }
+        else if (object instanceof Boolean) {
+            return Boolean.TRUE.equals(object) ? "1" : "0";
+        }
+        return object.toString();
+    }
+
     public DataForm(Type type) {
         super(ELEMENT_NAME, NAMESPACE);
         // Set the type of the data form
@@ -240,19 +259,6 @@ public class DataForm extends PacketExtension {
                 field.addElement("value").setText(encode(value));
             }
         }
-    }
-
-    private String encode(Object object) {
-        if (object instanceof String) {
-            return object.toString();
-        }
-        else if (object instanceof Date) {
-            return UTC_FORMAT.format(object);
-        }
-        else if (object instanceof Boolean) {
-            return Boolean.TRUE.equals(object) ? "1" : "0";
-        }
-        return object.toString();
     }
 
     public DataForm createCopy() {

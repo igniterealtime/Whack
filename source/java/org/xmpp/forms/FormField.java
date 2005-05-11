@@ -47,8 +47,8 @@ public class FormField {
      *
      * @param value a default value or an answered value of the question.
      */
-    public void addValue(String value) {
-        element.addElement("value").setText(value);
+    public void addValue(Object value) {
+        element.addElement("value").setText(DataForm.encode(value));
     }
 
     /**
