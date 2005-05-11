@@ -43,7 +43,7 @@ import java.text.ParseException;
  * <p/>
  * In case the form represents a search, the report will be structured in columns and rows. Use
  * {@link #addReportedField(String,String,FormField.Type)} to set the columns of the report whilst
- * the report's rows can be configured using {@link #addItemFields(Map<String,String>)}.
+ * the report's rows can be configured using {@link #addItemFields(Map)}.
  *
  * @author Gaston Dombiak
  */

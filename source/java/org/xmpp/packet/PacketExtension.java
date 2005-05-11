@@ -33,7 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * element. The wrapper provides an easy way to handle the packet extension.<p>
  *
  * Subclasses of this class should be registered in the static variable
- * {@link registeredExtensions} when loaded. The registration process associates the new subclass
+ * <tt>registeredExtensions</tt> when loaded. The registration process associates the new subclass
  * with a given qualified name (ie. element name and namespace). This information will be used by
  * {@link Packet#getExtension(String, String)} for locating the corresponding PacketExtension
  * subclass to return for the requested qualified name.
@@ -57,7 +57,7 @@ public abstract class PacketExtension {
      *
      * @param name the child element name.
      * @param namespace the child element namespace.
-     * @return
+     * @return the extension class to use for the specified element name and namespace.
      */
     public static Class getExtensionClass(String name, String namespace) {
         return registeredExtensions.get(QName.get(name, namespace));

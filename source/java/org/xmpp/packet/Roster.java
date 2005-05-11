@@ -37,7 +37,7 @@ public class Roster extends IQ {
 
     /**
      * Constructs a new Roster with an automatically generated ID and a type
-     * of {@link Type#get IQ.Type.get}.
+     * of {@link IQ.Type#get}.
      */
     public Roster() {
         super();
