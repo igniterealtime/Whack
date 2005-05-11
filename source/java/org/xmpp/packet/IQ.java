@@ -192,6 +192,19 @@ public class IQ extends Packet {
         return element.addElement(name, namespace);
     }
 
+    /**
+     * Adds the element contained in the PacketExtension to the child element of the IQ
+     * packet. IQ packets, unlike the other packet types, have a unique child element that
+     * holds the packet extensions. If an extension is added to an IQ packet that does
+     * not have a child element then an IllegalStateException will be thrown.<p>
+     *
+     * It is important that this is the first and last time the element contained in
+     * PacketExtension is added to another Packet. Otherwise, a runtime error will be
+     * thrown when trying to add the PacketExtension's element to the Packet's element.
+     * Future modifications to the PacketExtension will be reflected in this Packet.
+     *
+     * @param extension the PacketExtension whose element will be added to this Packet's element.
+     */
     public void addExtension(PacketExtension extension) {
         Element childElement = getChildElement();
         if (childElement == null) {
@@ -201,6 +214,17 @@ public class IQ extends Packet {
         childElement.add(extension.getElement());
     }
 
+    /**
+     * Returns a {@link PacketExtension} on the first element found in this packet
+     * for the specified <tt>name</tt> and <tt>namespace</tt> or <tt>null</tt> if
+     * none was found. The search will be performed on the child element. If the IQ
+     * packet does not have a child element then an IllegalStateException will be thrown.
+     *
+     * @param name the child element name.
+     * @param namespace the child element namespace.
+     * @return a PacketExtension on the first element found in this packet for the specified
+     *         name and namespace or null if none was found.
+     */
     public PacketExtension getExtension(String name, String namespace) {
         Element childElement = getChildElement();
         if (childElement == null) {
@@ -223,6 +247,19 @@ public class IQ extends Packet {
         return null;
     }
 
+    /**
+     * Deletes the first element whose element name and namespace matches the specified
+     * element name and namespace. The search will be performed on the child element. If the
+     * IQ packet does not have a child element then an IllegalStateException will be thrown.<p>
+     *
+     * Notice that this method may remove any child element that matches the specified
+     * element name and namespace even if that element was not added to the Packet using a
+     * {@link PacketExtension}.
+     *
+     * @param name the child element name.
+     * @param namespace the child element namespace.
+     * @return true if a child element was removed.
+     */
     public boolean deleteExtension(String name, String namespace) {
         Element childElement = getChildElement();
         if (childElement == null) {
