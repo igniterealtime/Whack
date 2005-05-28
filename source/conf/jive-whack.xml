@@ -26,6 +26,7 @@
   <xmppServer>
     <host>localhost</host>
     <port>5222</port>
+    <!-- <domain>localhost</domain> -->
     <defaultSecretKey>ThisIsMySecretKey</defaultSecretKey>
   </xmppServer>
   <setup>true</setup>

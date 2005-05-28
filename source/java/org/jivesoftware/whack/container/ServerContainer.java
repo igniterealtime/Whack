@@ -63,10 +63,6 @@ public class ServerContainer {
 
     private String homeDir;
     private XMLProperties properties;
-    private int adminPort;
-    private int adminSecurePort;
-    private String xmppServerHost;
-    private int xmppServerPort;
 
     public static void main(String[] args) {
         if (args.length < 2) {
@@ -131,7 +127,7 @@ public class ServerContainer {
             // accept connect requests to that IP address
             String interfaceName = properties.getProperty("adminConsole.inteface");
             String port = properties.getProperty("adminConsole.port");
-            adminPort = (port == null ? 9090 : Integer.parseInt(port));
+            int adminPort = (port == null ? 9090 : Integer.parseInt(port));
             InetAddrPort address = new InetAddrPort(interfaceName, adminPort);
             if (adminPort > 0) {
                 jetty.addListener(address);
@@ -139,8 +135,9 @@ public class ServerContainer {
             }
 
             boolean secureStarted = false;
+            String securePortProperty = properties.getProperty("adminConsole.securePort");
+            int adminSecurePort = 9091;
             try {
-                String securePortProperty = properties.getProperty("adminConsole.securePort");
                 adminSecurePort = (securePortProperty == null ? 9091 : Integer.parseInt(securePortProperty));
                 if (adminSecurePort > 0) {
                     SunJsseListener listener = new SunJsseListener();
@@ -190,10 +187,14 @@ public class ServerContainer {
             }
 
             // Start the ExternalComponentManager
-            xmppServerHost = properties.getProperty("xmppServer.host");
+            String xmppServerHost = properties.getProperty("xmppServer.host");
             port = properties.getProperty("xmppServer.port");
-            xmppServerPort = (port == null ? 5222 : Integer.parseInt(port));
+            int xmppServerPort = (port == null ? 10015 : Integer.parseInt(port));
             manager = new ExternalComponentManager(xmppServerHost, xmppServerPort);
+            String serverDomain = properties.getProperty("xmppServer.domain");
+            if (serverDomain != null) {
+                manager.setServerName(serverDomain);
+            }
             if (properties.getProperty("xmppServer.defaultSecretKey") != null) {
                 manager.setDefaultSecretKey(properties.getProperty("xmppServer.defaultSecretKey"));
             }

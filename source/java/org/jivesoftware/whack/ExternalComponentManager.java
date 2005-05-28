@@ -38,10 +38,33 @@ import java.util.prefs.Preferences;
  */
 public class ExternalComponentManager implements ComponentManager {
 
+    /**
+     * Keeps the IP address or hostname of the server. This value will be used only for creating
+     * connections.
+     */
     private String host;
+    /**
+     * Port of the server used for establishing new connections.
+     */
     private int port;
+    /**
+     * Keeps the domain of the XMPP server. The domain may or may not match the host. The domain
+     * will be used mainly for the XMPP packets while the host is used mainly for creating
+     * connections to the server.
+     */
+    private String domain;
+    /**
+     * This is a global secret key that will be used during the handshake with the server. If a
+     * secret key was not defined for the specific component then the global secret key will be
+     * used.
+     */
     private String defaultSecretKey;
+    /**
+     * Keeps the secret keys to use for each subdomain. If a key was not found for a specific
+     * subdomain then the global secret key will used for the handshake with the server.
+     */
     private Map<String, String> secretKeys = new Hashtable<String,String>();
+
     Preferences preferences = Preferences.userRoot();
     private String preferencesPrefix;
 
@@ -76,7 +99,7 @@ public class ExternalComponentManager implements ComponentManager {
     public ExternalComponentManager(String host, int port) {
         this.host = host;
         this.port = port;
-        this.preferencesPrefix = "whack." + host + ".";
+        this.domain = host;
 
         createDummyLogger();
 
@@ -178,17 +201,33 @@ public class ExternalComponentManager implements ComponentManager {
     }
 
     public String getProperty(String name) {
-        return preferences.get(preferencesPrefix + name, null);
+        return preferences.get(getPreferencesPrefix() + name, null);
     }
 
     public void setProperty(String name, String value) {
-        preferences.put(preferencesPrefix + name, value);
+        preferences.put(getPreferencesPrefix() + name, value);
+    }
+
+    private String getPreferencesPrefix() {
+        if (preferencesPrefix == null) {
+            preferencesPrefix = "whack." + domain + ".";
+        }
+        return preferencesPrefix;
+    }
+
+    /**
+     * Sets the domain of the XMPP server. The domain may or may not match the host. The domain
+     * will be used mainly for the XMPP packets while the host is used mainly for creating
+     * connections to the server.
+     *
+     * @param domain the domain of the XMPP server.
+     */
+    public void setServerName(String domain) {
+        this.domain = domain;
     }
 
     public String getServerName() {
-        // We are assuming here that the host name (or IP address) matches the name of the
-        // XMPP server
-        return host;
+        return domain;
     }
 
     public boolean isExternalMode() {

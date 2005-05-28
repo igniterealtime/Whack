@@ -128,8 +128,7 @@ public class ExternalComponent implements Component {
         try {
             // Open a socket to the server
             this.socket = socketFactory.createSocket(host, port);
-            // Assume that the host name matches the real name of the XMPP server
-            this.domain = subdomain + "." + host;
+            this.domain = subdomain + "." + manager.getServerName();
             this.subdomain = subdomain;
             // Keep these variables that will be used in case a reconnection is required
             this.host= host;
