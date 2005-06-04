@@ -75,6 +75,20 @@ public class FormField {
     }
 
     /**
+     * Returns the available options to answer for this question. The returned options cannot
+     * be modified but they will be updated if the underlying DOM object gets updated.
+     *
+     * @return the available options to answer for this question.
+     */
+    public List<Option> getOptions() {
+        List<Option> answer = new ArrayList<Option>();
+        for (Iterator it = element.elementIterator("option"); it.hasNext();) {
+            answer.add(new Option((Element) it.next()));
+        }
+        return answer;
+    }
+
+    /**
      * Sets an indicative of the format for the data to answer. Valid formats are:
      * <p/>
      * <ul>
@@ -234,6 +248,37 @@ public class FormField {
      */
     public String getDescription() {
         return element.elementTextTrim("desc");
+    }
+
+    /**
+     * Represents the available option of a given FormField.
+     *
+     * @author Gaston Dombiak
+     */
+    public static class Option {
+        private Element element;
+
+        private Option(Element element) {
+            this.element = element;
+        }
+
+        /**
+         * Returns the label that represents the option.
+         *
+         * @return the label that represents the option.
+         */
+        public String getLabel() {
+            return element.attributeValue("label");
+        }
+
+        /**
+         * Returns the value of the option.
+         *
+         * @return the value of the option.
+         */
+        public String getValue() {
+            return element.elementTextTrim("value");
+        }
     }
 
     /**
