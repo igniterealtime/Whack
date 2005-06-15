@@ -44,6 +44,16 @@ public class Presence extends Packet {
     }
 
     /**
+     * Constructs a new Presence with the specified type.
+     *
+     * @param type the presence type.
+     */
+    public Presence(Presence.Type type) {
+        this();
+        setType(type);
+    }
+
+    /**
      * Constructs a new Presence using an existing Element. This is useful
      * for parsing incoming presence Elements into Presence objects.
      *
