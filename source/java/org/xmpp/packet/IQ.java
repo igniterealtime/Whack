@@ -174,6 +174,10 @@ public class IQ extends Packet {
      * This method is a convenience method to avoid manipulating the underlying
      * packet's Element instance directly.<p>
      *
+     * In some cases, additional custom sub-elements must be added to an IQ child
+     * element (called packet extensions). For example, when adding a data form to
+     * an IQ response. See {@link #addExtension(PacketExtension)}.<p>
+     *
      * A sample use of this method might look like the following:
      * <pre>
      * IQ iq = new IQ("time_1");
@@ -201,34 +205,40 @@ public class IQ extends Packet {
      * It is important that this is the first and last time the element contained in
      * PacketExtension is added to another Packet. Otherwise, a runtime error will be
      * thrown when trying to add the PacketExtension's element to the Packet's element.
-     * Future modifications to the PacketExtension will be reflected in this Packet.
+     * Future modifications to the PacketExtension will be reflected in this Packet.<p>
+     *
+     * Note: packet extensions on IQ packets are only for use in specialized situations.
+     * In most cases, you should only need to set the child element of the IQ.
      *
      * @param extension the PacketExtension whose element will be added to this Packet's element.
      */
     public void addExtension(PacketExtension extension) {
         Element childElement = getChildElement();
         if (childElement == null) {
-            throw new IllegalStateException("Child element cannot be null");
+            throw new IllegalStateException("Cannot add packet extension when child element is null");
         }
         // Add the extension to the child element
         childElement.add(extension.getElement());
     }
 
     /**
-     * Returns a {@link PacketExtension} on the first element found in this packet
-     * for the specified <tt>name</tt> and <tt>namespace</tt> or <tt>null</tt> if
-     * none was found. The search will be performed on the child element. If the IQ
-     * packet does not have a child element then an IllegalStateException will be thrown.
+     * Returns a {@link PacketExtension} on the first element found in this packet's
+     * child element for the specified <tt>name</tt> and <tt>namespace</tt> or <tt>null</tt> if
+     * none was found. If the IQ packet does not have a child element then <tt>null</tt>
+     * will be returned.<p>
+     *
+     * Note: packet extensions on IQ packets are only for use in specialized situations.
+     * In most cases, you should only need to set the child element of the IQ.
      *
      * @param name the child element name.
      * @param namespace the child element namespace.
      * @return a PacketExtension on the first element found in this packet for the specified
-     *         name and namespace or null if none was found.
+     *         name and namespace or <tt>null</tt> if none was found.
      */
     public PacketExtension getExtension(String name, String namespace) {
         Element childElement = getChildElement();
         if (childElement == null) {
-            throw new IllegalStateException("Child element cannot be null");
+            return null;
         }
         // Search for extensions in the child element
         List extensions = childElement.elements(QName.get(name, namespace));
@@ -240,7 +250,8 @@ public class IQ extends Packet {
                         Element.class});
                     return (PacketExtension) constructor.newInstance(new Object[]{
                         extensions.get(0)});
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
                 }
             }
         }
@@ -249,12 +260,16 @@ public class IQ extends Packet {
 
     /**
      * Deletes the first element whose element name and namespace matches the specified
-     * element name and namespace. The search will be performed on the child element. If the
-     * IQ packet does not have a child element then an IllegalStateException will be thrown.<p>
+     * element name and namespace in this packet's child element. If the
+     * IQ packet does not have a child element then this method does nothing and returns
+     * <tt>false</tt>.<p>
      *
      * Notice that this method may remove any child element that matches the specified
      * element name and namespace even if that element was not added to the Packet using a
-     * {@link PacketExtension}.
+     * {@link PacketExtension}.<p>
+     *
+     * Note: packet extensions on IQ packets are only for use in specialized situations.
+     * In most cases, you should only need to set the child element of the IQ.
      *
      * @param name the child element name.
      * @param namespace the child element namespace.
@@ -263,7 +278,7 @@ public class IQ extends Packet {
     public boolean deleteExtension(String name, String namespace) {
         Element childElement = getChildElement();
         if (childElement == null) {
-            throw new IllegalStateException("Child element cannot be null");
+            return false;
         }
         // Delete extensions in the child element
         List extensions = childElement.elements(QName.get(name, namespace));
