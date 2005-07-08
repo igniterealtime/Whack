@@ -33,7 +33,15 @@ import java.util.List;
 /**
  * An XMPP packet (also referred to as a stanza). Each packet is backed by a
  * DOM4J Element. A set of convenience methods allows easy manipulation of
- * the Element, or the Element can be accessed directly and manipulated.
+ * the Element, or the Element can be accessed directly and manipulated.<p>
+ *
+ * There are three core packet types:<ul>
+ *      <li>{@link Message} -- used to send data between users.
+ *      <li>{@link Presence} -- contains user presence information or is used
+ *          to manage presence subscriptions.
+ *      <li>{@link IQ} -- exchange information and perform queries using a
+ *          request/response protocol.
+ * </ul>
  *
  * @author Matt Tucker
  */
