@@ -234,7 +234,9 @@ public abstract class Packet {
                         Element.class});
                     return (PacketExtension) constructor.newInstance(new Object[]{
                         extensions.get(0)});
-                } catch (Exception e) {
+                }
+                catch (Exception e) {
+                    // Ignore.
                 }
             }
         }
@@ -271,7 +273,7 @@ public abstract class Packet {
     public PacketError getError() {
         Element error = element.element("error");
         if (error != null) {
-            return new PacketError(element);
+            return new PacketError(error);
         }
         return null;
     }
@@ -342,7 +344,9 @@ public abstract class Packet {
         try {
             writer.write(element);
         }
-        catch (Exception e) { }
+        catch (Exception e) {
+            // Ignore.
+        }
         return out.toString();
     }
 }
