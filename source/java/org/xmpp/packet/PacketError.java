@@ -280,7 +280,9 @@ public class PacketError {
         try {
             writer.write(element);
         }
-        catch (Exception e) { }
+        catch (Exception e) {
+            // Ignore.
+        }
         return out.toString();
     }
 
