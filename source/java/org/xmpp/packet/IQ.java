@@ -318,7 +318,8 @@ public class IQ extends Packet {
      */
     public static IQ createResultIQ(IQ iq) {
         if (!(iq.getType() == Type.get || iq.getType() == Type.set)) {
-            throw new IllegalArgumentException("IQ must be of type 'set' or 'get'.");
+            throw new IllegalArgumentException(
+                    "IQ must be of type 'set' or 'get'. Original IQ: " + iq.toXML());
         }
         IQ result = new IQ(Type.result, iq.getID());
         result.setFrom(iq.getTo());
