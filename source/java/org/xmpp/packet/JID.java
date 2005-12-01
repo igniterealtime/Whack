@@ -56,6 +56,9 @@ public class JID implements Comparable {
     private String domain;
     private String resource;
 
+    private String cachedFullJID;
+    private String cachedBareJID;
+
     /**
      * Escapes the node portion of a JID according to "JID Escaping" (JEP-0106).
      * Escaping replaces characters prohibited by node-prep with escape sequences,
@@ -317,6 +320,8 @@ public class JID implements Comparable {
         else {
             resource = jid.substring(slashIndex + 1);
         }
+        // Cache the bare and full JID String representation
+        updateCache();
     }
 
     /**
@@ -378,6 +383,8 @@ public class JID implements Comparable {
             else {
                 this.resource = resource;
             }
+            // Cache the bare and full JID String representation
+            updateCache();
         }
         catch (Exception e) {
             StringBuilder buf = new StringBuilder();
@@ -390,6 +397,27 @@ public class JID implements Comparable {
             }
             throw new IllegalArgumentException("Illegal JID: " + buf.toString(), e);
         }
+    }
+
+    private void updateCache() {
+        // Cache the bare JID
+        StringBuilder buf = new StringBuilder();
+        if (node != null) {
+            buf.append(node).append("@");
+        }
+        buf.append(domain);
+        cachedBareJID = buf.toString();
+
+        // Cache the full JID
+        buf = new StringBuilder();
+        if (node != null) {
+            buf.append(node).append("@");
+        }
+        buf.append(domain);
+        if (resource != null) {
+            buf.append("/").append(resource);
+        }
+        cachedFullJID = buf.toString();
     }
 
     /**
@@ -426,12 +454,7 @@ public class JID implements Comparable {
      * @return the bare JID.
      */
     public String toBareJID() {
-        StringBuilder buf = new StringBuilder();
-        if (node != null) {
-            buf.append(node).append("@");
-        }
-        buf.append(domain);
-        return buf.toString();
+        return cachedBareJID;
     }
 
     /**
@@ -440,15 +463,7 @@ public class JID implements Comparable {
      * @return a String representation of the JID.
      */
     public String toString() {
-        StringBuilder buf = new StringBuilder();
-        if (node != null) {
-            buf.append(node).append("@");
-        }
-        buf.append(domain);
-        if (resource != null) {
-            buf.append("/").append(resource);
-        }
-        return buf.toString();
+        return cachedFullJID;
     }
 
     public int hashCode() {
