@@ -401,7 +401,7 @@ public class JID implements Comparable {
 
     private void updateCache() {
         // Cache the bare JID
-        StringBuilder buf = new StringBuilder();
+        StringBuilder buf = new StringBuilder(40);
         if (node != null) {
             buf.append(node).append("@");
         }
@@ -409,15 +409,13 @@ public class JID implements Comparable {
         cachedBareJID = buf.toString();
 
         // Cache the full JID
-        buf = new StringBuilder();
-        if (node != null) {
-            buf.append(node).append("@");
-        }
-        buf.append(domain);
         if (resource != null) {
             buf.append("/").append(resource);
+            cachedFullJID = buf.toString();
         }
-        cachedFullJID = buf.toString();
+        else {
+            cachedFullJID = cachedBareJID;
+        }
     }
 
     /**
