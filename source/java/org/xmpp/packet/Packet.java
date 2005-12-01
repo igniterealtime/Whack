@@ -51,6 +51,10 @@ public abstract class Packet {
 
     protected Element element;
 
+    // Cache to and from JIDs
+    private JID toJID;
+    private JID fromJID;
+
     /**
      * Constructs a new Packet.
      *
@@ -61,12 +65,12 @@ public abstract class Packet {
         // Apply stringprep profiles to the "to" and "from" values.
         String to = element.attributeValue("to");
         if (to != null) {
-            JID toJID = new JID(to);
+            toJID = new JID(to);
             element.addAttribute("to",  toJID.toString());
         }
         String from = element.attributeValue("from");
         if (from != null) {
-            JID fromJID = new JID(from);
+            fromJID = new JID(from);
             element.addAttribute("from",  fromJID.toString());
         }
     }
@@ -113,11 +117,17 @@ public abstract class Packet {
             return null;
         }
         else {
-            // Return a new JID that bypasses stringprep profile checking.
-            // This improves speed and is safe as long as the user doesn't
-            // directly manipulate the attributes of the underlying Element
-            // that represent JID's.
-            return new JID(to, null);
+            if (toJID != null && to.equals(toJID.toString())) {
+                return toJID;
+            }
+            else {
+                // Return a new JID that bypasses stringprep profile checking.
+                // This improves speed and is safe as long as the user doesn't
+                // directly manipulate the attributes of the underlying Element
+                // that represent JID's.
+                toJID = new JID(to, null);
+                return toJID;
+            }
         }
     }
 
@@ -130,7 +140,8 @@ public abstract class Packet {
     public void setTo(String to) {
         // Apply stringprep profiles to value.
         if (to !=  null) {
-            to = new JID(to).toString();
+            toJID = new JID(to);
+            to = toJID.toString();
         }
         element.addAttribute("to", to);
     }
@@ -142,6 +153,7 @@ public abstract class Packet {
      * @param to the XMPP address (JID) that the packet is addressed to.
      */
     public void setTo(JID to) {
+        toJID = to;
         if (to == null) {
             element.addAttribute("to", null);
         }
@@ -164,11 +176,17 @@ public abstract class Packet {
             return null;
         }
         else {
-            // Return a new JID that bypasses stringprep profile checking.
-            // This improves speed and is safe as long as the user doesn't
-            // directly manipulate the attributes of the underlying Element
-            // that represent JID's.
-            return new JID(from, null);
+            if (fromJID != null && from.equals(fromJID.toString())) {
+                return fromJID;
+            }
+            else {
+                // Return a new JID that bypasses stringprep profile checking.
+                // This improves speed and is safe as long as the user doesn't
+                // directly manipulate the attributes of the underlying Element
+                // that represent JID's.
+                fromJID = new JID(from, null);
+                return fromJID;
+            }
         }
     }
 
@@ -181,7 +199,8 @@ public abstract class Packet {
     public void setFrom(String from) {
         // Apply stringprep profiles to value.
         if (from != null) {
-            from = new JID(from).toString();
+            fromJID = new JID(from);
+            from = fromJID.toString();
         }
         element.addAttribute("from", from);
     }
@@ -193,6 +212,7 @@ public abstract class Packet {
      * @param from the XMPP address (JID) that the packet comes from.
      */
     public void setFrom(JID from) {
+        fromJID = from;
         if (from == null) {
             element.addAttribute("from", null);
         }
