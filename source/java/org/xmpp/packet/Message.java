@@ -69,6 +69,9 @@ public class Message extends Packet {
         Element elementCopy = message.element.createCopy();
         docFactory.createDocument().add(elementCopy);
         this.element = elementCopy;
+        // Copy cached JIDs (for performance reasons)
+        this.toJID = message.toJID;
+        this.fromJID = message.fromJID;
     }
 
     /**

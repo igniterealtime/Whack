@@ -73,6 +73,9 @@ public class Presence extends Packet {
         Element elementCopy = presence.element.createCopy();
         docFactory.createDocument().add(elementCopy);
         this.element = elementCopy;
+        // Copy cached JIDs (for performance reasons)
+        this.toJID = presence.toJID;
+        this.fromJID = presence.fromJID;
     }
 
     /**

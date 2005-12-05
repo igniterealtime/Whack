@@ -79,6 +79,9 @@ public class IQ extends Packet {
         Element elementCopy = iq.element.createCopy();
         docFactory.createDocument().add(elementCopy);
         this.element = elementCopy;
+        // Copy cached JIDs (for performance reasons)
+        this.toJID = iq.toJID;
+        this.fromJID = iq.fromJID;
     }
 
     /**

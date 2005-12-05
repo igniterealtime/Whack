@@ -52,8 +52,8 @@ public abstract class Packet {
     protected Element element;
 
     // Cache to and from JIDs
-    private JID toJID;
-    private JID fromJID;
+    protected JID toJID;
+    protected JID fromJID;
 
     /**
      * Constructs a new Packet.
