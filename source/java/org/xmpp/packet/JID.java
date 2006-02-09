@@ -23,7 +23,10 @@ package org.xmpp.packet;
 import org.jivesoftware.stringprep.IDNA;
 import org.jivesoftware.stringprep.Stringprep;
 
-import java.util.*;
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * An XMPP address (JID). A JID is made up of a node (generally a username), a domain,
@@ -45,7 +48,7 @@ import java.util.*;
  *
  * @author Matt Tucker
  */
-public class JID implements Comparable {
+public class JID implements Comparable, Serializable {
 
     // Stringprep operations are very expensive. Therefore, we cache node, domain and
     // resource values that have already had stringprep applied so that we can check
