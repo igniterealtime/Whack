@@ -22,11 +22,12 @@ package org.xmpp.forms;
 
 import org.dom4j.Element;
 import org.dom4j.QName;
+import org.jivesoftware.util.FastDateFormat;
 import org.xmpp.packet.PacketExtension;
 
-import java.util.*;
-import java.text.SimpleDateFormat;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 /**
  * Represents a form that could be use for gathering data as well as for reporting data
@@ -50,6 +51,8 @@ import java.text.ParseException;
 public class DataForm extends PacketExtension {
 
     private static final SimpleDateFormat UTC_FORMAT = new SimpleDateFormat("yyyyMMdd'T'HH:mm:ss");
+    private static final FastDateFormat FAST_UTC_FORMAT =
+            FastDateFormat.getInstance("yyyyMMdd'T'HH:mm:ss", TimeZone.getTimeZone("UTC"));
 
     /**
      * Element name of the packet extension.
@@ -76,7 +79,9 @@ public class DataForm extends PacketExtension {
      * @throws ParseException if an error occurs while parsing the date representation.
      */
     public static Date parseDate(String date) throws ParseException {
-        return UTC_FORMAT.parse(date);
+        synchronized (UTC_FORMAT) {
+            return UTC_FORMAT.parse(date);
+        }
     }
 
     /**
@@ -89,11 +94,11 @@ public class DataForm extends PacketExtension {
         if (object instanceof String) {
             return object.toString();
         }
-        else if (object instanceof Date) {
-            return UTC_FORMAT.format(object);
-        }
         else if (object instanceof Boolean) {
             return Boolean.TRUE.equals(object) ? "1" : "0";
+        }
+        else if (object instanceof Date) {
+            return FAST_UTC_FORMAT.format((Date) object);
         }
         return object.toString();
     }
@@ -194,9 +199,9 @@ public class DataForm extends PacketExtension {
     }
 
     /**
-     * Returns an Iterator for the fields that are part of the form.
+     * Returns the fields that are part of the form.
      *
-     * @return an Iterator for the fields that are part of the form.
+     * @return fields that are part of the form.
      */
     public List<FormField> getFields() {
         List<FormField> answer = new ArrayList<FormField>();
@@ -204,6 +209,21 @@ public class DataForm extends PacketExtension {
             answer.add(new FormField((Element) it.next()));
         }
         return answer;
+    }
+
+    /**
+     * Returns the field whose variable matches the specified variable.
+     *
+     * @return the field whose variable matches the specified variable
+     */
+    public FormField getField(String variable) {
+        for (Iterator it = element.elementIterator("field"); it.hasNext();) {
+            FormField formField = new FormField((Element) it.next());
+            if (variable.equals(formField.getVariable())) {
+                return formField;
+            }
+        }
+        return null;
     }
 
     /**
