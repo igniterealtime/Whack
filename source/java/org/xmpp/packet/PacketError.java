@@ -20,12 +20,14 @@
 
 package org.xmpp.packet;
 
-import org.dom4j.*;
-import org.dom4j.io.XMLWriter;
+import org.dom4j.DocumentFactory;
+import org.dom4j.Element;
+import org.dom4j.QName;
 import org.dom4j.io.OutputFormat;
+import org.dom4j.io.XMLWriter;
 
-import java.util.Iterator;
 import java.io.StringWriter;
+import java.util.Iterator;
 
 /**
  * A packet error. Errors must have a type and condition. Optionally, they
@@ -458,7 +460,7 @@ public class PacketError {
          * expecting it at this time (e.g., the request was out of order);
          * the associated error type SHOULD be "wait".
          */
-        unexpected_condition("unexpected-condition", Type.wait, 400);
+        unexpected_request("unexpected-request", Type.wait, 400);
 
         /**
          * Converts a String value into its Condition representation.
@@ -534,8 +536,8 @@ public class PacketError {
             else if (undefined_condition.toXMPP().equals(condition)) {
                 return undefined_condition;
             }
-            else if (unexpected_condition.toXMPP().equals(condition)) {
-                return unexpected_condition;
+            else if (unexpected_request.toXMPP().equals(condition)) {
+                return unexpected_request;
             }
             else {
                 throw new IllegalArgumentException("Condition invalid:" + condition);
@@ -606,8 +608,8 @@ public class PacketError {
             else if (undefined_condition.getLegacyCode() == code) {
                 return undefined_condition;
             }
-            else if (unexpected_condition.getLegacyCode() == code) {
-                return unexpected_condition;
+            else if (unexpected_request.getLegacyCode() == code) {
+                return unexpected_request;
             }
             else {
                 throw new IllegalArgumentException("Code invalid:" + code);
