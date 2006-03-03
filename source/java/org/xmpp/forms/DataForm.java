@@ -214,6 +214,7 @@ public class DataForm extends PacketExtension {
     /**
      * Returns the field whose variable matches the specified variable.
      *
+     * @param variable the variable name of the field to search.
      * @return the field whose variable matches the specified variable
      */
     public FormField getField(String variable) {
@@ -224,6 +225,23 @@ public class DataForm extends PacketExtension {
             }
         }
         return null;
+    }
+
+    /**
+     * Removes the field whose variable matches the specified variable.
+     *
+     * @param variable the variable name of the field to remove.
+     * @return true if the field was removed.
+     */
+    public boolean removeField(String variable) {
+        for (Iterator it = element.elementIterator("field"); it.hasNext();) {
+            Element field = (Element) it.next();
+            String fieldVariable = field.attributeValue("var");
+            if (variable.equals(fieldVariable)) {
+                return element.remove(field);
+            }
+        }
+        return false;
     }
 
     /**
