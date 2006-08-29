@@ -310,8 +310,6 @@ public class IQ extends Packet {
      *      <li>The recipient set to the sender of the originating IQ.
      *      <li>The type set to {@link Type#result IQ.Type.result}.
      *      <li>The id set to the id of the originating IQ.
-     *      <li>An empty child element using the same element name and namespace
-     *          as the orginiating IQ.
      * </ul>
      *
      * @param iq the {@link Type#get IQ.Type.get} or {@link Type#set IQ.Type.set} IQ packet.
