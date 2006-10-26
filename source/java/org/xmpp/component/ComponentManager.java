@@ -50,10 +50,11 @@ public interface ComponentManager {
     public void removeComponent(String subdomain) throws ComponentException;
 
     /**
-     * Sends a packet to the XMPP server. The "from" value of the packet must be in
-     * the domain name of the component. For example, if the component has a domain
-     * of "test.example.com", then "user@test.example.com" would be a valid "from"
-     * value.
+     * Sends a packet to the XMPP server. The "from" value of the packet must not be null.
+     * An <tt>IllegalArgumentException</tt> will be thrown when the "from" value is null.<p>
+     *
+     * Components are trusted by the server and may use any value in from address. Usually
+     * the from address uses the component's address as the domain but this is not required.
      *
      * @param component the component sending the packet.
      * @param packet the packet to send.
