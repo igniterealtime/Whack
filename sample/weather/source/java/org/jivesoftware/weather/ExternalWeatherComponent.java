@@ -14,13 +14,13 @@ public class ExternalWeatherComponent {
 
     public static void main(String[] args) {
         // Create a manager for the external components that will connect to the server "localhost"
-        // at the port 5222
-        final ExternalComponentManager manager = new ExternalComponentManager("localhost", 5222);
+        // at the port 5225
+        final ExternalComponentManager manager = new ExternalComponentManager("localhost", 5225);
         // Set the secret key for this component. The server must be using the same secret key
         // otherwise the component won't be able to authenticate with the server. Check that the
         // server has the properfy "component.external.secretKey" defined and that it is using the
         // same value that we are setting here.
-        manager.setSecretKey("weather", "ThisIsMySecretKey");
+        manager.setSecretKey("weather", "secret");
         try {
             // Register that this component will be serving the given subdomain of the server
             manager.addComponent("weather", new WeatherComponent());
