@@ -23,7 +23,6 @@ package org.jivesoftware.whack;
 import org.xmpp.component.*;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Packet;
-import org.jivesoftware.whack.container.ServerContainer;
 
 import javax.net.SocketFactory;
 import java.util.Hashtable;
@@ -232,15 +231,6 @@ public class ExternalComponentManager implements ComponentManager {
 
     public boolean isExternalMode() {
         return true;
-    }
-
-    /**
-     * Returns the location of the <code>home</code> directory.
-     *
-     * @return the location of the home directory.
-     */
-    public String getHomeDirectory() {
-        return ServerContainer.getInstance().getHomeDirectory();
     }
 
     public Log getLog() {
