@@ -85,7 +85,7 @@ public class ExternalComponentManager implements ComponentManager {
      * @param host the IP address or name of the XMPP server to connect to (e.g. "example.com").
      */
     public ExternalComponentManager(String host) {
-        this(host, 5222);
+        this(host, 5225);
     }
 
     /**
@@ -96,6 +96,9 @@ public class ExternalComponentManager implements ComponentManager {
      * @param port the port to connect on.
      */
     public ExternalComponentManager(String host, int port) {
+        if (host == null) {
+            throw new IllegalArgumentException("Host of XMPP server cannot be null");
+        }
         this.host = host;
         this.port = port;
         this.domain = host;
