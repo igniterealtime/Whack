@@ -190,8 +190,8 @@ public class ExternalComponentManager implements ComponentManager {
 
     public void removeComponent(String subdomain) throws ComponentException {
         ExternalComponent externalComponent = componentsByDomain.remove(subdomain);
-        components.remove(externalComponent.getComponent());
         if (externalComponent != null) {
+            components.remove(externalComponent.getComponent());
             externalComponent.shutdown();
         }
     }
