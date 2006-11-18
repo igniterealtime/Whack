@@ -344,6 +344,10 @@ public class ExternalComponent implements Component {
                 if (shutdown) {
                     disconnect();
                 }
+                else {
+                    // Component is back again working so start it up again
+                    start();
+                }
             } catch (ComponentException e) {
                 manager.getLog().error("Error trying to reconnect with the server", e);
                 // Wait for 5 seconds until the next retry
