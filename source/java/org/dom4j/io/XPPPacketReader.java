@@ -9,17 +9,13 @@
 
 package org.dom4j.io;
 
-import java.io.*;
-import java.net.URL;
-import org.dom4j.Document;
-import org.dom4j.DocumentException;
-import org.dom4j.DocumentFactory;
-import org.dom4j.Element;
-import org.dom4j.ElementHandler;
-import org.dom4j.QName;
+import org.dom4j.*;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
+
+import java.io.*;
+import java.net.URL;
 
 /**
  * <p><code>XPPPacketReader</code> is a Reader of DOM4J documents that
@@ -320,7 +316,8 @@ public class XPPPacketReader {
                     // "jabber:component:accept"
                     if ("jabber:client".equals(qname.getNamespaceURI()) ||
                             "jabber:server".equals(qname.getNamespaceURI()) ||
-                            "jabber:component:accept".equals(qname.getNamespaceURI())) {
+                            "jabber:component:accept".equals(qname.getNamespaceURI()) ||
+                            "http://jabber.org/protocol/httpbind".equals(qname.getNamespaceURI())) {
                         newElement = df.createElement(pp.getName());
                     }
                     else {
