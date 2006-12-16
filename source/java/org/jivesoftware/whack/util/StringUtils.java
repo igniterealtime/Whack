@@ -23,12 +23,22 @@ package org.jivesoftware.whack.util;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Random;
+import java.util.TimeZone;
 
 /**
  * A collection of utility methods for String objects.
  */
 public class StringUtils {
+
+    public static final SimpleDateFormat UTC_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+    static {
+        UTC_FORMAT.setTimeZone(TimeZone.getTimeZone("UTC"));
+    }
 
     private static final char[] QUOTE_ENCODE = "&quot;".toCharArray();
     private static final char[] AMP_ENCODE = "&amp;".toCharArray();
@@ -429,6 +439,20 @@ public class StringUtils {
             randBuffer[i] = numbersAndLetters[randGen.nextInt(71)];
         }
         return new String(randBuffer);
+    }
+
+    /**
+     * Parses a textual representation of a Date based on the XMPP standard format and returns
+     * a Date.
+     *
+     * @param date the textual representation.
+     * @return the parsed Date
+     * @throws ParseException if the text cannot be parsed.
+     */
+    public static Date parseDate(String date) throws ParseException {
+        synchronized (UTC_FORMAT) {
+            return UTC_FORMAT.parse(date);
+        }
     }
 
     private StringUtils() {

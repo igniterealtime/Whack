@@ -21,12 +21,16 @@
 package org.jivesoftware.whack;
 
 import org.xmpp.component.*;
+import org.xmpp.packet.IQ;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Packet;
+import org.xmpp.packet.PacketError;
 
 import javax.net.SocketFactory;
 import java.util.Hashtable;
 import java.util.Map;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
 /**
@@ -200,6 +204,34 @@ public class ExternalComponentManager implements ComponentManager {
         // Get the ExternalComponent that is wrapping the specified component and ask it to
         // send the packet
         components.get(component).send(packet);
+    }
+
+    public IQ query(Component component, IQ packet, int timeout) throws ComponentException {
+        final LinkedBlockingQueue<IQ> answer = new LinkedBlockingQueue<IQ>(8);
+        ExternalComponent externalComponent = (ExternalComponent) component;
+        externalComponent.addIQResultListener(packet.getID(), new IQResultListener() {
+            public void receivedAnswer(IQ packet) {
+                answer.offer(packet);
+            }
+        });
+        sendPacket(component, packet);
+        IQ reply = null;
+        try {
+            reply = answer.poll(timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            // Ignore
+        }
+        if (reply == null) {
+            reply = IQ.createResultIQ(packet);
+            reply.setError(PacketError.Condition.item_not_found);
+        }
+        return reply;
+    }
+
+    public void query(Component component, IQ packet, IQResultListener listener) throws ComponentException {
+        ExternalComponent externalComponent = (ExternalComponent) component;
+        externalComponent.addIQResultListener(packet.getID(), listener);
+        sendPacket(component, packet);
     }
 
     public String getProperty(String name) {
