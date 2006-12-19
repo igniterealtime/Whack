@@ -208,7 +208,7 @@ public class ExternalComponentManager implements ComponentManager {
 
     public IQ query(Component component, IQ packet, int timeout) throws ComponentException {
         final LinkedBlockingQueue<IQ> answer = new LinkedBlockingQueue<IQ>(8);
-        ExternalComponent externalComponent = (ExternalComponent) component;
+        ExternalComponent externalComponent = components.get(component);
         externalComponent.addIQResultListener(packet.getID(), new IQResultListener() {
             public void receivedAnswer(IQ packet) {
                 answer.offer(packet);
@@ -229,7 +229,7 @@ public class ExternalComponentManager implements ComponentManager {
     }
 
     public void query(Component component, IQ packet, IQResultListener listener) throws ComponentException {
-        ExternalComponent externalComponent = (ExternalComponent) component;
+        ExternalComponent externalComponent = components.get(component);
         externalComponent.addIQResultListener(packet.getID(), listener);
         sendPacket(component, packet);
     }
