@@ -26,7 +26,6 @@ import org.xmpp.packet.JID;
 import org.xmpp.packet.Packet;
 import org.xmpp.packet.PacketError;
 
-import javax.net.SocketFactory;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -56,6 +55,10 @@ public class ExternalComponentManager implements ComponentManager {
      * connections to the server.
      */
     private String domain;
+    /**
+     * Timeout to use when trying to connect to the server.
+     */
+    private int connectTimeout = 2000;
     /**
      * This is a global secret key that will be used during the handshake with the server. If a
      * secret key was not defined for the specific component then the global secret key will be
@@ -165,11 +168,6 @@ public class ExternalComponentManager implements ComponentManager {
                 throw new IllegalArgumentException("Subdomain already in use by another component");
             }
         }
-        // Find the proper secret key to connect as the subdomain.
-        String secretKey = secretKeys.get(subdomain);
-        if (secretKey == null) {
-            secretKey = defaultSecretKey;
-        }
         // Create a wrapping ExternalComponent on the component
         ExternalComponent externalComponent = new ExternalComponent(component, this);
         try {
@@ -177,7 +175,7 @@ public class ExternalComponentManager implements ComponentManager {
             componentsByDomain.put(subdomain, externalComponent);
             components.put(component, externalComponent);
             // Ask the ExternalComponent to connect with the remote server
-            externalComponent.connect(host, port, SocketFactory.getDefault(), subdomain);
+            externalComponent.connect(host, port, subdomain);
             // Initialize the component
             JID componentJID = new JID(null, externalComponent.getDomain(), null);
             externalComponent.initialize(componentJID, this);
@@ -262,6 +260,26 @@ public class ExternalComponentManager implements ComponentManager {
 
     public String getServerName() {
         return domain;
+    }
+
+    /**
+     * Returns the timeout (in milliseconds) to use when trying to connect to the server.
+     * The default value is 2 seconds.
+     *
+     * @return the timeout to use when trying to connect to the server.
+     */
+    public int getConnectTimeout() {
+        return connectTimeout;
+    }
+
+    /**
+     * Sets the timeout (in milliseconds) to use when trying to connect to the server.
+     * The default value is 2 seconds.
+     *
+     * @param connectTimeout the timeout, in milliseconds, to use when trying to connect to the server.
+     */
+    public void setConnectTimeout(int connectTimeout) {
+        this.connectTimeout = connectTimeout;
     }
 
     public boolean isExternalMode() {

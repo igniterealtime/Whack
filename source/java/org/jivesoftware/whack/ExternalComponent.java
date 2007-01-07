@@ -36,8 +36,8 @@ import org.xmpp.packet.JID;
 import org.xmpp.packet.Packet;
 import org.xmpp.packet.StreamError;
 
-import javax.net.SocketFactory;
 import java.io.*;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.Map;
@@ -89,7 +89,6 @@ public class ExternalComponent implements Component {
      */
     private String host;
     private int port;
-    private SocketFactory socketFactory;
 
     /**
      * Pool of threads that are available for processing the requests.
@@ -124,21 +123,19 @@ public class ExternalComponent implements Component {
      *
      * @param host          the host to connect with.
      * @param port          the port to use.
-     * @param socketFactory SocketFactory to be used for generating the socket.
      * @param subdomain     the subdomain that this component will be handling.
      * @throws ComponentException if an error happens during the connection and authentication steps.
      */
-    public void connect(String host, int port, SocketFactory socketFactory, String subdomain)
-            throws ComponentException {
+    public void connect(String host, int port, String subdomain) throws ComponentException {
         try {
             // Open a socket to the server
-            this.socket = socketFactory.createSocket(host, port);
+            this.socket = new Socket();
+            socket.connect(new InetSocketAddress(host, port), manager.getConnectTimeout());
             this.domain = subdomain + "." + manager.getServerName();
             this.subdomain = subdomain;
             // Keep these variables that will be used in case a reconnection is required
             this.host= host;
             this.port = port;
-            this.socketFactory = socketFactory;
 
             try {
                 factory = XmlPullParserFactory.newInstance();
@@ -358,7 +355,7 @@ public class ExternalComponent implements Component {
         boolean isConnected = false;
         while (!isConnected && !shutdown) {
             try {
-                connect(host, port, socketFactory, subdomain);
+                connect(host, port, subdomain);
                 isConnected = true;
                 // It may be possible that while a new connection was being established the
                 // component was required to shutdown so in this case we need to close the new
