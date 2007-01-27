@@ -68,6 +68,7 @@
         <javac destdir="${build}"
             debug="on"
             source="1.5"
+            target="1.5"
             includeAntRuntime="no"
             classpathref="cp"
         >
