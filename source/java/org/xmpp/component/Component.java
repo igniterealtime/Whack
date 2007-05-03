@@ -20,8 +20,8 @@
 
 package org.xmpp.component;
 
-import org.xmpp.packet.Packet;
 import org.xmpp.packet.JID;
+import org.xmpp.packet.Packet;
 
 /**
  * Component enhance the functionality of an XMPP server.
@@ -80,8 +80,14 @@ public interface Component {
     public void start();
 
     /**
-     * Shuts down this component. All component resources must be released as
-     * part of shutdown.
+     * Notification message indicating that the component will stop receiving incoming
+     * packets. All component resources must be released as part of shutdown. This could
+     * happen when the component is unregistered or when running as an external component
+     * when the connection to the server is lost.<p>
+     *
+     * In the case of connection to the server was lost, the External Component will keep
+     * trying to reconnect to the server. When reconnection is successful the {@link #start()}
+     * event will be sent to the component.
      */
     public void shutdown();
 }

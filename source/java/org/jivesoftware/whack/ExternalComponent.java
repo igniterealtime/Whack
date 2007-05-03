@@ -353,6 +353,11 @@ public class ExternalComponent implements Component {
     public void connectionLost() {
         readerThread = null;
         boolean isConnected = false;
+        if (!shutdown) {
+            // Notify the component that connection was lost so it needs to shutdown. The component is
+            // still registered in the local component manager but just not connected to the server
+            component.shutdown();
+        }
         while (!isConnected && !shutdown) {
             try {
                 connect(host, port, subdomain);
