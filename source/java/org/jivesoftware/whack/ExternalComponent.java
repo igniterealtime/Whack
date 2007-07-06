@@ -71,6 +71,13 @@ public class ExternalComponent implements Component {
     private Writer writer = null;
     private boolean shutdown = false;
 
+    private Thread keepAliveThread;
+    /**
+     * Timestamp when the last stanza was sent to the server. This information is used
+     * by the keep alive process to only send heartbeats when the connection has been idle.
+     */
+    private long lastActive = System.currentTimeMillis();
+
     private String connectionID;
     /**
      * Hold the full domain of this component. The full domain is composed by the subdomain plus
@@ -193,6 +200,15 @@ public class ExternalComponent implements Component {
                         throw new ComponentException(error);
                     }
                     // Everything went fine
+                    // Start keep alive thread to send every 30 seconds of inactivity a heart beat
+                    int keepAliveInterval = 30000;
+                    KeepAliveTask task = new KeepAliveTask(keepAliveInterval);
+                    keepAliveThread = new Thread(task);
+                    task.setThread(keepAliveThread);
+                    keepAliveThread.setDaemon(true);
+                    keepAliveThread.setName("Keep Alive of component " + subdomain);
+                    keepAliveThread.start();
+
                 } catch (DocumentException e) {
                     try { socket.close(); } catch (IOException ioe) {}
                     throw new ComponentException(e);
@@ -286,15 +302,15 @@ public class ExternalComponent implements Component {
             try {
                 xmlSerializer.write(packet.getElement());
                 xmlSerializer.flush();
+                // Keep track of the last time a stanza was sent to the server
+                lastActive = System.currentTimeMillis();
             }
             catch (IOException e) {
                 // Log the exception
                 manager.getLog().error(e);
-                // Unbind this component from the serviced subdomain
-                try {
-                    manager.removeComponent(subdomain);
-                } catch (ComponentException e1) {
-                    manager.getLog().error(e);
+                if (!shutdown) {
+                    // Connection was lost so try to reconnect
+                    connectionLost();
                 }
             }
         }
@@ -399,5 +415,61 @@ public class ExternalComponent implements Component {
         resultListeners.put(id, listener);
     }
 
+    /**
+     * A TimerTask that keeps connections to the server alive by sending a space
+     * character on an interval.
+     */
+    private class KeepAliveTask implements Runnable {
 
+        private int delay;
+        private Thread thread;
+
+        public KeepAliveTask(int delay) {
+            this.delay = delay;
+        }
+
+        protected void setThread(Thread thread) {
+            this.thread = thread;
+        }
+
+        public void run() {
+            try {
+                // Sleep 15 seconds before sending first heartbeat. This will give time to
+                // properly finish TLS negotiation and then start sending heartbeats.
+                Thread.sleep(15000);
+            }
+            catch (InterruptedException ie) {
+                // Do nothing
+            }
+            while (!shutdown && keepAliveThread == thread) {
+                synchronized (writer) {
+                    // Send heartbeat if no packet has been sent to the server for a given time
+                    if (System.currentTimeMillis() - lastActive >= delay) {
+                        try {
+                            writer.write(" ");
+                            writer.flush();
+                        }
+                        catch (IOException e) {
+                            // Log the exception
+                            manager.getLog().error(e);
+                            if (!shutdown) {
+                                // Connection was lost so try to reconnect
+                                connectionLost();
+                            }
+                        }
+                        catch (Exception e) {
+                            // Do nothing
+                        }
+                    }
+                }
+                try {
+                    // Sleep until we should write the next keep-alive.
+                    Thread.sleep(delay);
+                }
+                catch (InterruptedException ie) {
+                    // Do nothing
+                }
+            }
+        }
+    }
 }
