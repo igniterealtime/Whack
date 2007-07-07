@@ -108,7 +108,6 @@ public class ExternalComponentManager implements ComponentManager {
         }
         this.host = host;
         this.port = port;
-        this.domain = host;
 
         createDummyLogger();
 
@@ -258,6 +257,14 @@ public class ExternalComponentManager implements ComponentManager {
         this.domain = domain;
     }
 
+    /**
+     * Returns the domain of the XMPP server where we are connected to or <tt>null</tt> if
+     * this value was never configured. When the value is null then the component will
+     * register with just its subdomain and we expect the server to accept the component and
+     * append its domain to form the JID of the component.
+     *
+     * @return the domain of the XMPP server or null if never configured.
+     */
     public String getServerName() {
         return domain;
     }

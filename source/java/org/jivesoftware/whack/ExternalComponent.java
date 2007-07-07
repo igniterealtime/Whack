@@ -70,6 +70,7 @@ public class ExternalComponent implements Component {
     private XPPPacketReader reader = null;
     private Writer writer = null;
     private boolean shutdown = false;
+    private boolean reconnecting = false;
 
     private Thread keepAliveThread;
     /**
@@ -138,7 +139,12 @@ public class ExternalComponent implements Component {
             // Open a socket to the server
             this.socket = new Socket();
             socket.connect(new InetSocketAddress(host, port), manager.getConnectTimeout());
-            this.domain = subdomain + "." + manager.getServerName();
+            if (manager.getServerName() != null) {
+                this.domain = subdomain + "." + manager.getServerName();
+            }
+            else {
+                this.domain = subdomain;
+            }
             this.subdomain = subdomain;
             // Keep these variables that will be used in case a reconnection is required
             this.host= host;
@@ -161,7 +167,7 @@ public class ExternalComponent implements Component {
                 stream.append("<stream:stream");
                 stream.append(" xmlns=\"jabber:component:accept\"");
                 stream.append(" xmlns:stream=\"http://etherx.jabber.org/streams\"");
-                stream.append(" to=\"" + domain + "\">");
+                stream.append(" to=\"").append(domain).append("\">");
                 writer.write(stream.toString());
                 writer.flush();
                 stream = null;
@@ -367,6 +373,13 @@ public class ExternalComponent implements Component {
      * thread has been stopped.
      */
     public void connectionLost() {
+        // Ensure that only one thread will try to reconnect.
+        synchronized(this) {
+            if (reconnecting) {
+                return;
+            }
+            reconnecting = true;
+        }
         readerThread = null;
         boolean isConnected = false;
         if (!shutdown) {
@@ -396,6 +409,7 @@ public class ExternalComponent implements Component {
                 } catch (InterruptedException e1) {}
             }
         }
+        reconnecting = false;
     }
 
     /**
@@ -455,6 +469,9 @@ public class ExternalComponent implements Component {
                             if (!shutdown) {
                                 // Connection was lost so try to reconnect
                                 connectionLost();
+                                // Either the connectio was reestablished or the component was stopped
+                                // so stop this thread since a new one will be created
+                                break;
                             }
                         }
                         catch (Exception e) {
