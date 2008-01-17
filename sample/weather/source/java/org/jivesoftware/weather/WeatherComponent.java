@@ -41,6 +41,7 @@ public class WeatherComponent implements Component {
      * @param packet the Message requesting information about a certain station id.
      */
     public void processPacket(Packet packet) {
+        System.out.println("Received package:"+packet.toXML());
         // Only process Message packets
         if (packet instanceof Message) {
             // Get the requested station to obtain it's weather information

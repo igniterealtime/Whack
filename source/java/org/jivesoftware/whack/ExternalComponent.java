@@ -167,6 +167,9 @@ public class ExternalComponent implements Component {
                 stream.append("<stream:stream");
                 stream.append(" xmlns=\"jabber:component:accept\"");
                 stream.append(" xmlns:stream=\"http://etherx.jabber.org/streams\"");
+                if (manager.isAllowMultiple()) {
+                    stream.append(" allowMultiple=\"true\"");
+                }
                 stream.append(" to=\"").append(domain).append("\">");
                 writer.write(stream.toString());
                 writer.flush();
@@ -216,23 +219,48 @@ public class ExternalComponent implements Component {
                     keepAliveThread.start();
 
                 } catch (DocumentException e) {
-                    try { socket.close(); } catch (IOException ioe) {}
+                    try {
+                        socket.close();
+                    }
+                    catch (IOException ioe) {
+                        // Do nothing
+                    }
                     throw new ComponentException(e);
                 } catch (XmlPullParserException e) {
-                    try { socket.close(); } catch (IOException ioe) {}
+                    try {
+                        socket.close();
+                    }
+                    catch (IOException ioe) {
+                        // Do nothing
+                    }
                     throw new ComponentException(e);
                 }
             } catch (XmlPullParserException e) {
-                try { socket.close(); } catch (IOException ioe) {}
+                try {
+                    socket.close();
+                }
+                catch (IOException ioe) {
+                    // Do nothing
+                }
                 throw new ComponentException(e);
             }
         }
         catch (UnknownHostException uhe) {
-            try { if (socket != null) socket.close(); } catch (IOException e) {}
+            try {
+                if (socket != null) socket.close();
+            }
+            catch (IOException e) {
+                // Do nothing
+            }
             throw new ComponentException(uhe);
         }
         catch (IOException ioe) {
-            try { if (socket != null) socket.close(); } catch (IOException e) {}
+            try {
+                if (socket != null) socket.close();
+            }
+            catch (IOException e) {
+                // Do nothing
+            }
             throw new ComponentException(ioe);
         }
     }
@@ -352,7 +380,9 @@ public class ExternalComponent implements Component {
                         writer.write("</stream:stream>");
                         xmlSerializer.flush();
                     }
-                    catch (IOException e) {}
+                    catch (IOException e) {
+                        // Do nothing
+                    }
                 }
             }
             catch (Exception e) {
@@ -406,7 +436,10 @@ public class ExternalComponent implements Component {
                 // Wait for 5 seconds until the next retry
                 try {
                     Thread.sleep(5000);
-                } catch (InterruptedException e1) {}
+                }
+                catch (InterruptedException e1) {
+                    // Do nothing
+                }
             }
         }
         reconnecting = false;

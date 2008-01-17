@@ -70,6 +70,13 @@ public class ExternalComponentManager implements ComponentManager {
      * subdomain then the global secret key will used for the handshake with the server.
      */
     private Map<String, String> secretKeys = new Hashtable<String,String>();
+    /**
+     * Holds the settings for whether we will tell the XMPP server that we want multiple components
+     * to be able to connect to the same JID.  This is a custom Openfire extension and will not work
+     * with any other XMPP server and should not be used unless you are sure you need it and understand
+     * how to cope with it.
+     */
+    private boolean allowMultiple = false;
 
     Preferences preferences = Preferences.userRoot();
     private String preferencesPrefix;
@@ -155,6 +162,28 @@ public class ExternalComponentManager implements ComponentManager {
      */
     public void setDefaultSecretKey(String secretKey) {
         this.defaultSecretKey = secretKey;
+    }
+
+    /**
+     * Returns if we want multiple components to be able to connect to the same JID.  This is a custom
+     * Openfire extension and will not work with any other XMPP server and should not be used unless you
+     * are sure you need it and understand how to cope with it.
+     *
+     * @return True or false if we are allowing multiple connections.
+     */
+    public boolean isAllowMultiple() {
+        return allowMultiple;
+    }
+
+    /**
+     * Sets  whether we will tell the XMPP server that we want multiple components to be able to connect
+     * to the same JID.  This is a custom Openfire extension and will not work with any other XMPP server
+     * and should not be used unless you are sure you need it and understand how to cope with it.
+     *
+     * @param allowMultiple Set to true if we want to allow multiple connections to same JID.
+     */
+    public void setAllowMultiple(boolean allowMultiple) {
+        this.allowMultiple = allowMultiple;
     }
 
     public void addComponent(String subdomain, Component component) throws ComponentException {
