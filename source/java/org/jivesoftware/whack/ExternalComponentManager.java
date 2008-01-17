@@ -187,6 +187,10 @@ public class ExternalComponentManager implements ComponentManager {
     }
 
     public void addComponent(String subdomain, Component component) throws ComponentException {
+        addComponent(subdomain, component, this.port);
+    }
+
+    public void addComponent(String subdomain, Component component, Integer port) throws ComponentException {
         if (componentsByDomain.containsKey(subdomain)) {
             if (componentsByDomain.get(subdomain).getComponent() == component) {
                 // Do nothing since the component has already been registered
