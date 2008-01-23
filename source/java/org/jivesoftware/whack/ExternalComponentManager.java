@@ -28,7 +28,7 @@ import org.xmpp.packet.PacketError;
 
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
@@ -236,32 +236,40 @@ public class ExternalComponentManager implements ComponentManager {
         components.get(component).send(packet);
     }
 
-    public IQ query(Component component, IQ packet, int timeout) throws ComponentException {
-        final LinkedBlockingQueue<IQ> answer = new LinkedBlockingQueue<IQ>(8);
+    public IQ query(Component component, IQ packet, long timeout) throws ComponentException {
+        final SynchronousQueue<IQ> answer = new SynchronousQueue<IQ>();
         ExternalComponent externalComponent = components.get(component);
-        externalComponent.addIQResultListener(packet.getID(), new IQResultListener() {
+        IQResultListener listener = new IQResultListener() {
             public void receivedAnswer(IQ packet) {
-                answer.offer(packet);
+                try {
+                    answer.offer(packet, 500, TimeUnit.MILLISECONDS);
+                }
+                catch (InterruptedException e) {
+                    logger.error("Could not put recieved answer", e);
+                }
             }
-        });
-        sendPacket(component, packet);
+        };
+
         IQ reply = null;
         try {
-            reply = answer.poll(timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
-            // Ignore
+            externalComponent.addIQResultListener(packet.getID(), listener);
+            sendPacket(component, packet);
+
+            try {
+                reply = answer.poll(timeout, TimeUnit.MILLISECONDS);
+            }
+            catch (InterruptedException e) {
+                // Ignore
+            }
+        }
+        finally {
+            externalComponent.removeIQResultListener(packet.getID());
         }
         if (reply == null) {
             reply = IQ.createResultIQ(packet);
             reply.setError(PacketError.Condition.item_not_found);
         }
         return reply;
-    }
-
-    public void query(Component component, IQ packet, IQResultListener listener) throws ComponentException {
-        ExternalComponent externalComponent = components.get(component);
-        externalComponent.addIQResultListener(packet.getID(), listener);
-        sendPacket(component, packet);
     }
 
     public String getProperty(String name) {

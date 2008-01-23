@@ -462,6 +462,10 @@ public class ExternalComponent implements Component {
         resultListeners.put(id, listener);
     }
 
+    void removeIQResultListener(String id) {
+        resultListeners.remove(id);
+    }
+
     /**
      * A TimerTask that keeps connections to the server alive by sending a space
      * character on an interval.

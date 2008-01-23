@@ -20,7 +20,6 @@
 
 package org.xmpp.component;
 
-import org.jivesoftware.whack.IQResultListener;
 import org.xmpp.packet.IQ;
 import org.xmpp.packet.Packet;
 
@@ -40,6 +39,7 @@ public interface ComponentManager {
      *
      * @param subdomain the subdomain of the component's address.
      * @param component the component.
+     * @throws ComponentException if the component connection is lost and the component cannot be added.
      */
     public void addComponent(String subdomain, Component component) throws ComponentException;
 
@@ -48,6 +48,7 @@ public interface ComponentManager {
      * component.
      *
      * @param subdomain the subdomain of the component's address.
+     * @throws ComponentException if the component connection is lost and the component cannot be removed.
      */
     public void removeComponent(String subdomain) throws ComponentException;
 
@@ -60,6 +61,8 @@ public interface ComponentManager {
      *
      * @param component the component sending the packet.
      * @param packet the packet to send.
+     * @throws ComponentException if the component connection is lost or unavialble during the time of sending and
+     * recieving packets.
      */
     public void sendPacket(Component component, Packet packet) throws ComponentException;
 
@@ -79,18 +82,10 @@ public interface ComponentManager {
      * @param timeout the number of milliseconds to wait before returning an IQ error.
      * @return the answer sent by the server. The answer could be an IQ of type result or
      *         error.
+     * @throws ComponentException if the component connection is lost or unavialble during the time of sending and
+     * recieving packets.
      */
-    public IQ query(Component component, IQ packet, int timeout) throws ComponentException;
-
-    /**
-     * Sends an IQ packet to the server and returns immediately. The specified IQResultListener
-     * will be invoked when an answer is received.
-     *
-     * @param component the component sending the packet.
-     * @param packet the IQ packet to send.
-     * @param listener the listener that will be invoked when an answer is received.
-     */
-    public void query(Component component, IQ packet, IQResultListener listener) throws ComponentException;
+    public IQ query(Component component, IQ packet, long timeout) throws ComponentException;
 
     /**
      * Returns a property value specified by name. Properties can be used by
