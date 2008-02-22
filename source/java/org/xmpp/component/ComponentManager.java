@@ -20,6 +20,7 @@
 
 package org.xmpp.component;
 
+import org.jivesoftware.whack.IQResultListener;
 import org.xmpp.packet.IQ;
 import org.xmpp.packet.Packet;
 
@@ -86,6 +87,18 @@ public interface ComponentManager {
      * recieving packets.
      */
     public IQ query(Component component, IQ packet, long timeout) throws ComponentException;
+
+    /**
+     * Sends an IQ packet to the server and returns immediately. The specified IQResultListener
+     * will be invoked when an answer is received.
+     *
+     * @param component the component sending the packet.
+     * @param packet the IQ packet to send.
+     * @param listener the listener that will be invoked when an answer is received.
+     * @throws ComponentException if the component connection is lost or unavialble during the time of sending and
+     * recieving packets.
+     */
+    public void query(Component component, IQ packet, IQResultListener listener) throws ComponentException;
 
     /**
      * Returns a property value specified by name. Properties can be used by

@@ -28,7 +28,7 @@ import org.xmpp.packet.PacketError;
 
 import java.util.Hashtable;
 import java.util.Map;
-import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
@@ -71,12 +71,11 @@ public class ExternalComponentManager implements ComponentManager {
      */
     private Map<String, String> secretKeys = new Hashtable<String,String>();
     /**
-     * Holds the settings for whether we will tell the XMPP server that we want multiple components
-     * to be able to connect to the same JID.  This is a custom Openfire extension and will not work
-     * with any other XMPP server and should not be used unless you are sure you need it and understand
-     * how to cope with it.
+     * Holds the settings for whether we will tell the XMPP server that a given component can connect
+     * to the same JID multiple times.  This is a custom Openfire extension and will not work
+     * with any other XMPP server. Other servers should ignore this setting.
      */
-    private boolean allowMultiple = false;
+    private Map<String, Boolean> allowMultiple = new Hashtable<String,Boolean>();
 
     Preferences preferences = Preferences.userRoot();
     private String preferencesPrefix;
@@ -165,25 +164,28 @@ public class ExternalComponentManager implements ComponentManager {
     }
 
     /**
-     * Returns if we want multiple components to be able to connect to the same JID.  This is a custom
-     * Openfire extension and will not work with any other XMPP server and should not be used unless you
-     * are sure you need it and understand how to cope with it.
+     * Returns if we want components to be able to connect multiple times to the same JID.  This is a custom
+     * Openfire extension and will not work with any other XMPP server. Other XMPP servers should ignore
+     * this extra setting.
      *
+     * @param subdomain the sub-domain.
      * @return True or false if we are allowing multiple connections.
      */
-    public boolean isAllowMultiple() {
-        return allowMultiple;
+    public boolean isMultipleAllowed(String subdomain) {
+        Boolean allowed = allowMultiple.get(subdomain);
+        return allowed != null && allowed;
     }
 
     /**
-     * Sets  whether we will tell the XMPP server that we want multiple components to be able to connect
-     * to the same JID.  This is a custom Openfire extension and will not work with any other XMPP server
-     * and should not be used unless you are sure you need it and understand how to cope with it.
+     * Sets whether we will tell the XMPP server that we want multiple components to be able to connect
+     * to the same JID.  This is a custom Openfire extension and will not work with any other XMPP server.
+     * Other XMPP servers should ignore this extra setting.
      *
+     * @param subdomain the sub-domain.
      * @param allowMultiple Set to true if we want to allow multiple connections to same JID.
      */
-    public void setAllowMultiple(boolean allowMultiple) {
-        this.allowMultiple = allowMultiple;
+    public void setMultipleAllowed(String subdomain, boolean allowMultiple) {
+        this.allowMultiple.put(subdomain, allowMultiple);
     }
 
     public void addComponent(String subdomain, Component component) throws ComponentException {
@@ -237,39 +239,31 @@ public class ExternalComponentManager implements ComponentManager {
     }
 
     public IQ query(Component component, IQ packet, long timeout) throws ComponentException {
-        final SynchronousQueue<IQ> answer = new SynchronousQueue<IQ>();
+        final LinkedBlockingQueue<IQ> answer = new LinkedBlockingQueue<IQ>(8);
         ExternalComponent externalComponent = components.get(component);
-        IQResultListener listener = new IQResultListener() {
+        externalComponent.addIQResultListener(packet.getID(), new IQResultListener() {
             public void receivedAnswer(IQ packet) {
-                try {
-                    answer.offer(packet, 500, TimeUnit.MILLISECONDS);
-                }
-                catch (InterruptedException e) {
-                    logger.error("Could not put recieved answer", e);
-                }
+                answer.offer(packet);
             }
-        };
-
+        });
+        sendPacket(component, packet);
         IQ reply = null;
         try {
-            externalComponent.addIQResultListener(packet.getID(), listener);
-            sendPacket(component, packet);
-
-            try {
-                reply = answer.poll(timeout, TimeUnit.MILLISECONDS);
-            }
-            catch (InterruptedException e) {
-                // Ignore
-            }
-        }
-        finally {
-            externalComponent.removeIQResultListener(packet.getID());
+            reply = answer.poll(timeout, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            // Ignore
         }
         if (reply == null) {
             reply = IQ.createResultIQ(packet);
             reply.setError(PacketError.Condition.item_not_found);
         }
         return reply;
+    }
+
+    public void query(Component component, IQ packet, IQResultListener listener) throws ComponentException {
+        ExternalComponent externalComponent = components.get(component);
+        externalComponent.addIQResultListener(packet.getID(), listener);
+        sendPacket(component, packet);
     }
 
     public String getProperty(String name) {
