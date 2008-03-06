@@ -245,7 +245,11 @@ public class ExternalComponentManager implements ComponentManager {
             public void receivedAnswer(IQ packet) {
                 answer.offer(packet);
             }
-        });
+
+            public void answerTimeout(String packetId) {
+                //Do nothing
+            }
+        }, timeout);
         sendPacket(component, packet);
         IQ reply = null;
         try {
@@ -262,7 +266,8 @@ public class ExternalComponentManager implements ComponentManager {
 
     public void query(Component component, IQ packet, IQResultListener listener) throws ComponentException {
         ExternalComponent externalComponent = components.get(component);
-        externalComponent.addIQResultListener(packet.getID(), listener);
+        // Add listenet with a timeout of 5 minutes to prevent memory leaks
+        externalComponent.addIQResultListener(packet.getID(), listener, 300000);
         sendPacket(component, packet);
     }
 
