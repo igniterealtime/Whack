@@ -126,7 +126,7 @@ public class ExternalComponent implements Component {
 
         // Create a pool of threads that will process requests received by this component. If more
         // threads are required then the command will be executed on the SocketReadThread process
-        threadPool = new ThreadPoolExecutor(1, maxThreads, 15, TimeUnit.SECONDS,
+        threadPool = new ThreadPoolExecutor(maxThreads, maxThreads, 15, TimeUnit.SECONDS,
                         new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.CallerRunsPolicy());
     }
 

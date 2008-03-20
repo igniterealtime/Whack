@@ -24,7 +24,6 @@ import org.xmpp.component.*;
 import org.xmpp.packet.IQ;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Packet;
-import org.xmpp.packet.PacketError;
 
 import java.util.Hashtable;
 import java.util.Map;
@@ -256,10 +255,6 @@ public class ExternalComponentManager implements ComponentManager {
             reply = answer.poll(timeout, TimeUnit.MILLISECONDS);
         } catch (InterruptedException e) {
             // Ignore
-        }
-        if (reply == null) {
-            reply = IQ.createResultIQ(packet);
-            reply.setError(PacketError.Condition.item_not_found);
         }
         return reply;
     }
