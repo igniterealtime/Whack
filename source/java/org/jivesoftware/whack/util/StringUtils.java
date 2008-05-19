@@ -20,6 +20,8 @@
 
 package org.jivesoftware.whack.util;
 
+import org.jivesoftware.util.Base64;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -292,9 +294,9 @@ public class StringUtils {
      * @return a base64 encoded String.
      */
     public static String encodeBase64(String data) {
-        byte [] bytes = null;
+        byte[] bytes = null;
         try {
-            bytes = data.getBytes("ISO-8859-1");
+            bytes = data.getBytes("UTF-8");
         }
         catch (UnsupportedEncodingException uee) {
             uee.printStackTrace();
@@ -309,38 +311,11 @@ public class StringUtils {
      * @return a base64 encode String.
      */
     public static String encodeBase64(byte[] data) {
-        int c;
-        int len = data.length;
-        StringBuffer ret = new StringBuffer(((len / 3) + 1) * 4);
-        for (int i = 0; i < len; ++i) {
-            c = (data[i] >> 2) & 0x3f;
-            ret.append(cvt.charAt(c));
-            c = (data[i] << 4) & 0x3f;
-            if (++i < len)
-                c |= (data[i] >> 4) & 0x0f;
-
-            ret.append(cvt.charAt(c));
-            if (i < len) {
-                c = (data[i] << 2) & 0x3f;
-                if (++i < len)
-                    c |= (data[i] >> 6) & 0x03;
-
-                ret.append(cvt.charAt(c));
-            }
-            else {
-                ++i;
-                ret.append((char) fillchar);
-            }
-
-            if (i < len) {
-                c = data[i] & 0x3f;
-                ret.append(cvt.charAt(c));
-            }
-            else {
-                ret.append((char) fillchar);
-            }
-        }
-        return ret.toString();
+        // Encode the String. We pass in a flag to specify that line
+        // breaks not be added. This is consistent with our previous base64
+        // implementation. Section 2.1 of 3548 (base64 spec) also specifies
+        // no line breaks by default.
+        return Base64.encodeBytes(data, Base64.DONT_BREAK_LINES);
     }
 
     /**
@@ -350,54 +325,7 @@ public class StringUtils {
      * @return the decoded String.
      */
     public static byte[] decodeBase64(String data) {
-        byte [] bytes = null;
-        try {
-            bytes = data.getBytes("ISO-8859-1");
-            return decodeBase64(bytes).getBytes("ISO-8859-1");
-        }
-        catch (UnsupportedEncodingException uee) {
-            uee.printStackTrace();
-        }
-        return new byte[] { };
-    }
-
-    /**
-     * Decodes a base64 aray of bytes.
-     *
-     * @param data a base64 encode byte array to decode.
-     * @return the decoded String.
-     */
-    private static String decodeBase64(byte[] data) {
-        int c, c1;
-        int len = data.length;
-        StringBuffer ret = new StringBuffer((len * 3) / 4);
-        for (int i = 0; i < len; ++i) {
-            c = cvt.indexOf(data[i]);
-            ++i;
-            c1 = cvt.indexOf(data[i]);
-            c = ((c << 2) | ((c1 >> 4) & 0x3));
-            ret.append((char) c);
-            if (++i < len) {
-                c = data[i];
-                if (fillchar == c)
-                    break;
-
-                c = cvt.indexOf(c);
-                c1 = ((c1 << 4) & 0xf0) | ((c >> 2) & 0xf);
-                ret.append((char) c1);
-            }
-
-            if (++i < len) {
-                c1 = data[i];
-                if (fillchar == c1)
-                    break;
-
-                c1 = cvt.indexOf(c1);
-                c = ((c << 6) & 0xc0) | c1;
-                ret.append((char) c);
-            }
-        }
-        return ret.toString();
+        return Base64.decode(data);
     }
 
     /**
