@@ -26,9 +26,7 @@
     <target name="clean" description="Cleans generated output">
         <!--Delete created directory trees-->
         <delete dir="${build}" includeEmptyDirs="true"/>
-        <delete includeEmptyDirs="true">
-            <fileset dir="${dist}" excludes="lib/**"/>
-        </delete>
+        <delete dir="${dist}" includeEmptyDirs="true"/>
         <delete dir="${docs}" includeEmptyDirs="true"/>
         <delete dir="${docsapi}" includeEmptyDirs="true"/>
     </target>
