@@ -1,118 +1,292 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0"?>
 
-<project name="Whack" default="dist" basedir=".">
+<!-- Whack Build Script ========================================== -->
+<!-- Jive Software      ============================================== -->
 
-    <description>Whack build script</description>
+<!--
+    $RCSfile$
+    $Revision$
+    $Date$
+-->
 
-    <!--set global properties for this build-->
-    <property name="src" location="../source/java"/>
-    <property name="build" location="../target/classes"/>
-    <property name="dist" location="../target"/>
-    <property name="docs" location="${dist}/docs"/>
-    <property name="docsapi" location="docs/api"/>
-    <property name="libs" location="lib/merge"/>
+<project name="Whack" default="all" basedir="..">
 
-    <path id="cp">
-        <fileset dir="lib/merge" includes="*.jar" />
-        <fileset dir="lib/dist" includes="*.jar" />
-    </path>
+    <!-- TASKDEFS -->
+    <!-- ======================================================================================= -->
+    <!-- ======================================================================================= -->
 
-    <target name="release" description="Makes a full release">
-        <antcall target="dist"/>
-        <antcall target="doc"/>
-        <antcall target="clean_classes"/>
+    <taskdef resource="net/sf/antcontrib/antcontrib.properties">
+        <classpath>
+            <pathelement location="${basedir}/build/ant-contrib.jar"/>
+        </classpath>
+    </taskdef>
+
+    <!-- PROPERTIES -->
+    <!-- ======================================================================================= -->
+
+    <!-- Whack Version -->
+    <property name="version.major" value="1" />
+    <property name="version.minor" value="0" />
+    <property name="version.revision" value="0" />
+    <property name="version.extra" value="" /> 
+
+    <if>
+        <equals arg1="${version.extra}" arg2=""/>
+        <then>
+            <property name="version"
+                      value="${version.major}.${version.minor}.${version.revision}"/>
+            <property name="version.filename"
+                      value="${version.major}_${version.minor}_${version.revision}"/>
+        </then>
+        <else>
+            <property name="version"
+                      value="${version.major}.${version.minor}.${version.revision}.${version.extra}"/>
+            <property name="version.filename"
+                      value="${version.major}_${version.minor}_${version.revision}_${version.extra}"/>
+        </else>
+    </if>
+    <tstamp>
+        <format property="builddate" pattern="MM/dd/yyyy"/>
+    </tstamp>
+
+    <property file="${basedir}/build/build.properties" />
+    <property name="compile.dir" value="${basedir}/target/classes" />
+    <property name="compile.test.dir" value="${basedir}/target/classes-test" />
+    <property name="jar.dest.dir" value="${basedir}/target" />
+    <property name="javadoc.dest.dir" value="${basedir}/target/javadoc" />
+    <property name="lib.dir" value="${basedir}/build/lib" />
+    <property name="dist.lib.dir" value="${lib.dir}/dist" />
+    <property name="merge.lib.dir" value="${lib.dir}/merge" />
+    <property name="test.dir" value="${basedir}/test" />
+    <property name="resources.dir" value="${basedir}/build/resources" />
+
+    <!-- PATHS, DEPENDIENCIES, PATTERNS -->
+    <!-- ======================================================================================= -->
+    <!-- ======================================================================================= -->
+
+    <patternset id="test.cases">
+        <include name="org/jivesoftware/whack/**/*Test.java" />
+        <exclude name="org/jivesoftware/whack/**/Messenger*Test.java" />
+    </patternset>
+
+    <patternset id="messenger.test.cases">
+        <include name="org/jivesoftware/whack/**/Messenger*Test.java" />
+    </patternset>
+
+    <!-- TARGETS -->
+    <!-- ======================================================================================= -->
+
+    <!-- all -->
+    <!-- ======================================================================================= -->
+    <target name="all" depends="jar" description="Calls 'jar' target by default">
     </target>
 
-    <target name="clean" description="Cleans generated output">
-        <!--Delete created directory trees-->
-        <delete dir="${build}" includeEmptyDirs="true"/>
-        <delete dir="${dist}" includeEmptyDirs="true"/>
-        <delete dir="${docs}" includeEmptyDirs="true"/>
-        <delete dir="${docsapi}" includeEmptyDirs="true"/>
-    </target>
-
-    <target name="clean_classes">
-        <!--Delete created directory trees-->
-        <delete dir="${build}" includeEmptyDirs="true"/>
-    </target>
-    <target name="init">
-        <!--creates the build directory-->
-        <mkdir dir="${build}"/>
-        <mkdir dir="${dist}"/>
-        <mkdir dir="${docs}"/>
-        <mkdir dir="${docsapi}"/>
-    </target>
-
-    <target name="resources">
-        <copy todir="${build}">
-            <fileset dir="${src}">
-                <include name="**/*.jpe"/>
-                <include name="**/*.jpeg"/>
-                <include name="**/*.rmf"/>
-                <include name="**/*.wav"/>
-                <include name="**/*.mid"/>
-                <include name="**/*.midi"/>
-                <include name="**/*.au"/>
-                <include name="**/*.gif"/>
-                <include name="**/*.png"/>
-                <include name="**/*.aiff"/>
-                <include name="**/*.properties"/>
-            </fileset>
-        </copy>
-    </target>
-
-    <target name="build" depends="init, resources" description="Compiles Whack source">
-        <!--Compiles the java code from ${src} directory into ${build} directory-->
-        <javac destdir="${build}"
+    <!-- compile -->
+    <!-- ======================================================================================= -->
+    <target name="compile" description="Compiles all source to ${compile.dir}.">
+        <!-- make target dir -->
+        <mkdir dir="${compile.dir}" />
+        <javac
+            destdir="${compile.dir}"
+            includeAntRuntime="no"
             debug="on"
             source="1.5"
             target="1.5"
-            includeAntRuntime="no"
-            classpathref="cp"
         >
-            <src path="${src}"/>
-            <exclude name="**/*Test.java"/>
-            <exclude name="**/Test*.java"/>
+            <src path="${basedir}/source" />
+            <classpath>
+                <fileset dir="${dist.lib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${merge.lib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>		
+    </target>
+
+    <!-- compile-test -->
+    <!-- ======================================================================================= -->
+    <target name="compile-test" description="Compiles all source to ${compile.dir}.">
+        <!-- make target dir -->
+        <mkdir dir="${compile.test.dir}" />
+        <javac
+            destdir="${compile.test.dir}"
+            includeAntRuntime="no"
+            debug="on"
+            source="1.5"
+            target="1.5"
+        >
+            <src path="${test.dir}" />
+            <classpath>
+                <fileset dir="${merge.lib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${basedir}/build">
+                    <include name="junit.jar"/>
+                    <include name="xmlunit.jar"/>
+                </fileset>
+                <pathelement location="${compile.dir}" />
+            </classpath>
         </javac>
     </target>
 
-    <target name="dist" depends="build" description="Creates a jar">
-        <!--Put everything in ${build} into the MyProject-${DSTAMP}.jar file-->
-        <tstamp/>
-        <jar jarfile="${dist}/whack-full.jar" basedir="${build}">
-            <zipgroupfileset dir="${libs}" includes="*.jar"/>
-            <fileset dir="${src}" includes="**/*.java" />
-        </jar>
-        <jar jarfile="${dist}/whack.jar" basedir="${build}">
-            <zipgroupfileset dir="${libs}" includes="stringprep.jar"/>
-            <!-- <fileset dir="${src}" includes="**/*.java" /> -->
-        </jar>
-        <antcall target="clean_classes"/>
+    <!-- jar -->
+    <!-- ======================================================================================= -->
+    <target name="jar" depends="compile" unless="jar.uptodate" description="Produces whack.jar">
+        <jar destfile="${jar.dest.dir}/whack.jar"
+            basedir="${compile.dir}"
+            includes="org/jivesoftware/whack/**/*.class"
+        />
     </target>
 
-    <target name="doc" depends="init" description="Generates javadoc">
-        <javadoc destdir="${docsapi}" author="true" version="true" use="true" windowtitle="API for Whack">
-            <fileset dir="${src}" defaultexcludes="yes">
-                <exclude name="**/*Test.java"/>
-                <exclude name="**/Test*.java"/>
-            </fileset>
-            <classpath path="lib/merge/dom4j.jar"/>
-            <classpath path="lib/merge/stringprep.jar"/>
-            <classpath path="lib/merge/xpp3.jar"/>
+    <!-- jar -->
+    <!-- ======================================================================================= -->
+    <target name="jar-test" depends="compile-test" description="Produces jar of test code">
+        <jar destfile="${jar.dest.dir}/whack-test.jar"
+            basedir="${compile.test.dir}"
+            includes="org/jivesoftware/whack/**/*.class"
+        />
+    </target>
+
+    <!-- javadoc -->
+    <!-- ======================================================================================= -->
+    <target name="javadoc" description="JavaDocs the Whack source code">
+
+        <mkdir dir="${javadoc.dest.dir}" />
+        <javadoc
+            packagenames="org.jivesoftware.whack.*"
+            sourcepath="${basedir}/source/java"
+            destdir="${javadoc.dest.dir}"
+            author="true"
+            windowtitle="Whack ${version} Documentation"
+        >
+            <classpath>
+                <fileset dir="${dist.lib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${merge.lib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+            <doctitle><![CDATA[<font face="arial,helvetica">Whack ${version}</font>]]></doctitle>
+            <header><![CDATA[<b>Whack</b>]]></header>
+            <bottom><![CDATA[<i>Copyright &copy; 2003-2008 Jive Software. </i>]]></bottom>
+            <link href="http://java.sun.com/j2se/1.3/docs/api/" />
+            <link href="http://java.sun.com/j2ee/sdk_1.2.1/techdocs/api/" />
         </javadoc>
     </target>
 
-    <target name="build_tests" depends="init">
-        <!--Compiles the tests into ${tests} directory-->
-        <javac destdir="${tests}">
-            <src path="${src}"/>
-            <include name="**/*Test.java"/>
-            <include name="**/Test*.java"/>
-            <src path="${src}"/>
-            <classpath path="lib/merge/dom4j.jar"/>
-            <classpath path="lib/merge/stringprep.jar"/>
-            <classpath path="lib/merge/xpp3.jar"/>
-        </javac>
-    </target>
-</project>
 
+    <!-- test -->
+    <!-- ======================================================================================= -->
+    <target name="func-test" depends="compile, jar-test" unless="no.test">
+        <antcall target="test.messenger"/>
+        <antcall target="test"/>
+    </target>
+
+
+    <!-- test -->
+    <!-- ======================================================================================= -->
+    <target name="test" depends="compile, jar-test" unless="no.test">
+
+        <echo>
+
+
+            **** no.test: ${no.test}
+
+
+        </echo>
+
+        <property name="test.messenger" value="false" />
+
+        <if>
+            <not><equals arg1="test.messenger" arg2="true" /></not>
+            <then>
+                <property name="test.classes" value="test.cases" />
+            </then>
+        </if>
+
+        <junit printsummary="on"
+            fork="true"
+            haltonfailure="false"
+            failureproperty="tests.failed"
+            showoutput="true">
+
+            <sysproperty key="whack.test.host" value="${test.host}" />
+            <sysproperty key="whack.test.port" value="${test.port}" />
+            <sysproperty key="whack.test.admin.username" value="${test.admin.username}" />
+            <sysproperty key="whack.test.admin.password" value="${test.admin.password}" />
+            <sysproperty key="whack.test.admin.resource" value="${test.admin.resource}" />
+            <sysproperty key="whack.debug" value="${test.whack.debug}" />
+
+            <classpath>
+                <fileset dir="${basedir}/build">
+                    <include name="xmlunit.jar"/>
+                </fileset>
+                <fileset dir="${merge.lib.dir}">
+                    <include name="*.jar"/>
+                </fileset>
+                <fileset dir="${basedir}">
+                    <include name="whack-test.jar"/>
+                </fileset>
+                <pathelement location="${compile.dir}" />
+                <pathelement location="${test.dir}" />
+                <pathelement location="${resources.dir}" />
+            </classpath>
+
+            <formatter type="brief" usefile="false"/>
+
+            <batchtest>
+                <fileset dir="${basedir}/test">
+                    <patternset refid="${test.classes}" />
+                </fileset>
+            </batchtest>
+        </junit>
+
+        <fail if="tests.failed" message="** Tests failed, see test log. **" />
+    </target>
+
+
+    <!-- test -->
+    <!-- ======================================================================================= -->
+    <target name="test.messenger" depends="compile, jar-test" unless="no.test">
+        <antcall target="test" inheritall="true" inheritrefs="true">
+            <param name="test.messenger" value="true" />
+            <param name="test.classes" value="messenger.test.cases" />
+        </antcall>
+    </target>
+
+
+    <!-- release -->
+    <!-- ======================================================================================= -->
+    <target name="release" description="Builds a release" if="release.exists" depends="release-exists">
+        <antcall target="jar">
+            <param name="no.test" value="true" />
+        </antcall>
+        <antcall target="javadoc">
+            <param name="no.test" value="true" />
+        </antcall>
+        <ant antfile="${basedir}/build/release.xml" />
+    </target>
+
+
+    <!-- release-exists -->
+    <!-- ======================================================================================= -->
+    <target name="release-exists" >
+        <available file="${basedir}/build/release.xml" property="release.exists"/>
+    </target>
+
+
+    <!-- clean -->
+    <!-- ======================================================================================= -->
+    <target name="clean" description="Deletes all generated content.">
+    	<delete dir="${javadoc.dest.dir}" />
+        <delete dir="${compile.dir}" />
+        <delete dir="${compile.test.dir}" />
+        <delete file="${basedir}/whack.jar" />
+        <delete file="${basedir}/whack-test.jar" />
+        <delete dir="${basedir}/target" />
+    </target>
+
+</project>
