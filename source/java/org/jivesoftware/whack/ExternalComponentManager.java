@@ -92,12 +92,12 @@ public class ExternalComponentManager implements ComponentManager {
 
     /**
      * Constructs a new ExternalComponentManager that will make connections
-     * to the specified XMPP server on the default port (5222).
+     * to the specified XMPP server on the default external component port (5275).
      *
      * @param host the IP address or name of the XMPP server to connect to (e.g. "example.com").
      */
     public ExternalComponentManager(String host) {
-        this(host, 5225);
+        this(host, 5275);
     }
 
     /**
@@ -212,7 +212,8 @@ public class ExternalComponentManager implements ComponentManager {
             // Initialize the component
             JID componentJID = new JID(null, externalComponent.getDomain(), null);
             externalComponent.initialize(componentJID, this);
-        } catch (ComponentException e) {
+        }
+        catch (ComponentException e) {
             // Unregister the new component
             componentsByDomain.remove(subdomain);
             components.remove(component);
@@ -253,7 +254,8 @@ public class ExternalComponentManager implements ComponentManager {
         IQ reply = null;
         try {
             reply = answer.poll(timeout, TimeUnit.MILLISECONDS);
-        } catch (InterruptedException e) {
+        }
+        catch (InterruptedException e) {
             // Ignore
         }
         return reply;
