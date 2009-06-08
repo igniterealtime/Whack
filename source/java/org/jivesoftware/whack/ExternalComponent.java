@@ -20,10 +20,27 @@
 
 package org.jivesoftware.whack;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
+import java.net.InetSocketAddress;
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.TimerTask;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import org.dom4j.DocumentException;
 import org.dom4j.Element;
 import org.dom4j.io.XMLWriter;
 import org.dom4j.io.XPPPacketReader;
+import org.jivesoftware.openfire.IQResultListener;
 import org.jivesoftware.whack.util.StringUtils;
 import org.jivesoftware.whack.util.TaskEngine;
 import org.xmlpull.v1.XmlPullParser;
@@ -36,18 +53,6 @@ import org.xmpp.packet.IQ;
 import org.xmpp.packet.JID;
 import org.xmpp.packet.Packet;
 import org.xmpp.packet.StreamError;
-
-import java.io.*;
-import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.UnknownHostException;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.TimerTask;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
 
 /**
  * ExternalComponents are responsible for connecting and authenticating with a remote server and

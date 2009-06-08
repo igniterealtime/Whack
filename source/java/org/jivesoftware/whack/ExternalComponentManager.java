@@ -20,16 +20,21 @@
 
 package org.jivesoftware.whack;
 
-import org.xmpp.component.*;
-import org.xmpp.packet.IQ;
-import org.xmpp.packet.JID;
-import org.xmpp.packet.Packet;
-
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
+
+import org.jivesoftware.openfire.IQResultListener;
+import org.xmpp.component.Component;
+import org.xmpp.component.ComponentException;
+import org.xmpp.component.ComponentManager;
+import org.xmpp.component.ComponentManagerFactory;
+import org.xmpp.component.Log;
+import org.xmpp.packet.IQ;
+import org.xmpp.packet.JID;
+import org.xmpp.packet.Packet;
 
 /**
  * Implementation of the ComponentManager interface for external components.
