@@ -26,11 +26,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
-import org.jivesoftware.openfire.IQResultListener;
 import org.xmpp.component.Component;
 import org.xmpp.component.ComponentException;
 import org.xmpp.component.ComponentManager;
 import org.xmpp.component.ComponentManagerFactory;
+import org.xmpp.component.IQResultListener;
 import org.xmpp.component.Log;
 import org.xmpp.packet.IQ;
 import org.xmpp.packet.JID;
