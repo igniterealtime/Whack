@@ -23,8 +23,8 @@ package org.jivesoftware.whack.container;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.jivesoftware.whack.ExternalComponentManager;
 import org.xmpp.component.Component;
-import org.xmpp.component.ComponentManager;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletException;
@@ -62,12 +62,12 @@ public class ComponentServlet extends HttpServlet {
     private static File componentDirectory;
     private static ServletConfig servletConfig;
 
-    private static ComponentManager manager;
+    private static ExternalComponentManager manager;
 
     static {
         servlets = new ConcurrentHashMap<String, HttpServlet>();
         componentDirectory = new File(ServerContainer.getInstance().getHomeDirectory(), "components");
-        manager = ServerContainer.getInstance().getManager();
+        manager = (ExternalComponentManager) ServerContainer.getInstance().getManager();
     }
 
     public void init(ServletConfig config) throws ServletException {

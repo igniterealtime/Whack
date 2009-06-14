@@ -23,6 +23,7 @@ package org.jivesoftware.whack.container;
 import org.dom4j.Document;
 import org.dom4j.Element;
 import org.dom4j.io.SAXReader;
+import org.jivesoftware.whack.ExternalComponentManager;
 import org.xmpp.component.Component;
 import org.xmpp.component.ComponentException;
 import org.xmpp.component.ComponentManager;
@@ -56,7 +57,7 @@ public class ComponentFinder {
     private Map<Component,File> componentDirs;
     private Map<Component, String> componentDomains;
     private boolean setupMode = true;
-    private ComponentManager manager;
+    private ExternalComponentManager manager;
     private ScheduledExecutorService executor = null;
 
     /**
@@ -70,7 +71,7 @@ public class ComponentFinder {
         componentDirs = new HashMap<Component,File>();
         classloaders = new HashMap<Component,ComponentClassLoader>();
         componentDomains = new HashMap<Component,String>();
-        manager = server.getManager();
+        manager = (ExternalComponentManager) server.getManager();
         setupMode = server.isSetupMode();
     }
 

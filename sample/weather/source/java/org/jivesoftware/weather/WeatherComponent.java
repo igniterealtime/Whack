@@ -91,7 +91,7 @@ public class WeatherComponent implements Component {
             try {
                 ComponentManagerFactory.getComponentManager().sendPacket(this, reply);
             } catch (ComponentException e) {
-                ComponentManagerFactory.getComponentManager().getLog().error(e);
+                Log.error(e);
             }
         }
     }
