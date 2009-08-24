@@ -35,7 +35,9 @@ package org.xmpp.component;
  * external component that is not currently connected to the server.
  *
  * @author Matt Tucker
+ * @deprecated Use SLF4J provided Loggers instead.
  */
+@Deprecated
 public interface Log {
 
     /**

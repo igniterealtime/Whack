@@ -26,6 +26,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.prefs.Preferences;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmpp.component.Component;
 import org.xmpp.component.ComponentException;
 import org.xmpp.component.ComponentManager;
@@ -44,6 +46,8 @@ import org.xmpp.packet.Packet;
  */
 public class ExternalComponentManager implements ComponentManager {
 
+	private static final Logger Logger = LoggerFactory.getLogger(ExternalComponentManager.class);
+	
     /**
      * Keeps the IP address or hostname of the server. This value will be used only for creating
      * connections.
@@ -93,7 +97,8 @@ public class ExternalComponentManager implements ComponentManager {
      */
     private Map<Component, ExternalComponent> components  = new Hashtable<Component,ExternalComponent>();
 
-    private Log logger;
+    @Deprecated
+    private Log oldLogger;
 
     /**
      * Constructs a new ExternalComponentManager that will make connections
@@ -335,62 +340,59 @@ public class ExternalComponentManager implements ComponentManager {
         return true;
     }
 
+    @Deprecated
     public Log getLog() {
-        return logger;
+        return oldLogger;
     }
 
     private void createDummyLogger() {
-        this.logger = new Log() {
+        this.oldLogger = new Log() {
             public void error(String message) {
-                System.out.println(message);
+            	Logger.error(message);
             }
 
             public void error(String message, Throwable throwable) {
-                System.err.println(message);
-                throwable.printStackTrace();
+            	Logger.error(message, throwable);
             }
 
             public void error(Throwable throwable) {
-                throwable.printStackTrace();
+            	Logger.error("", throwable);
             }
 
             public void warn(String message) {
-                System.out.println(message);
+                Logger.warn(message);
             }
 
             public void warn(String message, Throwable throwable) {
-                System.out.println(message);
-                throwable.printStackTrace();
+                Logger.warn(message, throwable);
             }
 
             public void warn(Throwable throwable) {
-                throwable.printStackTrace();
+                Logger.warn("", throwable);
             }
 
             public void info(String message) {
-                System.out.println(message);
+                Logger.info(message);
             }
 
             public void info(String message, Throwable throwable) {
-                System.out.println(message);
-                throwable.printStackTrace();
+            	Logger.info(message, throwable);
             }
 
             public void info(Throwable throwable) {
-                throwable.printStackTrace();
+            	Logger.info("", throwable);
             }
 
             public void debug(String message) {
-                System.out.println(message);
+                Logger.debug(message);
             }
 
             public void debug(String message, Throwable throwable) {
-                System.out.println(message);
-                throwable.printStackTrace();
+            	Logger.debug(message, throwable);
             }
 
             public void debug(Throwable throwable) {
-                throwable.printStackTrace();
+                Logger.debug("", throwable);
             }
         };
     }
