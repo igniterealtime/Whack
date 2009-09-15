@@ -136,7 +136,7 @@
     <target name="jar" depends="compile" unless="jar.uptodate" description="Produces whack.jar">
         <jar destfile="${jar.dest.dir}/whack.jar"
             basedir="${compile.dir}"
-            includes="org/jivesoftware/whack/**/*.class"
+            includes="org/**/*.class"
         />
     </target>
 

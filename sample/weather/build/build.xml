@@ -39,8 +39,10 @@
             <classpath path="lib/merge/jakarta-oro.jar"/>
             <classpath path="lib/merge/jweather.jar"/>
             <classpath path="lib/merge/log4j.jar"/>
+            <classpath path="lib/merge/tinder-with-dependencies.jar"/>
             <classpath path="lib/merge/whack.jar"/>
             <classpath path="lib/merge/xpp3.jar"/>
+            <classpath path="lib/merge/slf4j-api.jar"/>
             <classpath path="lib/merge/dom4j.jar"/>
         </javac>
     </target>

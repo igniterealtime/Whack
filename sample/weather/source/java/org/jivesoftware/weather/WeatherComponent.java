@@ -1,5 +1,7 @@
 package org.jivesoftware.weather;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmpp.component.Component;
 import org.xmpp.component.ComponentManager;
 import org.xmpp.component.ComponentManagerFactory;
@@ -21,6 +23,8 @@ import net.sf.jweather.metar.Metar;
  * @author Gaston Dombiak
  */
 public class WeatherComponent implements Component {
+
+    Logger log = LoggerFactory.getLogger(getClass());
 
     public String getName() {
         return "US Weather";
@@ -91,7 +95,7 @@ public class WeatherComponent implements Component {
             try {
                 ComponentManagerFactory.getComponentManager().sendPacket(this, reply);
             } catch (ComponentException e) {
-                Log.error(e);
+                log.error("Error while sending weather infos.", e);
             }
         }
     }
