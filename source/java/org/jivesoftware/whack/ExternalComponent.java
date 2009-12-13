@@ -374,6 +374,8 @@ public class ExternalComponent implements Component {
 
     public void shutdown() {
         shutdown = true;
+        // Notify the component to shutdown
+        component.shutdown();
         disconnect();
     }
 
