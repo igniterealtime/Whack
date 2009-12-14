@@ -1,7 +1,8 @@
 dom4j.jar -- 1.5.1
 stringprep.jar -- based on libidn 0.5.6
 
-log4j.jar							| 1.2.15                                                       | Apache 2.0 (http://logging.apache.org/log4j/1.2/license.html)
+libidn.jar                          | 1.15                                                         | GNU Lesser General Public License version 2.1 or later (http://www.gnu.org/licenses/licenses.html)
+log4j.jar                           | 1.2.15                                                       | Apache 2.0 (http://logging.apache.org/log4j/1.2/license.html)
 slf4j-api                           | 1.5.8                                                        | http://www.slf4j.org/license.html
 slf4j-log4j12                       | 1.5.8                                                        | http://www.slf4j.org/license.html
-tinder-with-dependencies.jar        | 1.1.0                                                        | GPL
+tinder.jar                          | 1.2.0                                                        | Apache 2.0

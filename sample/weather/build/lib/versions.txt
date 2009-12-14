@@ -5,10 +5,11 @@ commons-httpclient.jar  | 2.0-final
 commons-logging.jar     | 1.0.4
 jakarta-oro.jar         | 2.0.7
 log4j.jar               | 1.2.15
-whack.jar               | Sep-15-2009
+whack.jar               | Dec-14-2009
 slf4j-api               | 1.5.8
 slf4j-log4j12           | 1.5.8
-tinder-with-dependencies.jar  | 1.1.0
+tinder                  | 1.2.0
+libidn                  | 1.15
 ant.jar                 | Jetty 5.1.2pre0
 ant-contrib.jar         | 1.0b1
 ant-subdirtask.jar      | Revision 1.4 (CVS)

@@ -4,8 +4,8 @@
     <!--set global properties for this build-->
     <property name="bin" location="../source/bin"/>
     <property name="src" location="../source/java"/>
-    <property name="build" location="classes"/>
     <property name="dist" location="../target"/>
+    <property name="build" location="classes"/>
     <property name="docs" location="${dist}/docs"/>
     <property name="docsapi" location="docs/api"/>
     <property name="libs" location="lib/merge"/>
@@ -34,16 +34,11 @@
             <src path="${src}"/>
             <exclude name="**/*Test.java"/>
             <exclude name="**/Test*.java"/>
-            <classpath path="lib/merge/commons-httpclient.jar"/>
-            <classpath path="lib/merge/commons-logging.jar"/>
-            <classpath path="lib/merge/jakarta-oro.jar"/>
-            <classpath path="lib/merge/jweather.jar"/>
-            <classpath path="lib/merge/log4j.jar"/>
-            <classpath path="lib/merge/tinder-with-dependencies.jar"/>
-            <classpath path="lib/merge/whack.jar"/>
-            <classpath path="lib/merge/xpp3.jar"/>
-            <classpath path="lib/merge/slf4j-api.jar"/>
-            <classpath path="lib/merge/dom4j.jar"/>
+            <classpath>
+                <fileset dir="${libs}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
         </javac>
     </target>
     <target name="dist" depends="build">
@@ -51,6 +46,9 @@
         <tstamp/>
         <jar jarfile="${dist}/lib/weather-comp.jar" basedir="${build}">
             <zipgroupfileset dir="${libs}" includes="*.jar"/>
+            <manifest>
+                <attribute name="Main-Class" value="org.jivesoftware.weather.ExternalWeatherComponent"/>
+            </manifest>
         </jar>
         <!-- Copy bin dir -->
         <copy todir="${dist}/bin">
