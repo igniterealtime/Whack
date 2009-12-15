@@ -46,6 +46,7 @@
         <tstamp/>
         <jar jarfile="${dist}/lib/weather-comp.jar" basedir="${build}">
             <zipgroupfileset dir="${libs}" includes="*.jar"/>
+            <fileset dir="${libs}" excludes="*.jar"/>
             <manifest>
                 <attribute name="Main-Class" value="org.jivesoftware.weather.ExternalWeatherComponent"/>
             </manifest>
