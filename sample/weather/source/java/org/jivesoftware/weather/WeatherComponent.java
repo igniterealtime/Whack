@@ -2,12 +2,12 @@ package org.jivesoftware.weather;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import org.xmpp.component.AbstractComponent;
-import org.xmpp.component.ComponentManager;
 import org.xmpp.component.ComponentManagerFactory;
 import org.xmpp.component.ComponentException;
-import org.xmpp.packet.JID;
 import org.xmpp.packet.Message;
+
 import net.sf.jweather.Weather;
 import net.sf.jweather.metar.Metar;
 
@@ -125,11 +125,6 @@ public class WeatherComponent extends AbstractComponent {
         catch (ComponentException e) {
             log.error("Error while sending weather infos.", e);
         }
-    }
-
-    public void initialize(JID jid, ComponentManager componentManager)
-            throws ComponentException {
-        super.initialize(jid, jid.getDomain(), componentManager);
     }
 
 }
