@@ -18,10 +18,10 @@ public class ExternalWeatherComponent {
         final ExternalComponentManager manager = new ExternalComponentManager("localhost", 5275);
         // Set the secret key for this component. The server must be using the same secret key
         // otherwise the component won't be able to authenticate with the server. Check that the
-        // server has the properfy "component.external.secretKey" defined and that it is using the
+        // server has the property "component.external.secretKey" defined and that it is using the
         // same value that we are setting here.
         manager.setSecretKey("weather", "test");
-        // Set the manager to tag components as being allowed to connect multiple times to te same
+        // Set the manager to tag components as being allowed to connect multiple times to the same
         // JID.
         manager.setMultipleAllowed("weather", true);
         try {

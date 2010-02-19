@@ -119,12 +119,7 @@ public class WeatherComponent extends AbstractComponent {
         }
 
         // Send the response to the sender of the request
-        try {
-            ComponentManagerFactory.getComponentManager().sendPacket(this, reply);
-        }
-        catch (ComponentException e) {
-            log.error("Error while sending weather infos.", e);
-        }
+        send(reply);
     }
 
 }
