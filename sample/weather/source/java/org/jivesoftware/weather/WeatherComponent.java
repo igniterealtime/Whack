@@ -1,13 +1,12 @@
 package org.jivesoftware.weather;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import org.xmpp.component.AbstractComponent;
+import org.xmpp.component.Component;
+import org.xmpp.component.ComponentManager;
 import org.xmpp.component.ComponentManagerFactory;
 import org.xmpp.component.ComponentException;
+import org.xmpp.packet.Packet;
+import org.xmpp.packet.JID;
 import org.xmpp.packet.Message;
-
 import net.sf.jweather.Weather;
 import net.sf.jweather.metar.Metar;
 
@@ -21,49 +20,18 @@ import net.sf.jweather.metar.Metar;
  *
  * @author Gaston Dombiak
  */
-public class WeatherComponent extends AbstractComponent {
+public class WeatherComponent implements Component {
 
-    Logger log = LoggerFactory.getLogger(getClass());
-
-    /**
-     * The XMPP domain to which this component is registered to.
-     */
-    private String serverDomain;
-
-    /**
-     * The name of this component.
-     */
-    private String name;
-
-
-    /**
-     * Create a new component which provides weather information.
-     * 
-     * @param name The name of this component.
-     * @param serverDomain The XMPP domain to which this component is registered to.
-     */
-    public WeatherComponent(String name, String serverDomain) {
-        this.name = name;
-        this.serverDomain = serverDomain;
-    }
-
-    @Override
     public String getName() {
-        return name;
+        return "US Weather";
     }
 
-    @Override
     public String getDescription() {
         return "Weather component - sample component";
     }
 
-    @Override
-    public String getDomain() {
-        return serverDomain;
-    }
-
     /**
-     * Handle a receied message and answer the weather information of the requested station id.
+     * Handle the receied packet and answer the weather information of the requested station id.
      * The request must be made using Message packets where the body of the message should be the
      * station id.<p>
      *
@@ -72,54 +40,68 @@ public class WeatherComponent extends AbstractComponent {
      *
      * @param packet the Message requesting information about a certain station id.
      */
-    @Override
-    protected void handleMessage(Message message) {
-        System.out.println("Received message:"+message.toXML());
-        // Get the requested station to obtain it's weather information
-        String station = message.getBody();
-        // Send the request and get the weather information
-        Metar metar = Weather.getMetar(station, 5000);
+    public void processPacket(Packet packet) {
+        System.out.println("Received package:"+packet.toXML());
+        // Only process Message packets
+        if (packet instanceof Message) {
+            // Get the requested station to obtain it's weather information
+            Message message = (Message) packet;
+            String station = message.getBody();
+            // Send the request and get the weather information
+            Metar metar = Weather.getMetar(station, 5000);
 
-        // Build the answer
-        Message reply = new Message();
-        reply.setTo(message.getFrom());
-        reply.setFrom(message.getTo());
-        reply.setType(message.getType());
-        reply.setThread(message.getThread());
+            // Build the answer
+            Message reply = new Message();
+            reply.setTo(message.getFrom());
+            reply.setFrom(message.getTo());
+            reply.setType(message.getType());
+            reply.setThread(message.getThread());
 
-        // Append the discovered information if something was found
-        if (metar != null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("station id : " + metar.getStationID());
-            sb.append("\rwind dir   : " + metar.getWindDirection() + " degrees");
-            sb.append("\rwind speed : " + metar.getWindSpeedInMPH() + " mph, " +
-                                                 metar.getWindSpeedInKnots() + " knots");
-            if (!metar.getVisibilityLessThan()) {
-                sb.append("\rvisibility : " + metar.getVisibility() + " mile(s)");
+            // Append the discovered information if something was found
+            if (metar != null) {
+                StringBuilder sb = new StringBuilder();
+                sb.append("station id : " + metar.getStationID());
+                sb.append("\rwind dir   : " + metar.getWindDirection() + " degrees");
+                sb.append("\rwind speed : " + metar.getWindSpeedInMPH() + " mph, " +
+                                                     metar.getWindSpeedInKnots() + " knots");
+                if (!metar.getVisibilityLessThan()) {
+                    sb.append("\rvisibility : " + metar.getVisibility() + " mile(s)");
+                } else {
+                    sb.append("\rvisibility : < " + metar.getVisibility() + " mile(s)");
+                }
+
+                sb.append("\rpressure   : " + metar.getPressure() + " in Hg");
+                sb.append("\rtemperaturePrecise: " +
+                                   metar.getTemperaturePreciseInCelsius() + " C, " +
+                                   metar.getTemperaturePreciseInFahrenheit() + " F");
+                sb.append("\rtemperature: " +
+                                   metar.getTemperatureInCelsius() + " C, " +
+                                   metar.getTemperatureInFahrenheit() + " F");
+                sb.append("\rtemperatureMostPrecise: " +
+                                   metar.getTemperatureMostPreciseInCelsius() + " C, " +
+                                   metar.getTemperatureMostPreciseInFahrenheit() + " F");
+                reply.setBody(sb.toString());
             }
             else {
-                sb.append("\rvisibility : < " + metar.getVisibility() + " mile(s)");
+                // Answer that the requested station id does not exist
+                reply.setBody("Unknown station ID");
             }
 
-            sb.append("\rpressure   : " + metar.getPressure() + " in Hg");
-            sb.append("\rtemperaturePrecise: " +
-                               metar.getTemperaturePreciseInCelsius() + " C, " +
-                               metar.getTemperaturePreciseInFahrenheit() + " F");
-            sb.append("\rtemperature: " +
-                               metar.getTemperatureInCelsius() + " C, " +
-                               metar.getTemperatureInFahrenheit() + " F");
-            sb.append("\rtemperatureMostPrecise: " +
-                               metar.getTemperatureMostPreciseInCelsius() + " C, " +
-                               metar.getTemperatureMostPreciseInFahrenheit() + " F");
-            reply.setBody(sb.toString());
+            // Send the response to the sender of the request
+            try {
+                ComponentManagerFactory.getComponentManager().sendPacket(this, reply);
+            } catch (ComponentException e) {
+                Log.error(e.getMessage(), e);
+            }
         }
-        else {
-            // Answer that the requested station id does not exist
-            reply.setBody("Unknown station ID");
-        }
-
-        // Send the response to the sender of the request
-        send(reply);
     }
 
+    public void initialize(JID jid, ComponentManager componentManager) {
+    }
+
+    public void start() {
+    }
+
+    public void shutdown() {
+    }
 }

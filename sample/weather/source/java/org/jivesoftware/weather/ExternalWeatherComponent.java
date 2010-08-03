@@ -26,7 +26,7 @@ public class ExternalWeatherComponent {
         manager.setMultipleAllowed("weather", true);
         try {
             // Register that this component will be serving the given subdomain of the server
-            manager.addComponent("weather", new WeatherComponent("weather", manager.getServerName()));
+            manager.addComponent("weather", new WeatherComponent());
             // Quick trick to ensure that this application will be running for ever. To stop the
             // application you will need to kill the process
             while (true) {
