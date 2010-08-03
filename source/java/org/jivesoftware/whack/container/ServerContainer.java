@@ -20,15 +20,12 @@
 
 package org.jivesoftware.whack.container;
 
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.nio.SelectChannelConnector;
+import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
+import org.eclipse.jetty.webapp.WebAppContext;
 import org.jivesoftware.util.XMLProperties;
 import org.jivesoftware.whack.ExternalComponentManager;
-import org.mortbay.http.SunJsseListener;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.servlet.WebApplicationContext;
-import org.mortbay.log.Factory;
-import org.mortbay.log.LogImpl;
-import org.mortbay.log.OutputStreamLogSink;
-import org.mortbay.util.InetAddrPort;
 import org.xmpp.component.ComponentManager;
 
 import java.io.File;
@@ -105,20 +102,6 @@ public class ServerContainer {
 
     public void start() {
         try {
-            // Configure logging to a file, creating log dir if needed
-            System.setProperty("org.apache.commons.logging.LogFactory", "org.mortbay.log.Factory");
-            File logDir = new File(homeDir, "logs");
-            if (!logDir.exists()) {
-                logDir.mkdirs();
-            }
-            File logFile = new File(logDir, "admin-console.log");
-            OutputStreamLogSink logSink = new OutputStreamLogSink(logFile.toString());
-            logSink.start();
-            LogImpl log = (LogImpl) Factory.getFactory().getInstance("");
-            // Ignore INFO logs.
-            log.setVerbose(-1);
-            log.add(logSink);
-
             jetty = new Server();
 
             // Configure HTTP socket listener
@@ -128,9 +111,14 @@ public class ServerContainer {
             String interfaceName = properties.getProperty("adminConsole.inteface");
             String port = properties.getProperty("adminConsole.port");
             int adminPort = (port == null ? 9090 : Integer.parseInt(port));
-            InetAddrPort address = new InetAddrPort(interfaceName, adminPort);
+            
+            SelectChannelConnector connector0 = new SelectChannelConnector();
+            connector0.setPort(adminPort);
+            if (interfaceName != null) {
+                connector0.setHost(interfaceName);
+            }
             if (adminPort > 0) {
-                jetty.addListener(address);
+            	jetty.addConnector(connector0);
                 plainStarted = true;
             }
 
@@ -140,7 +128,8 @@ public class ServerContainer {
             try {
                 adminSecurePort = (securePortProperty == null ? 9091 : Integer.parseInt(securePortProperty));
                 if (adminSecurePort > 0) {
-                    SunJsseListener listener = new SunJsseListener();
+                	SslSelectChannelConnector listener = new SslSelectChannelConnector();
+
                     // Get the keystore location. The default location is security/keystore
                     String keyStoreLocation = properties.getProperty("xmpp.socket.ssl.keystore");
                     keyStoreLocation = (keyStoreLocation == null ?
@@ -174,7 +163,7 @@ public class ServerContainer {
                     listener.setHost(interfaceName);
                     listener.setPort(adminSecurePort);
 
-                    jetty.addListener(listener);
+                    jetty.addConnector(listener);
                     secureStarted = true;
                 }
             }
@@ -200,12 +189,17 @@ public class ServerContainer {
             }
 
             // Add web-app
-            WebApplicationContext webAppContext = jetty.addWebApplication("/",
-                    homeDir + File.separator + "webapp");
-            webAppContext.setWelcomeFiles(new String[]{"index.jsp"});
+            WebAppContext webapp = new WebAppContext();
+            webapp.setContextPath("/");
+            // if this doesn't work, try referencing the web.xml programatically.
+            webapp.setResourceBase(homeDir + File.separator + "webapp");
+            webapp.setWelcomeFiles(new String[]{"index.jsp"});
+            webapp.setParentLoaderPriority(true);
+            jetty.setHandler(webapp);            
 
             // Start the http server
             jetty.start();
+            jetty.join();
 
             if (!plainStarted && !secureStarted) {
                 manager.getLog().info("Warning: admin console not started due to configuration settings.");
