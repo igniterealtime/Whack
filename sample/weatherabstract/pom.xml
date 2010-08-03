@@ -1,0 +1,26 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>org.igniterealtime.whack</groupId>
+	<artifactId>sample.weatherabstract</artifactId>
+	<name>Whack example: Weather AbstractComponent</name>
+	<description>The Whack Weather AbstractComponent example shows you Whack can be used to implement a simple XMPP service, using the AbstractComponent class.</description>
+	<packaging>jar</packaging>
+	<parent>
+		<groupId>org.igniterealtime</groupId>
+		<artifactId>whack</artifactId>
+		<version>2.0.0-SNAPSHOT</version>
+		<relativePath>../../pom.xml</relativePath>
+	</parent>
+	<build>
+		<sourceDirectory>source/java</sourceDirectory>
+	</build>
+	<dependencies>
+		<dependency>
+			<groupId>org.igniterealtime.whack</groupId>
+			<artifactId>core</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+			<type>jar</type>
+		</dependency>
+	</dependencies>
+</project>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Weather" default="dist" basedir=".">
+    <description>Weather Build File</description>
+    <!--set global properties for this build-->
+    <property name="bin" location="../source/bin"/>
+    <property name="src" location="../source/java"/>
+    <property name="dist" location="../target"/>
+    <property name="build" location="classes"/>
+    <property name="docs" location="${dist}/docs"/>
+    <property name="docsapi" location="docs/api"/>
+    <property name="libs" location="lib/merge"/>
+
+    <target name="clean">
+        <!--Delete created directory trees-->
+        <delete dir="${build}" includeEmptyDirs="true"/>
+        <delete dir="${dist}" includeEmptyDirs="true"/>
+    </target>
+    <target name="clean_classes">
+        <!--Delete created directory trees-->
+        <delete dir="${build}" includeEmptyDirs="true"/>
+    </target>
+    <target name="init">
+        <!--creates the build directory-->
+        <mkdir dir="${build}"/>
+        <mkdir dir="${dist}"/>
+        <mkdir dir="${dist}/lib"/>
+    </target>
+    <target name="build" depends="init">
+        <!--Compiles the java code from ${src} directory into ${build} directory-->
+        <javac destdir="${build}"
+            debug="on"
+            source="1.5"
+        >
+            <src path="${src}"/>
+            <exclude name="**/*Test.java"/>
+            <exclude name="**/Test*.java"/>
+            <classpath>
+                <fileset dir="${libs}">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+    </target>
+    <target name="dist" depends="build">
+        <!--Put everything in ${build} into the MyProject-${DSTAMP}.jar file-->
+        <tstamp/>
+        <jar jarfile="${dist}/lib/weather-comp.jar" basedir="${build}">
+            <zipgroupfileset dir="${libs}" includes="*.jar"/>
+            <fileset dir="${libs}" excludes="*.jar"/>
+            <manifest>
+                <attribute name="Main-Class" value="org.jivesoftware.weather.ExternalWeatherComponent"/>
+            </manifest>
+        </jar>
+        <!-- Copy bin dir -->
+        <copy todir="${dist}/bin">
+            <fileset dir="${bin}" includes="**/*" />
+        </copy>
+        <antcall target="clean_classes"/>
+    </target>
+</project>
+
