@@ -22,5 +22,11 @@
 			<version>2.0.0-SNAPSHOT</version>
 			<type>jar</type>
 		</dependency>
+		<dependency>
+			<groupId>net.sourceforge.jweather</groupId>
+			<artifactId>jweather</artifactId>
+			<version>0.3.0</version>
+			<type>jar</type>
+		</dependency>
 	</dependencies>
 </project>
