@@ -64,7 +64,7 @@
 	</build>	
 	<modules>
 		<module>source</module>
-		<module>sample\weather</module>
-		<module>sample\weatherabstract</module>
+		<module>sample/weather</module>
+		<module>sample/weatherabstract</module>
 	</modules>
 </project>
