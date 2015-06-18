@@ -24,7 +24,7 @@
 		<dependency>
 			<groupId>org.igniterealtime</groupId>
 			<artifactId>tinder</artifactId>
-			<version>1.2.1</version>
+			<version>1.2.3</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
