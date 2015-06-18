@@ -70,7 +70,7 @@ public class WeatherComponent extends AbstractComponent {
      * Note: I don't know the list of valid station ids so if you find the list please send it to me
      * so I can add it to this example.
      *
-     * @param packet the Message requesting information about a certain station id.
+     * @param message the Message requesting information about a certain station id.
      */
     @Override
     protected void handleMessage(Message message) {
