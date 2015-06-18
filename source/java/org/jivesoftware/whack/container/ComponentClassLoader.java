@@ -58,7 +58,7 @@ class ComponentClassLoader {
         final List list = new ArrayList();
         File classesDir = new File(componentDir, "classes");
         if (classesDir.exists()) {
-            list.add(classesDir.toURL());
+            list.add(classesDir.toURI().toURL());
         }
         File libDir = new File(componentDir, "lib");
         File[] jars = libDir.listFiles(new FilenameFilter() {
@@ -69,7 +69,7 @@ class ComponentClassLoader {
         if (jars != null) {
             for (int i = 0; i < jars.length; i++) {
                 if (jars[i] != null && jars[i].isFile()) {
-                    list.add(jars[i].toURL());
+                    list.add(jars[i].toURI().toURL());
                 }
             }
         }
