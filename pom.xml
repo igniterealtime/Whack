@@ -47,8 +47,9 @@
 		<url>http://www.igniterealtime.org/issues/browse/WHACK</url>
 	</issueManagement>
 	<scm>
-		<connection>http://www.igniterealtime.org/downloads/source.jsp</connection>
-		<url>http://www.igniterealtime.org/fisheye/viewrep/svn-org/whack</url>
+		<url>https://github.com/igniterealtime/Whack</url>
+		<connection>scm:git:https://github.com/igniterealtime/Whack.git</connection>
+		<developerConnection>scm:git:https://github.com/igniterealtime/Whack.git</developerConnection>
 	</scm>
 	<build>
 		<plugins>
