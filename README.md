@@ -1,4 +1,7 @@
 # Whack
+
+[![Build Status](https://travis-ci.org/igniterealtime/Whack.svg?branch=master)](https://travis-ci.org/igniterealtime/Whack)  [![Project Stats](https://www.openhub.net/p/WhackAPI/widgets/project_thin_badge.gif)](https://www.openhub.net/p/WhackAPI)
+
 Open Source XMPP (Jabber) component library for XMPP components
 
 Whack is a Java library that easily allows the creation of external components that follow the
