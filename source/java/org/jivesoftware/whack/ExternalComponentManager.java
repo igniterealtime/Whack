@@ -57,6 +57,12 @@ public class ExternalComponentManager implements ComponentManager {
      * Port of the server used for establishing new connections.
      */
     private int port;
+
+    /**
+     * Defines if sockets are started in encrypted mode ("old-style" TLS/SSL, non-STARTTLS
+     */
+    private boolean startEncrypted;
+
     /**
      * Keeps the domain of the XMPP server. The domain may or may not match the host. The domain
      * will be used mainly for the XMPP packets while the host is used mainly for creating
@@ -117,12 +123,27 @@ public class ExternalComponentManager implements ComponentManager {
      * @param host the IP address or name of the XMPP server to connect to (e.g. "example.com").
      * @param port the port to connect on.
      */
+    @Deprecated
     public ExternalComponentManager(String host, int port) {
         if (host == null) {
             throw new IllegalArgumentException("Host of XMPP server cannot be null");
         }
         this.host = host;
         this.port = port;
+
+        createDummyLogger();
+
+        // Set this ComponentManager as the current component manager
+        ComponentManagerFactory.setComponentManager(this);
+    }
+
+    public ExternalComponentManager(String host, int port, boolean startEncrypted) {
+        if (host == null) {
+            throw new IllegalArgumentException("Host of XMPP server cannot be null");
+        }
+        this.host = host;
+        this.port = port;
+        this.startEncrypted = startEncrypted;
 
         createDummyLogger();
 
@@ -218,7 +239,7 @@ public class ExternalComponentManager implements ComponentManager {
             componentsByDomain.put(subdomain, externalComponent);
             components.put(component, externalComponent);
             // Ask the ExternalComponent to connect with the remote server
-            externalComponent.connect(host, port, subdomain);
+            externalComponent.connect(host, port, subdomain, startEncrypted);
             // Initialize the component
             JID componentJID = new JID(null, externalComponent.getDomain(), null);
             externalComponent.initialize(componentJID, this);

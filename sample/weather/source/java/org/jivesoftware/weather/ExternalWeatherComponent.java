@@ -15,7 +15,7 @@ public class ExternalWeatherComponent {
     public static void main(String[] args) {
         // Create a manager for the external components that will connect to the server "localhost"
         // at the port 5225
-        final ExternalComponentManager manager = new ExternalComponentManager("localhost", 5275);
+        final ExternalComponentManager manager = new ExternalComponentManager("localhost", 5275, false);
         // Set the secret key for this component. The server must be using the same secret key
         // otherwise the component won't be able to authenticate with the server. Check that the
         // server has the property "component.external.secretKey" defined and that it is using the

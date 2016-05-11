@@ -54,6 +54,8 @@ import org.xmpp.packet.JID;
 import org.xmpp.packet.Packet;
 import org.xmpp.packet.StreamError;
 
+import javax.net.ssl.SSLSocketFactory;
+
 /**
  * ExternalComponents are responsible for connecting and authenticating with a remote server and
  * for sending and processing received packets. In fact, an ExternalComponent is a wrapper on a
@@ -107,6 +109,8 @@ public class ExternalComponent implements Component {
     private String host;
     private int port;
 
+    private boolean startEncrypted;
+
     /**
      * Pool of threads that are available for processing the requests.
      */
@@ -144,10 +148,29 @@ public class ExternalComponent implements Component {
      * @param subdomain     the subdomain that this component will be handling.
      * @throws ComponentException if an error happens during the connection and authentication steps.
      */
+    @Deprecated
     public void connect(String host, int port, String subdomain) throws ComponentException {
+        connect(host,port,subdomain,false);
+    }
+
+    /**
+     * Generates a connection with the server and tries to authenticate. If an error occurs in any
+     * of the steps then a ComponentException is thrown.
+     *
+     * @param host            the host to connect with.
+     * @param port            the port to use.
+     * @param subdomain       the subdomain that this component will be handling.
+     * @param startEncrypted  true if sockets are started in TLS/SSL mode, otherwise false.
+     * @throws ComponentException if an error happens during the connection and authentication steps.
+     */
+    public void connect(String host, int port, String subdomain, boolean startEncrypted) throws ComponentException {
         try {
             // Open a socket to the server
-            this.socket = new Socket();
+            if ( startEncrypted ) {
+                this.socket = SSLSocketFactory.getDefault().createSocket();
+            } else {
+                this.socket = new Socket();
+            }
             socket.connect(new InetSocketAddress(host, port), manager.getConnectTimeout());
             if (manager.getServerName() != null) {
                 this.domain = subdomain + "." + manager.getServerName();
@@ -159,6 +182,7 @@ public class ExternalComponent implements Component {
             // Keep these variables that will be used in case a reconnection is required
             this.host= host;
             this.port = port;
+            this.startEncrypted = startEncrypted;
 
             try {
                 factory = XmlPullParserFactory.newInstance();
@@ -432,7 +456,7 @@ public class ExternalComponent implements Component {
         }
         while (!isConnected && !shutdown) {
             try {
-                connect(host, port, subdomain);
+                connect(host, port, subdomain, startEncrypted);
                 isConnected = true;
                 // It may be possible that while a new connection was being established the
                 // component was required to shutdown so in this case we need to close the new
