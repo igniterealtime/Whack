@@ -179,7 +179,7 @@ public class ServerContainer {
             String xmppServerHost = properties.getProperty("xmppServer.host");
             port = properties.getProperty("xmppServer.port");
             int xmppServerPort = (port == null ? 10015 : Integer.parseInt(port));
-            manager = new ExternalComponentManager(xmppServerHost, xmppServerPort);
+            manager = new ExternalComponentManager(xmppServerHost, xmppServerPort, false);
             String serverDomain = properties.getProperty("xmppServer.domain");
             if (serverDomain != null) {
                 manager.setServerName(serverDomain);

@@ -3,6 +3,14 @@ package org.jivesoftware.weather;
 import org.jivesoftware.whack.ExternalComponentManager;
 import org.xmpp.component.ComponentException;
 
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
 /**
  * This is an example of how to make a component run as an external component. This examples
  * requires that the server be running in the same computer where this application will run and
@@ -14,8 +22,8 @@ public class ExternalWeatherComponent {
 
     public static void main(String[] args) {
         // Create a manager for the external components that will connect to the server "localhost"
-        // at the port 5225
-        final ExternalComponentManager manager = new ExternalComponentManager("localhost", 5275);
+        // at the port 5276, using encryption.
+        final ExternalComponentManager manager = new ExternalComponentManager("localhost", 5276, true);
         // Set the secret key for this component. The server must be using the same secret key
         // otherwise the component won't be able to authenticate with the server. Check that the
         // server has the property "component.external.secretKey" defined and that it is using the
