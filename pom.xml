@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.igniterealtime</groupId>
 	<artifactId>whack</artifactId>
-	<version>2.0.2-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Whack</name>
 	<description>Whack is a Java library that easily allows the	creation of external components that follow the XEP-0114: Jabber Component Protocol.</description>
@@ -61,8 +61,8 @@
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
 				<configuration>
-					<source>1.5</source>
-					<target>1.5</target>
+					<source>17</source>
+					<target>17</target>
 				</configuration>
 			</plugin>
 		</plugins>
