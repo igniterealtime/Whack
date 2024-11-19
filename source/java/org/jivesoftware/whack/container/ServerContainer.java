@@ -1,9 +1,6 @@
 /**
- * $RCSfile$
- * $Revision$
- * $Date$
  *
- * Copyright 2005 Jive Software.
+ * Copyright 2005 Jive Softwar, 2024 Ignite Realtime Foundation
  *
  * All rights reserved. Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,10 +17,14 @@
 
 package org.jivesoftware.whack.container;
 
+import org.eclipse.jetty.ee8.webapp.WebAppContext;
+import org.eclipse.jetty.server.HttpConfiguration;
+import org.eclipse.jetty.server.HttpConnectionFactory;
+import org.eclipse.jetty.server.SecureRequestCustomizer;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.server.nio.SelectChannelConnector;
-import org.eclipse.jetty.server.ssl.SslSelectChannelConnector;
-import org.eclipse.jetty.webapp.WebAppContext;
+import org.eclipse.jetty.server.ServerConnector;
+import org.eclipse.jetty.server.SslConnectionFactory;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.jivesoftware.util.XMLProperties;
 import org.jivesoftware.whack.ExternalComponentManager;
 import org.xmpp.component.ComponentManager;
@@ -112,7 +113,7 @@ public class ServerContainer {
             String port = properties.getProperty("adminConsole.port");
             int adminPort = (port == null ? 9090 : Integer.parseInt(port));
             
-            SelectChannelConnector connector0 = new SelectChannelConnector();
+            ServerConnector connector0 = new ServerConnector(jetty);
             connector0.setPort(adminPort);
             if (interfaceName != null) {
                 connector0.setHost(interfaceName);
@@ -128,7 +129,6 @@ public class ServerContainer {
             try {
                 adminSecurePort = (securePortProperty == null ? 9091 : Integer.parseInt(securePortProperty));
                 if (adminSecurePort > 0) {
-                	SslSelectChannelConnector listener = new SslSelectChannelConnector();
 
                     // Get the keystore location. The default location is security/keystore
                     String keyStoreLocation = properties.getProperty("xmpp.socket.ssl.keystore");
@@ -156,14 +156,29 @@ public class ServerContainer {
                     trustpass = (trustpass == null ? "changeit" : trustpass);
                     trustpass = trustpass.trim();
 
-                    listener.setKeystore(keyStoreLocation);
-                    listener.setKeyPassword(keypass);
-                    listener.setPassword(keypass);
+                    final SslContextFactory.Server sslContextFactory = new SslContextFactory.Server();
 
-                    listener.setHost(interfaceName);
-                    listener.setPort(adminSecurePort);
+                    sslContextFactory.setTrustStorePath(trustStoreLocation);
+                    sslContextFactory.setTrustStorePassword(trustpass);
 
-                    jetty.addConnector(listener);
+                    sslContextFactory.setKeyStorePath( keyStoreLocation );
+                    sslContextFactory.setKeyStorePassword(keypass);
+
+                    final HttpConfiguration httpsConfig = new HttpConfiguration();
+                    httpsConfig.setSendServerVersion(false);
+                    httpsConfig.setSecureScheme("https");
+                    httpsConfig.setSecurePort( adminSecurePort);
+                    SecureRequestCustomizer secureRequestCustomizer = new SecureRequestCustomizer();
+                    secureRequestCustomizer.setSniHostCheck(sslContextFactory.isSniRequired());
+                    httpsConfig.addCustomizer(secureRequestCustomizer);
+
+                    final HttpConnectionFactory httpConnectionFactory = new HttpConnectionFactory( httpsConfig );
+                    final SslConnectionFactory sslConnectionFactory = new SslConnectionFactory( sslContextFactory, org.eclipse.jetty.http.HttpVersion.HTTP_1_1.toString() );
+
+                    final ServerConnector httpsConnector = new ServerConnector( jetty, null, null, null, -1, -1, sslConnectionFactory, httpConnectionFactory );
+                    httpsConnector.setHost(interfaceName);
+                    httpsConnector.setPort(adminSecurePort);
+                    jetty.addConnector(httpsConnector);
                     secureStarted = true;
                 }
             }
