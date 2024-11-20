@@ -1,9 +1,5 @@
 /**
- * $RCSfile$
- * $Revision$
- * $Date$
- *
- * Copyright 2005 Jive Software.
+ * Copyright 2005 Jive Software, 2024 Ignite Realtime Foundation
  *
  * All rights reserved. Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,6 +18,8 @@ package org.jivesoftware.whack;
 
 import org.dom4j.Element;
 import org.dom4j.io.XPPPacketReader;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmpp.packet.*;
 
@@ -34,6 +32,8 @@ import java.net.SocketException;
  * @author Gaston Dombiak
  */
 class SocketReadThread extends Thread {
+
+    private static final Logger Log = LoggerFactory.getLogger(SocketReadThread.class);
 
     private ExternalComponent component;
     private boolean shutdown = false;
@@ -67,15 +67,15 @@ class SocketReadThread extends Thread {
             // Do nothing if the exception occured while shutting down the component otherwise
             // log the error and try to establish a new connection
             if (!shutdown) {
-                component.getManager().getLog().error(se);
+                Log.error("Unexpected exception", se);
                 component.connectionLost();
             }
         }
         catch (XmlPullParserException ie) {
-            component.getManager().getLog().error(ie);
+            Log.error("Unexpected XML parsing exception", ie);
         }
         catch (Exception e) {
-            component.getManager().getLog().warn(e);
+            Log.warn("Unexpected exception", e);
         }
     }
 

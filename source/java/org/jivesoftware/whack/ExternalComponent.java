@@ -1,9 +1,5 @@
 /**
- * $RCSfile$
- * $Revision$
- * $Date$
- *
- * Copyright 2005 Jive Software.
+ * Copyright 2005 Jive Software, 2024 Ignite Realtime Foundation
  *
  * All rights reserved. Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -42,6 +38,8 @@ import org.dom4j.io.XMLWriter;
 import org.dom4j.io.XPPPacketReader;
 import org.jivesoftware.whack.util.StringUtils;
 import org.jivesoftware.whack.util.TaskEngine;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlPullParserFactory;
@@ -65,6 +63,8 @@ import javax.net.ssl.SSLSocketFactory;
  * @author Gaston Dombiak
  */
 public class ExternalComponent implements Component {
+
+    private static final Logger Log = LoggerFactory.getLogger(ExternalComponent.class);
 
     /**
      * The utf-8 charset for decoding and encoding XMPP packet streams.
@@ -353,7 +353,7 @@ public class ExternalComponent implements Component {
                                 iqResultListener.receivedAnswer(iq);
                             }
                             catch (Exception e) {
-                                 manager.getLog().error("Error processing answer of remote entity", e);
+                                 Log.error("Error processing answer of remote entity", e);
                             }
                             return;
                         }
@@ -374,7 +374,7 @@ public class ExternalComponent implements Component {
             }
             catch (IOException e) {
                 // Log the exception
-                manager.getLog().error(e);
+                Log.error("Unable to send stanza: {}", packet, e);
                 if (!shutdown) {
                     // Connection was lost so try to reconnect
                     connectionLost();
@@ -429,7 +429,7 @@ public class ExternalComponent implements Component {
                 socket.close();
             }
             catch (Exception e) {
-                manager.getLog().error(e);
+                Log.error("Unable to close socket.", e);
             }
         }
     }
@@ -469,7 +469,7 @@ public class ExternalComponent implements Component {
                     start();
                 }
             } catch (ComponentException e) {
-                manager.getLog().error("Error trying to reconnect with the server", e);
+                Log.error("Error trying to reconnect with the server", e);
                 // Wait for 5 seconds until the next retry
                 try {
                     Thread.sleep(5000);
@@ -507,6 +507,8 @@ public class ExternalComponent implements Component {
      */
     private class KeepAliveTask extends TimerTask {
 
+        private final Logger Log = LoggerFactory.getLogger(KeepAliveTask.class);
+
         public void run() {
             synchronized (writer) {
                 // Send heartbeat if no packet has been sent to the server for a given time
@@ -517,7 +519,7 @@ public class ExternalComponent implements Component {
                     }
                     catch (IOException e) {
                         // Log the exception
-                        manager.getLog().error(e);
+                        Log.error("Unable to send a whitespace ping.", e);
                         if (!shutdown) {
                             // Connection was lost so try to reconnect
                             connectionLost();
