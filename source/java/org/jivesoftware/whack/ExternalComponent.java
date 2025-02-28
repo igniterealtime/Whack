@@ -28,6 +28,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -114,7 +115,7 @@ public class ExternalComponent implements Component {
     /**
      * Pool of threads that are available for processing the requests.
      */
-    private ThreadPoolExecutor threadPool;
+    private ExecutorService threadPool;
     /**
      * Thread that will read the XML from the socket and ask this component to process the read
      * packets.
@@ -129,14 +130,18 @@ public class ExternalComponent implements Component {
         this(component, manager, 25);
     }
 
-    public ExternalComponent(Component component, ExternalComponentManager manager, int maxThreads) {
+    public ExternalComponent(Component component, ExternalComponentManager manager, ExecutorService threadPool) {
         this.component = component;
         this.manager = manager;
+        this.threadPool = threadPool;
+    }
 
+    public ExternalComponent(Component component, ExternalComponentManager manager, int maxThreads) {
         // Create a pool of threads that will process requests received by this component. If more
         // threads are required then the command will be executed on the SocketReadThread process
-        threadPool = new ThreadPoolExecutor(maxThreads, maxThreads, 15, TimeUnit.SECONDS,
-                        new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.CallerRunsPolicy());
+        this(component, manager, new ThreadPoolExecutor(maxThreads, maxThreads, 15, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<Runnable>(), new ThreadPoolExecutor.CallerRunsPolicy())
+        );
     }
 
     /**
