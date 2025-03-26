@@ -1,5 +1,5 @@
 /**
- * Copyright 2005 Jive Software, 2024 Ignite Realtime Foundation
+ * Copyright 2005 Jive Software, 2024-2025 Ignite Realtime Foundation
  *
  * All rights reserved. Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,9 +22,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmpp.packet.*;
-
-import java.io.EOFException;
-import java.net.SocketException;
 
 /**
  * Reads XMPP XML packets from a socket and asks the component to process the packets.
@@ -60,22 +57,13 @@ class SocketReadThread extends Thread {
         try {
             readStream();
         }
-        catch (EOFException eof) {
-            // Normal disconnect
-        }
-        catch (SocketException se) {
-            // Do nothing if the exception occured while shutting down the component otherwise
+        catch (Exception e) {
+            // Do nothing if the exception occurred while shutting down the component otherwise
             // log the error and try to establish a new connection
             if (!shutdown) {
-                Log.error("Unexpected exception", se);
+                Log.error("Unexpected exception", e);
                 component.connectionLost();
             }
-        }
-        catch (XmlPullParserException ie) {
-            Log.error("Unexpected XML parsing exception", ie);
-        }
-        catch (Exception e) {
-            Log.warn("Unexpected exception", e);
         }
     }
 
