@@ -111,6 +111,11 @@
 								<goals>
 									<goal>jar</goal>
 								</goals>
+								<configuration>
+									<source>1.8</source>
+									<quiet>true</quiet>
+									<doclint>none</doclint>
+								</configuration>
 							</execution>
 						</executions>
 					</plugin>
