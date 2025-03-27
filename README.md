@@ -23,7 +23,7 @@ the one below to your `pom.xml` file:
 <dependency>
     <groupId>org.igniterealtime.whack</groupId>
     <artifactId>core</artifactId>
-    <version>2.0.1</version>
+    <version>3.0.0</version>
 </dependency>
 ```
 
