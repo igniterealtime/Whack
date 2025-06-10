@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>org.igniterealtime</groupId>
 	<artifactId>whack</artifactId>
-	<version>3.1.0</version>
+	<version>3.1.1-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Whack</name>
 	<description>Whack is a Java library that easily allows the	creation of external components that follow the XEP-0114: Jabber Component Protocol.</description>
@@ -49,7 +49,7 @@
 		<url>https://github.com/igniterealtime/Whack</url>
 		<connection>scm:git:https://github.com/igniterealtime/Whack.git</connection>
 		<developerConnection>scm:git:https://github.com/igniterealtime/Whack.git</developerConnection>
-	  <tag>v3.1.0</tag>
+	  <tag>HEAD</tag>
   </scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
